@@ -1,0 +1,35 @@
+<ArrayOfRailStation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <RailStation>
+        <StationID>4102</StationID>
+        <StationName>
+            <Zh_tw>樹調</Zh_tw>
+            <En>ShuDiao</En>
+        </StationName>
+        <StationPosition>
+            <PositionLat xsi:nil="true"/>
+            <PositionLon xsi:nil="true"/>
+        </StationPosition>
+        <StationAddress/>
+        <StationPhone/>
+        <OperatorID>TRA</OperatorID>
+        <StationClass>6</StationClass>
+        <UpdateTime>2017-04-12T11:30:19+08:00</UpdateTime>
+    </RailStation>
+    <RailStation>
+        <StationID>1632</StationID>
+        <StationName>
+            <Zh_tw>臺東</Zh_tw>
+            <En>Taitung</En>
+        </StationName>
+        <StationPosition>
+            <PositionLat>22.793711</PositionLat>
+            <PositionLon>121.123175</PositionLon>
+        </StationPosition>
+        <StationAddress>臺東市岩灣路101巷598號</StationAddress>
+        <StationPhone>089-229687</StationPhone>
+        <OperatorID>TRA</OperatorID>
+        <StationClass>1</StationClass>
+        <ReservationCode>004</ReservationCode>
+        <UpdateTime>2017-06-26T17:38:15+08:00</UpdateTime>
+    </RailStation>
+</ArrayOfRailStation>
