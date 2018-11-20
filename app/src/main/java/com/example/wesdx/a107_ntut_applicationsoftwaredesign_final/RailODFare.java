@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import java.util.List;
+
 /**
  * 臺鐵起迄站間票價資料
  *
@@ -8,23 +10,12 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
  */
 public class RailODFare {
     public String OriginStationID;
-    OriginStationNameC OriginStationName;
+    Zh_tw_En OriginStationName;
     public String DestinationStationID;
-    DestinationStationNameC DestinationStationName;
+    Zh_tw_En DestinationStationName;
     public String Direction;
-    FaresC Fares;
+    List<FareC> Fares;
     public String UpdateTime;
-}
-class OriginStationNameC{
-    public String Zh_tw;
-    public String En;
-}
-class DestinationStationNameC{
-    public String Zh_tw;
-    public String En;
-}
-class FaresC{
-    FareC Fare;
 }
 
 class  FareC{

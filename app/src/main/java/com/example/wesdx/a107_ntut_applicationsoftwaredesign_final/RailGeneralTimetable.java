@@ -1,4 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+
+import java.util.List;
+
 /**
  * 臺鐵定期時刻表資料
  *
@@ -8,27 +11,26 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 public class RailGeneralTimetable
 {
     public String UpdateTime;
+    public String VersionID;
     public GeneralTimetableC GeneralTimetable;
-
-
 }
 
 class GeneralTimetableC {
-    GeneralTrainInfoC GeneralTrainInfo;
-    StopTimesC StopTimes;
-    ServiceDayC ServiceDay;
-    public Boolean SrcUpdateTime;         //SrcUpdateTime xsi:nil  變數宣告有省略字元
+    public GeneralTrainInfoC GeneralTrainInfo;
+    public List<StopTimeC> StopTimes;
+    public ServiceDayC ServiceDay;
+    public String SrcUpdateTime;
 }
 class GeneralTrainInfoC{
     public String TrainNo;
     public String Direction;
     public String StartingStationID;
-    StartingStationNameC StartingStationName;
+    Zh_tw_En StartingStationName;
     public  String EndingStationID;
-    EndingStationNameC EndingStationName;
+    Zh_tw_En EndingStationName;
     public String TrainTypeID;
     public String TrainTypeCode;
-    TrainTypeNameC TrainTypeName;
+    Zh_tw_En TrainTypeName;
     public String TripLine;
     public String WheelchairFlag;
     public String PackageServiceFlag;
@@ -36,36 +38,17 @@ class GeneralTrainInfoC{
     public String BikeFlag;
     public String BreastFeedingFlag;
     public String DailyFlag;
-    NoteC Note;
+    Zh_tw_En Note;
 }
 
-class StartingStationNameC{
-    public String Zh_tw;
-    public String En;
-}
-class EndingStationNameC{
-    public String Zh_tw;
-    public String En;
-}
-class TrainTypeNameC{
-    public String Zh_tw;
-    public String En;
-}
-class  NoteC{
-    public String Zh_tw;
-    public String En;
-}
-
-class StopTimesC{
-    StopTimeC StopTime;
-}
 class StopTimeC{
     public String StopSequence;
     public String StationID;
-    StationNameC StationName;//不重複宣告class
+    Zh_tw_En StationName;
     public String ArrivalTime;
     public String DepartureTime;
 }
+
 class ServiceDayC{
     public String Monday;
     public String Tuesday;
