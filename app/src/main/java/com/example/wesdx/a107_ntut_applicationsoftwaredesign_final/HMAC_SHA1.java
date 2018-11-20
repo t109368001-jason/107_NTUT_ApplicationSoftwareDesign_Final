@@ -9,7 +9,8 @@ import javax.crypto.spec.SecretKeySpec;
 public class HMAC_SHA1 {
 	public static String Signature(String xData, String AppKey) throws java.security.SignatureException {
 		try {
-			final Base64.Encoder encoder = Base64.getEncoder();
+			//final Base64.Encoder encoder = Base64.getEncoder();
+
 			// get an hmac_sha1 key from the raw key bytes
 			SecretKeySpec signingKey = new SecretKeySpec(AppKey.getBytes("UTF-8"),"HmacSHA1");
 
