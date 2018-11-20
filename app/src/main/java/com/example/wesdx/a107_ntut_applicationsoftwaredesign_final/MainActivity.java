@@ -3,37 +3,23 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 //https://github.com/ptxmotc/Sample-code
 //https://ptx.transportdata.tw/PTX/Topic/fbeac0a2-fc53-4ffa-8961-597b2d3e6bdd
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.database.DataSetObserver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TabHost;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.security.SignatureException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +27,15 @@ public class MainActivity extends AppCompatActivity {
     private final static String APIUrl = "http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$top=30&$format=JSON";
 
     private TextView textView, textView2, textView3, textView4, textView5;
+    private RadioGroup radioGroup;
+    private CheckBox checkBox;
+    private CheckBox checkBox2;
+
+    private String startStationText;
+    private String arriveStationText;
+    private int railOrTHSR = 0;
+    private int price = 0;
+    private int arriveTimeFirst = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,15 +47,119 @@ public class MainActivity extends AppCompatActivity {
         textView3 = (TextView) findViewById(R.id.textView3);
         textView4 = (TextView) findViewById(R.id.textView4);
         textView5 = (TextView) findViewById(R.id.textView5);
+        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.radioButton:
+                        railOrTHSR = 1;
+                        break;
+                    case R.id.radioButton2:
+                        railOrTHSR = 2;
+                        break;
+                    case R.id.radioButton3:
+                        railOrTHSR = 3;
+                        break;
+                    default:
+                        railOrTHSR = 0;
+                        break;
+                }
+            }
+        });
+
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                price = (isChecked)? 1: 0;
+            }
+        });
+
+        checkBox2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                arriveTimeFirst = (isChecked)? 1: 0;
+            }
+        });
+
 
         RailStationTask railStationTask = new RailStationTask(APIUrl);
         List<RailStation> railStations = railStationTask.runAsyncTask();
 
-        textView.setText(railStations.get(0).StationName.Zh_tw);
-        textView2.setText(railStations.get(1).StationName.Zh_tw);
-        textView3.setText(railStations.get(2).StationName.Zh_tw);
-        textView4.setText(railStations.get(3).StationName.Zh_tw);
-        textView5.setText(railStations.get(4).StationName.Zh_tw);
+        String[] stationName = new String[railStations.size()];
+        for (int i = 0; i < stationName.length; i++) {
+            stationName[i] = railStations.get(i).StationName.Zh_tw;
+        }
+
+        Spinner start_station = (Spinner)findViewById(R.id.start_station);
+        final Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
+
+        myAdapter transAdapter = new myAdapter(stationName,R.layout.spinner_text);
+        start_station.setAdapter(transAdapter);
+        arrive_station.setAdapter(transAdapter);
+
+        start_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                TextView name = (TextView) view.findViewById(R.id.name);
+                startStationText = name.getText().toString();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        arrive_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                TextView name = (TextView) view.findViewById(R.id.name);
+                arriveStationText = name.getText().toString();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    public  class myAdapter extends BaseAdapter{
+        private String[] data;
+        private int view;
+
+        public myAdapter(String[] data, int view){
+            this.data = data;
+            this.view = view;
+        }
+
+        @Override
+        public int getCount() {
+            return data.length;
+        }
+
+        @Override
+        public String getItem(int position) {
+            return data[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = getLayoutInflater().inflate(view, parent, false);
+            TextView name = (TextView) convertView.findViewById(R.id.name);
+            name.setText(data[position]);
+            return convertView;
+        }
+
+
     }
 }
 /*
