@@ -1,8 +1,10 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 /**
+ * 臺鐵定期時刻表資料
+ *
  * 20181120 1342 完成
-* 臺鐵定期時刻表資料
-* */
+ *
+ */
 public class RailGeneralTimetable
 {
     public String UpdateTime;

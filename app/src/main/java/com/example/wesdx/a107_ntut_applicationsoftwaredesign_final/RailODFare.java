@@ -1,8 +1,11 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+
 /**
- *  20181120 1351 完成
-*臺鐵起迄站間票價資料
-* */
+ * 臺鐵起迄站間票價資料
+ *
+ * 20181120 1351 完成
+ *
+ */
 public class RailODFare {
     public String OriginStationID;
     OriginStationNameC OriginStationName;

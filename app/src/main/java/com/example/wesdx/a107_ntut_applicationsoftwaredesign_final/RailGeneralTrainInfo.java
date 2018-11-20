@@ -1,9 +1,10 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 /**
- *  20181120 1404  完成
+ * 臺鐵定期車次資料
  *
- *  臺鐵定期車次資料
- *  */
+ * 20181120 1404  完成
+ *
+ */
 public class RailGeneralTrainInfo {
     public String TrainNo;
     public String Direction;
