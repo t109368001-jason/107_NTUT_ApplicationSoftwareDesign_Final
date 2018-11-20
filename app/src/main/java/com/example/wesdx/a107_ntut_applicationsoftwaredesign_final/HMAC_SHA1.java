@@ -19,7 +19,8 @@ public class HMAC_SHA1 {
 
 			// compute the hmac on input data bytes
 			byte[] rawHmac = mac.doFinal(xData.getBytes("UTF-8"));
-			String result = encoder.encodeToString(rawHmac);
+            String result = android.util.Base64.encodeToString(rawHmac, android.util.Base64.DEFAULT); //這行要改成這樣，不然就只能在 Andorid 8.0 才能使用
+            result=result.replace("\n", ""); // 要加這一行，不然會認證失敗
 			return result;
 
 		} catch (Exception e) {

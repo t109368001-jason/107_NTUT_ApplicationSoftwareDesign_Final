@@ -1,14 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-//https://github.com/ptxmotc/Sample-code
-//https://ptx.transportdata.tw/PTX/Topic/fbeac0a2-fc53-4ffa-8961-597b2d3e6bdd
-
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,47 +22,29 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
+public class RailStationTask {
 
-public class MainActivity extends AppCompatActivity {
-
-    private final static String XMLUrl = "https://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$top=30&$format=xml";
-    private final static String APIUrl = "http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$top=30&$format=JSON";
-
-    private TextView textView, textView2, textView3, textView4, textView5;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        textView = (TextView) findViewById(R.id.textView);
-        textView2 = (TextView) findViewById(R.id.textView2);
-        textView3 = (TextView) findViewById(R.id.textView3);
-        textView4 = (TextView) findViewById(R.id.textView4);
-        textView5 = (TextView) findViewById(R.id.textView5);
-
-        RailStationTask railStationTask = new RailStationTask(APIUrl);
-        List<RailStation> railStations = railStationTask.runAsyncTask();
-
-        textView.setText(railStations.get(0).StationName.Zh_tw);
-        textView2.setText(railStations.get(1).StationName.Zh_tw);
-        textView3.setText(railStations.get(2).StationName.Zh_tw);
-        textView4.setText(railStations.get(3).StationName.Zh_tw);
-        textView5.setText(railStations.get(4).StationName.Zh_tw);
+    private String APIUrl = "http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$top=30&$format=JSON";
+    public RailStationTask(String APIUrl) {
+        this.APIUrl = APIUrl;
     }
-}
-/*
+
+    @SuppressLint("StaticFieldLeak")
+    public List<RailStation> runAsyncTask() {
+        List<RailStation> result = null;
+        AsyncTask<Void, Void, List<RailStation>> task = new AsyncTask<Void, Void, List<RailStation>>() {
+            @Override
+            protected List<RailStation> doInBackground(Void... voids) {
+                List<RailStation> obj = null;
                 HttpURLConnection connection = null;
                 //申請的APPID
                 //（FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF 為 Guest 帳號，以IP作為API呼叫限制，請替換為註冊的APPID & APPKey）
-                String APPID = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF";
+                String APPID = "6066d2cbc3324183bbaf01e2515df9df";
                 //申請的APPKey
-                String APPKey = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF";
+                String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
                 //取得當下的UTC時間，Java8有提供時間格式DateTimeFormatter.RFC_1123_DATE_TIME
                 //但是格式與C#有一點不同，所以只能自行定義
@@ -91,14 +66,16 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(sAuth);
 
                 try {
-                    URL url = new URL(this.url);
+                    //URL url = new URL(XMLUrl);
+                    URL url = new URL(APIUrl);
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
+                    //connection.setRequestProperty("Accept", "application/json");
                     connection.setRequestProperty("Authorization", sAuth);
                     connection.setRequestProperty("x-date", xdate);
                     connection.setRequestProperty("Accept-Encoding", "gzip");
                     connection.setDoInput(true);
-                    connection.setDoOutput(true);
+                    //connection.setDoOutput(true);
 
                     //將InputStream轉換為Byte
                     InputStream inputStream = connection.getInputStream();
@@ -124,12 +101,38 @@ public class MainActivity extends AppCompatActivity {
                     Type RailStationListType = new TypeToken<ArrayList<RailStation>>() {
                     }.getType();
                     Gson gsonReceiver = new Gson();
-                    List<RailStation> obj = gsonReceiver.fromJson(response, RailStationListType);
+                    obj = gsonReceiver.fromJson(response, RailStationListType);
                     System.out.println(response);
 
                 } catch (ProtocolException e) {
                     e.printStackTrace();
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     e.printStackTrace();
                 }
- */
+                return obj;
+            }
+        };
+
+        task.execute();
+
+        try {
+            result = task.get();
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    //取得當下UTC時間
+    public static String getServerTime() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return dateFormat.format(calendar.getTime());
+    }
+
+}

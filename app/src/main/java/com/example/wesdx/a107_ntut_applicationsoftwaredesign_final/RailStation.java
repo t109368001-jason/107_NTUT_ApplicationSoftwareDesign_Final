@@ -8,24 +8,23 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
  */
 public class RailStation {
 
-    // 車站代碼
+	class StationNameC
+	{
+		String Zh_tw;
+		String En;
+	}
+	class StationPositionC
+	{
+		float PositionLon;
+		float PositionLat;
+	}
     public String StationID;
-    // 車站中文
-    public String StationNameZh;
-    // 車站英文
-    public String StationNameEn;
-    // 經度
-    public long StationLon;
-    // 緯度
-    public long StationLat;
-    // 車站地址
+	public StationNameC StationName;
+	public StationPositionC StationPosition;
     public String StationAddress;
-    // 聯繫電話
     public String StationPhone;
-    // 車站級別定義
     public String StationClass;
-    
-    
+
 	public String getStationID() {
 		return StationID;
 	}
@@ -33,28 +32,28 @@ public class RailStation {
 		StationID = stationID;
 	}
 	public String getStationNameZh() {
-		return StationNameZh;
+		return StationName.Zh_tw;
 	}
 	public void setStationNameZh(String stationNameZh) {
-		StationNameZh = stationNameZh;
+		StationName.Zh_tw = stationNameZh;
 	}
 	public String getStationNameEn() {
-		return StationNameEn;
+		return StationName.En;
 	}
 	public void setStationNameEn(String stationNameEn) {
-		StationNameEn = stationNameEn;
+		StationName.En = stationNameEn;
 	}
-	public long getStationLon() {
-		return StationLon;
+	public float getStationLon() {
+		return StationPosition.PositionLon;
 	}
-	public void setStationLon(long stationLon) {
-		StationLon = stationLon;
+	public void setStationLon(float stationLon) {
+		StationPosition.PositionLon = stationLon;
 	}
-	public long getStationLat() {
-		return StationLat;
+	public float getStationLat() {
+		return StationPosition.PositionLat;
 	}
-	public void setStationLat(long stationLat) {
-		StationLat = stationLat;
+	public void setStationLat(float stationLat) {
+		StationPosition.PositionLat = stationLat;
 	}
 	public String getStationAddress() {
 		return StationAddress;
@@ -74,5 +73,4 @@ public class RailStation {
 	public void setStationClass(String stationClass) {
 		StationClass = stationClass;
 	}
-
 }
