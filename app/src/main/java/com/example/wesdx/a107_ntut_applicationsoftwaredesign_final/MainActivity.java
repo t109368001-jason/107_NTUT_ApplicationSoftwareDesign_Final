@@ -15,8 +15,6 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,12 +24,14 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox checkBox;
     private CheckBox checkBox2;
 
-    private List<RailStation> railStations;
-    private List<RailGeneralTimetable> railGeneralTimetables;
-    private List<RailGeneralTrainInfo> railGeneralTrainInfos;
+    private List<RailStation> railStationList;
+    private List<RailGeneralTimetable> railGeneralTimetableList;
+    private List<RailGeneralTrainInfo> railGeneralTrainInfoList;
+    private List<RailODDailyTimetable> railODDailyTimetableList;
+    private List<RegionalRailStation> regionalRailStationList;
 
-    private RailStation startStation;
-    private RailStation arriveStation;
+    private RailStation originStation;
+    private RailStation destinationStation;
     private int TRAOrTHSR = 0;
     private int price = 0;
     private int arriveTimeFirst = 0;
@@ -50,16 +50,21 @@ public class MainActivity extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
 
-        railStations = TRAAPI.getRailStation();
-        RailStation.removeUnreservationStation(railStations);
-        railGeneralTimetables = TRAAPI.getRailGeneralTimetable();
-        railGeneralTrainInfos = TRAAPI.getRailGeneralTrainInfo();
+        railStationList = TRAAPI.getRailStation();
+        RailStation.removeUnreservationStation(railStationList);
+        railGeneralTimetableList = TRAAPI.getRailGeneralTimetable();
+        railGeneralTrainInfoList = TRAAPI.getRailGeneralTrainInfo();
+        railODDailyTimetableList = TRAAPI.getRailODDailyTimetable("1002", "1004", "2018-11-21");
+        regionalRailStationList = RegionalRailStation.convert(railStationList);
+        //List<RailODFare> railODFares = TRAAPI.getRailODFare(originStation.StationID, destinationStation.StationID);
 
-        textView.setText(railStations.get(0).StationName.Zh_tw);
-        textView2.setText(railStations.get(1).StationName.Zh_tw);
-        textView3.setText(railStations.get(2).StationName.Zh_tw);
-        textView4.setText(railStations.get(3).StationName.Zh_tw);
-        textView5.setText(railStations.get(4).StationName.Zh_tw);
+        railODDailyTimetableList = RailODDailyTimetable.filter(railODDailyTimetableList, "07:00", "01:00");
+
+        textView.setText(railStationList.get(0).StationName.Zh_tw);
+        textView2.setText(railStationList.get(1).StationName.Zh_tw);
+        textView3.setText(railStationList.get(2).StationName.Zh_tw);
+        textView4.setText(railStationList.get(3).StationName.Zh_tw);
+        textView5.setText(railStationList.get(4).StationName.Zh_tw);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -95,49 +100,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String[] stationName = new String[railStations.size()];
+        String[] stationName = new String[railStationList.size()];
         for (int i = 0; i < stationName.length; i++) {
-            stationName[i] = railStations.get(i).ReservationCode + railStations.get(i).StationName.Zh_tw;
+            stationName[i] = railStationList.get(i).ReservationCode + railStationList.get(i).StationName.Zh_tw;
         }
 
         Spinner start_station = (Spinner)findViewById(R.id.start_station);
         final Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
 
-        myAdapter transAdapter = new myAdapter(stationName,R.layout.spinner_text);
+        myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
         start_station.setAdapter(transAdapter);
         arrive_station.setAdapter(transAdapter);
 
         start_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                startStation = railStations.get(position);
-                if((startStation != null)&& (arriveStation!= null)) {
-                    List<RailODFare> railODFares = TRAAPI.getRailODFare(startStation.StationID, arriveStation.StationID);
-                    if(railODFares.size() > 0) {
-                        textView.setText(railODFares.get(0).Fares.get(0).Price);
-                    }
-                }
+                originStation = railStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                originStation = null;
             }
         });
 
         arrive_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                arriveStation = railStations.get(position);
-                if((startStation != null)&& (arriveStation!= null)) {
-                    List<RailODFare> railODFares = TRAAPI.getRailODFare(startStation.StationID, arriveStation.StationID);
-                    if(railODFares.size() > 0) {
-                        textView.setText(railODFares.get(0).Fares.get(0).Price);
-                    }
-                }
+                destinationStation = railStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                destinationStation = null;
             }
         });
     }

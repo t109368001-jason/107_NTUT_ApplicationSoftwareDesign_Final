@@ -4,9 +4,6 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
@@ -14,13 +11,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -122,8 +117,13 @@ public class TRAAPI {
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
-    public static List<RailODFare> getRailODFare(String OriginStationID, String DestinationStationID) {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + OriginStationID + "/to/" + DestinationStationID + "?format=JSON"));
+    public static List<RailODFare> getRailODFare(String originStationID, String destinationStationID) {
+        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStationID + "/to/" + destinationStationID + "?format=JSON"));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
+    }
+
+    public static List<RailODFare> getRailODFare(RailStation originStation, RailStation destinationStation) {
+        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStation.StationID + "/to/" + destinationStation.StationID + "?format=JSON"));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
@@ -132,8 +132,18 @@ public class TRAAPI {
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
+    public static List<RailODDailyTimetable> getRailODDailyTimetable(String originStationID, String destinationStationID, String TrainDate) {
+        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate + "?$format=JSON"));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
+    }
+
+    public static List<RailODDailyTimetable> getRailODDailyTimetable(RailStation originStation, RailStation destinationStation, String trainDate) {
+        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStation.StationID + "/to/" + destinationStation.StationID + "/" + trainDate + "?$format=JSON"));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
+    }
+
     //取得當下UTC時間
-    public static String getServerTime() {
+    private static String getServerTime() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
