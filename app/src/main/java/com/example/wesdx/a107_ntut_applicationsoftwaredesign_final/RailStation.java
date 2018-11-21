@@ -44,6 +44,8 @@ public class RailStation  implements Comparable<RailStation> {
     public String UpdateTime;
     public String VersionID;
 
+    public String OperatorID;//高鐵
+
     public static void removeUnreservationStation(List<RailStation> list)
     {
         for(int i = 0; i < list.size(); i++) {

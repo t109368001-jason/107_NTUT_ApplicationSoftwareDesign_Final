@@ -11,6 +11,7 @@ import java.util.List;
 public class RailGeneralTimetable
 {
     public String UpdateTime;
+    public String EffectiveDate;//高鐵
     public String VersionID;
     public GeneralTimetableC GeneralTimetable;
 }
