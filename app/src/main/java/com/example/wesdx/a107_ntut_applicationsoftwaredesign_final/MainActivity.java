@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         railGeneralTrainInfoList = TRAAPI.getRailGeneralTrainInfo();
         railODDailyTimetableList = TRAAPI.getRailODDailyTimetable("1002", "1004", "2018-11-21");
         regionalRailStationList = RegionalRailStation.convert(railStationList);
-        //List<RailODFare> railODFares = TRAAPI.getRailODFare(originStation.StationID, destinationStation.StationID);
+        //List<RailODFare> railODFares = TRAAPI.getRailODFare(originStation, destinationStation);
 
         railODDailyTimetableList = RailODDailyTimetable.filter(railODDailyTimetableList, "07:00", "01:00");
 

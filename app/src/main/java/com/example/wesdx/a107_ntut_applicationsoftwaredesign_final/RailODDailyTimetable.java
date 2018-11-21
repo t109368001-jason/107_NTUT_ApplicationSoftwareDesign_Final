@@ -31,7 +31,9 @@ public class RailODDailyTimetable {
         try {
             start = (new SimpleDateFormat("HH:mm")).parse(startTime);
             endAdd = (new SimpleDateFormat("HH:mm")).parse(lessThanEndTimeOfHours);
-
+            if(endAdd.compareTo((new SimpleDateFormat("HH:mm")).parse("00:00")) == 0) {
+                endAdd = (new SimpleDateFormat("HH:mm")).parse("24:00");
+            }
 
             for(int i = 0; i < railODDailyTimetableList.size(); i++) {
                 Date temp = new Date(0);
@@ -41,6 +43,7 @@ public class RailODDailyTimetable {
                     railODDailyTimetableList_new.add(railODDailyTimetableList.get(i));
                 }
             }
+
             end = (new SimpleDateFormat("HH:mm")).parse(railODDailyTimetableList_new.get(0).DestinationStopTime.ArrivalTime);
 
             for(int i = 0; i < railODDailyTimetableList_new.size(); i++) {
@@ -75,6 +78,7 @@ public class RailODDailyTimetable {
         return railODDailyTimetableList_new;
     }
 }
+
 class DailyTrainInfoC{
     public String TrainNo;
     public String Direction;
@@ -97,11 +101,11 @@ class DailyTrainInfoC{
     public String ServiceAddedFlag;
     public Zh_tw_En Note;
 }
+
 class RailStopTimeC{
     public String StopSequence;
     public String StationID;
     public Zh_tw_En StationName;
     public String ArrivalTime;
     public String DepartureTime;
-
 }
