@@ -1,8 +1,9 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.HMAC_SHA1;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -48,7 +49,7 @@ class APIURL {
     }
 }
 
-public class PTXAPI {
+public class API {
     public final static String TRA = "TRA";
     public final static String THSR = "THSR";
     public final static int TRAIN_NO = 1;
@@ -123,7 +124,7 @@ public class PTXAPI {
         }
     };
 
-    public PTXAPI(String APIUrl) {
+    public API(String APIUrl) {
         task.execute(APIUrl);
     }
 
@@ -143,7 +144,7 @@ public class PTXAPI {
 
     public static List<RailStation> getStation(String transportation) {
         APIURL apiurl = new APIURL(transportation, "Station");
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailStation>>() {}.getType());
     }
 
@@ -154,7 +155,7 @@ public class PTXAPI {
 
     public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) {
         APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
@@ -164,7 +165,7 @@ public class PTXAPI {
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) {
         if(transportation == THSR) return null;
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
@@ -180,13 +181,13 @@ public class PTXAPI {
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
@@ -197,7 +198,7 @@ public class PTXAPI {
 
     public static List<RailODDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
     }
 

@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 /**
  * 臺鐵定期車次資料
  *
@@ -9,12 +9,12 @@ public class RailGeneralTrainInfo {
     public String TrainNo;
     public String Direction;
     public String StartingStationID;
-    Zh_tw_En StartingStationName;//前面宣告過了
+    NameType StartingStationName;//前面宣告過了
     public  String EndingStationID;
-    Zh_tw_En EndingStationName; //前面宣告過了
+    NameType EndingStationName; //前面宣告過了
     public String TrainTypeID;
     public String TrainTypeCode;
-    Zh_tw_En TrainTypeName; //前面宣告過了
+    NameType TrainTypeName; //前面宣告過了
     public String TripLine;
     public String WheelchairFlag;
     public String PackageServiceFlag;
@@ -22,5 +22,5 @@ public class RailGeneralTrainInfo {
     public String BikeFlag;
     public String BreastFeedingFlag;
     public String DailyFlag;
-    Zh_tw_En Note; //前面宣告過了
+    NameType Note; //前面宣告過了
 }

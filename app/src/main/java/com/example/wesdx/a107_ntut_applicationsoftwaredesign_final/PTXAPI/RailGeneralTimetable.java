@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import java.util.List;
 
@@ -26,12 +26,12 @@ class GeneralTrainInfoC{
     public String TrainNo;
     public String Direction;
     public String StartingStationID;
-    Zh_tw_En StartingStationName;
+    NameType StartingStationName;
     public  String EndingStationID;
-    Zh_tw_En EndingStationName;
+    NameType EndingStationName;
     public String TrainTypeID;
     public String TrainTypeCode;
-    Zh_tw_En TrainTypeName;
+    NameType TrainTypeName;
     public String TripLine;
     public String WheelchairFlag;
     public String PackageServiceFlag;
@@ -39,13 +39,13 @@ class GeneralTrainInfoC{
     public String BikeFlag;
     public String BreastFeedingFlag;
     public String DailyFlag;
-    Zh_tw_En Note;
+    NameType Note;
 }
 
 class StopTimeC{
     public String StopSequence;
     public String StationID;
-    Zh_tw_En StationName;
+    NameType StationName;
     public String ArrivalTime;
     public String DepartureTime;
 }

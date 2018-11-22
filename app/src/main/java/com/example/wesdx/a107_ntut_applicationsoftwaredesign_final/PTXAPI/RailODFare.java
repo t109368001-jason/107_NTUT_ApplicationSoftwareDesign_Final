@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import java.util.List;
  */
 public class RailODFare {
     public String OriginStationID;
-    Zh_tw_En OriginStationName;
+    NameType OriginStationName;
     public String DestinationStationID;
-    Zh_tw_En DestinationStationName;
+    NameType DestinationStationName;
     public String Direction;
     List<FareC> Fares;
     public String UpdateTime;
