@@ -1,8 +1,9 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.HMAC_SHA1;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -48,9 +49,13 @@ class APIURL {
     }
 }
 
-public class PTXAPI {
+public class API {
     public final static String TRA = "TRA";
     public final static String THSR = "THSR";
+    public final static int TRAIN_NO = 1;
+    public final static int TRAIN_DATE = 2;
+    public final static int TRAIN_NO_AND_TRAIN_DATE = 3;
+    public final static int STATION_ID_AND_TRAIN_DATE = 4;
 
     private final String APPID = "6066d2cbc3324183bbaf01e2515df9df";
 
@@ -119,7 +124,7 @@ public class PTXAPI {
         }
     };
 
-    public PTXAPI(String APIUrl) {
+    public API(String APIUrl) {
         task.execute(APIUrl);
     }
 
@@ -135,45 +140,100 @@ public class PTXAPI {
         return result;
     }
 
-    public static List<RailStation> getRailStation(String transportation) {
+    //Network
+
+    public static List<RailStation> getStation(String transportation) {
         APIURL apiurl = new APIURL(transportation, "Station");
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailStation>>() {}.getType());
     }
 
-    public static List<RailGeneralTimetable> getRailGeneralTimetable(String transportation) {
-        APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
-    }
+    //Line
+    //StationOfLine
+    //TrainType
+    //Shape
 
-    public static List<RailODFare> getRailODFare(String transportation, String originStationID, String destinationStationID) {
+    public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) {
         APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
-        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStationID + "/to/" + destinationStationID + "?format=JSON"));
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
     public static List<RailODFare> getRailODFare(String transportation, RailStation originStation, RailStation destinationStation) {
-        return getRailODFare(transportation, originStation.StationID, destinationStation.StationID);
+        return getODFare(transportation, originStation.StationID, destinationStation.StationID);
     }
 
-    public static List<RailGeneralTrainInfo> getRailGeneralTrainInfo(String transportation) {
-        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo");
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
-        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/GeneralTrainInfo?format=JSON"));
+    public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) {
+        if(transportation == THSR) return null;
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getRailODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
-        APIURL apiurl = new APIURL(transportation, "DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate);
-        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
-        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate + "?$format=JSON"));
+    public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo");
+        return getGeneralTrainInfo(transportation, apiurl);
+    }
+
+    public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, String TrainTypeID) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo/TrainNo/" + TrainTypeID);
+        return getGeneralTrainInfo(transportation, apiurl);
+    }
+
+    public static List<RailGeneralTimetable> getGeneralTimetable(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
+        API getAPI = (new API(apiurl.get()));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+    }
+
+    public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
+        API getAPI = (new API(apiurl.get()));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+    }
+
+    //DailyTrainInfo/Today
+    //DailyTrainInfo/Today/TrainNo/{TrainNo}
+    //DailyTrainInfo/TrainDate/{TrainDate}
+    //DailyTrainInfo/TrainNo/{TrainNo}/TrainDate{TrainDate}
+
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
+        API getAPI = (new API(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getRailODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
-        return getRailODDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation) {
+        String functionParameter = "Today";
+        return getDailyTimetable(transportation, functionParameter);
+    }
+
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key) {
+        String functionParameter = "";
+        if(serachBy == TRAIN_NO) {
+            functionParameter = "Today/TrainNo" + key;
+        } else if(serachBy == TRAIN_DATE){
+            functionParameter = "TrainDate" + key;
+        }
+        return getDailyTimetable(transportation, functionParameter);
+    }
+
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key1, String key2) {
+        String functionParameter = "";
+        if(serachBy == TRAIN_NO_AND_TRAIN_DATE) {
+            functionParameter = "TrainNo/" + key1 + "/TrainDate/" + key2;
+        } else if(serachBy == STATION_ID_AND_TRAIN_DATE){
+            functionParameter = "TrainNo/" + key1 + "/" + key2;
+        }
+        return getDailyTimetable(transportation, functionParameter);
+    }
+
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
+        String functionParameter = "OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
+        return getDailyTimetable(transportation, functionParameter);
+    }
+
+    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
+        return getDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
     }
 
     //取得當下UTC時間

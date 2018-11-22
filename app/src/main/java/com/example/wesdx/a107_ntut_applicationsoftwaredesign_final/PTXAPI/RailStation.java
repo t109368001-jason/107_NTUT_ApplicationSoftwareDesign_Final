@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import java.util.List;
 /**
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class RailStation  implements Comparable<RailStation> {
     public String StationID;
-    public Zh_tw_En StationName;
+    public NameType  StationName;
     public StationPositionC StationPosition;
     public String StationAddress;
     public String StationPhone;
@@ -104,11 +104,6 @@ public class RailStation  implements Comparable<RailStation> {
     }
 }
 
-class Zh_tw_En
-{
-    public String Zh_tw;
-    public String En;
-}
 class StationPositionC
 {
     public String PositionLon;

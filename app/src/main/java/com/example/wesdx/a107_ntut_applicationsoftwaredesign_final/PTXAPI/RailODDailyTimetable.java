@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,13 +83,13 @@ class DailyTrainInfoC{
     public String TrainNo;
     public String Direction;
     public String StartingStationID;
-    public Zh_tw_En StartingStationName;
+    public NameType StartingStationName;
     public String EndingStationID;
-    public Zh_tw_En EndingStationName;
+    public NameType EndingStationName;
     public String TripHeadsign;
     public String TrainTypeID;
     public String TrainTypeCode;
-    public Zh_tw_En TrainTypeName;
+    public NameType TrainTypeName;
     public String TripLine;
     public String OverNightStationID;
     public String WheelchairFlag;
@@ -99,13 +99,13 @@ class DailyTrainInfoC{
     public String BreastFeedingFlag;
     public String DailyFlag;
     public String ServiceAddedFlag;
-    public Zh_tw_En Note;
+    public NameType Note;
 }
 
 class RailStopTimeC{
     public String StopSequence;
     public String StationID;
-    public Zh_tw_En StationName;
+    public NameType StationName;
     public String ArrivalTime;
     public String DepartureTime;
 }

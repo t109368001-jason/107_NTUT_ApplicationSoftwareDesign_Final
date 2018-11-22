@@ -1,8 +1,9 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.HMAC_SHA1;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

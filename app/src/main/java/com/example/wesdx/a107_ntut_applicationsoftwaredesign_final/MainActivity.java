@@ -15,6 +15,13 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTrainInfo;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailODDailyTimetable;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
+
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,23 +63,20 @@ public class MainActivity extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
 
-        TRARailStationList = PTXAPI.getRailStation(PTXAPI.TRA);
+        TRARailStationList = API.getStation(API.TRA);
         RailStation.removeUnreservationStation(TRARailStationList);
-        TRARailGeneralTimetableList = PTXAPI.getRailGeneralTimetable(PTXAPI.TRA);
-        TRARailGeneralTrainInfoList = PTXAPI.getRailGeneralTrainInfo(PTXAPI.TRA);
-        TRARailODDailyTimetableList = PTXAPI.getRailODDailyTimetable(PTXAPI.TRA, "1002", "1004", "2018-11-22");
+        TRARailGeneralTimetableList = API.getGeneralTimetable(API.TRA);
+        TRARailGeneralTrainInfoList = API.getGeneralTrainInfo(API.TRA);
+        TRARailODDailyTimetableList = API.getDailyTimetable(API.TRA, "1002", "1004", "2018-11-30");
         TRARegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
         //List<RailODFare> TRARailODFares = TRAAPI.getRailODFare(PTXAPI.TRA, originStation, destinationStation);
         TRARailODDailyTimetableList = RailODDailyTimetable.filter(TRARailODDailyTimetableList, "07:00", "01:00");
 
-        THSRRailStationList = PTXAPI.getRailStation(PTXAPI.THSR);
-        THSRRailGeneralTimetableList = PTXAPI.getRailGeneralTimetable(PTXAPI.THSR);
-        THSRRailGeneralTrainInfoList = PTXAPI.getRailGeneralTrainInfo(PTXAPI.THSR);
-        THSRRailODDailyTimetableList = PTXAPI.getRailODDailyTimetable(PTXAPI.THSR, "1010", "1020", "2018-11-22");
+        THSRRailStationList = API.getStation(API.THSR);
+        THSRRailGeneralTimetableList = API.getGeneralTimetable(API.THSR);
+        THSRRailODDailyTimetableList = API.getDailyTimetable(API.THSR, "1010", "1020", "2018-11-30");
         THSRRegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
         THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
-
-
 
         textView.setText(TRARailStationList.get(0).StationName.Zh_tw);
         textView2.setText(TRARailStationList.get(1).StationName.Zh_tw);
