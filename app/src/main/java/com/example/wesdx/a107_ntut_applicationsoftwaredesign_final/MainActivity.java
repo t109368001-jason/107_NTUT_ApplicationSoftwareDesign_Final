@@ -3,18 +3,26 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 //https://github.com/ptxmotc/Sample-code
 //https://ptx.transportdata.tw/PTX/Topic/fbeac0a2-fc53-4ffa-8961-597b2d3e6bdd
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+<<<<<<< Updated upstream
+=======
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
+>>>>>>> Stashed changes
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     private CheckBox checkBox;
     private CheckBox checkBox2;
+    private Button button;
 
     private List<RailStation> railStationList;
     private List<RailGeneralTimetable> railGeneralTimetableList;
@@ -49,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
+        button = (Button)findViewById(R.id.button);
 
         railStationList = TRAAPI.getRailStation();
         RailStation.removeUnreservationStation(railStationList);
@@ -133,6 +143,15 @@ public class MainActivity extends AppCompatActivity {
                 destinationStation = null;
             }
         });
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, ShowResult.class);
+                startActivityForResult(intent, 0);
+            }
+        });
     }
 
     public  class myAdapter extends BaseAdapter{
@@ -167,5 +186,6 @@ public class MainActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
 }
 
