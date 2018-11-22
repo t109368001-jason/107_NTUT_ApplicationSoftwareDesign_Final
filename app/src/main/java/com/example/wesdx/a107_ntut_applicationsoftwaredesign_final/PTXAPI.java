@@ -23,7 +23,35 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
-public class TRAAPI {
+class APIURL {
+    private String preFix;
+    public String transportation;
+    public String function;
+    private String postFix;
+
+    public APIURL() {
+        preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
+        transportation = "TRA / THSR";
+        function = "Station / GeneralTimetable / ODFare/OS/to/DS / GeneralTrainInfo / DailyTimetable/OS/to/DS";
+        postFix = "?format=JSON";
+    }
+
+    public APIURL(String transportation, String function) {
+        this.preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
+        this.transportation =transportation;
+        this.function = function;
+        this.postFix = "?format=JSON";
+    }
+
+    public String get() {
+        return preFix + transportation + '/' + function + postFix;
+    }
+}
+
+public class PTXAPI {
+    public final static String TRA = "TRA";
+    public final static String THSR = "THSR";
+
     private final String APPID = "6066d2cbc3324183bbaf01e2515df9df";
 
     private final String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
@@ -91,7 +119,7 @@ public class TRAAPI {
         }
     };
 
-    public TRAAPI(String APIUrl) {
+    public PTXAPI(String APIUrl) {
         task.execute(APIUrl);
     }
 
@@ -107,39 +135,45 @@ public class TRAAPI {
         return result;
     }
 
-    public static List<RailStation> getRailStation() {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?format=JSON"));
+    public static List<RailStation> getRailStation(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "Station");
+        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailStation>>() {}.getType());
     }
 
-    public static List<RailGeneralTimetable> getRailGeneralTimetable() {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/GeneralTimetable?format=JSON"));
+    public static List<RailGeneralTimetable> getRailGeneralTimetable(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
+        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
-    public static List<RailODFare> getRailODFare(String originStationID, String destinationStationID) {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStationID + "/to/" + destinationStationID + "?format=JSON"));
+    public static List<RailODFare> getRailODFare(String transportation, String originStationID, String destinationStationID) {
+        APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
+        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStationID + "/to/" + destinationStationID + "?format=JSON"));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
-    public static List<RailODFare> getRailODFare(RailStation originStation, RailStation destinationStation) {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/ODFare/" + originStation.StationID + "/to/" + destinationStation.StationID + "?format=JSON"));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
+    public static List<RailODFare> getRailODFare(String transportation, RailStation originStation, RailStation destinationStation) {
+        return getRailODFare(transportation, originStation.StationID, destinationStation.StationID);
     }
 
-    public static List<RailGeneralTrainInfo> getRailGeneralTrainInfo() {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/GeneralTrainInfo?format=JSON"));
+    public static List<RailGeneralTrainInfo> getRailGeneralTrainInfo(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo");
+        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/GeneralTrainInfo?format=JSON"));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getRailODDailyTimetable(String originStationID, String destinationStationID, String TrainDate) {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate + "?$format=JSON"));
+    public static List<RailODDailyTimetable> getRailODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate);
+        PTXAPI getAPI = (new PTXAPI(apiurl.get()));
+        //TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate + "?$format=JSON"));
         return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getRailODDailyTimetable(RailStation originStation, RailStation destinationStation, String trainDate) {
-        TRAAPI getAPI = (new TRAAPI("http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/" + originStation.StationID + "/to/" + destinationStation.StationID + "/" + trainDate + "?$format=JSON"));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
+    public static List<RailODDailyTimetable> getRailODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
+        return getRailODDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
     }
 
     //取得當下UTC時間

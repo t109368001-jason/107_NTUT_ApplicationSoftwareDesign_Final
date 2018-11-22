@@ -24,11 +24,16 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox checkBox;
     private CheckBox checkBox2;
 
-    private List<RailStation> railStationList;
-    private List<RailGeneralTimetable> railGeneralTimetableList;
-    private List<RailGeneralTrainInfo> railGeneralTrainInfoList;
-    private List<RailODDailyTimetable> railODDailyTimetableList;
-    private List<RegionalRailStation> regionalRailStationList;
+    private List<RailStation> TRARailStationList;
+    private List<RailStation> THSRRailStationList;
+    private List<RailGeneralTimetable> TRARailGeneralTimetableList;
+    private List<RailGeneralTimetable> THSRRailGeneralTimetableList;
+    private List<RailGeneralTrainInfo> TRARailGeneralTrainInfoList;
+    private List<RailGeneralTrainInfo> THSRRailGeneralTrainInfoList;
+    private List<RailODDailyTimetable> TRARailODDailyTimetableList;
+    private List<RailODDailyTimetable> THSRRailODDailyTimetableList;
+    private List<RegionalRailStation> TRARegionalRailStationList;
+    private List<RegionalRailStation> THSRRegionalRailStationList;
 
     private RailStation originStation;
     private RailStation destinationStation;
@@ -50,21 +55,29 @@ public class MainActivity extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
 
-        railStationList = TRAAPI.getRailStation();
-        RailStation.removeUnreservationStation(railStationList);
-        railGeneralTimetableList = TRAAPI.getRailGeneralTimetable();
-        railGeneralTrainInfoList = TRAAPI.getRailGeneralTrainInfo();
-        railODDailyTimetableList = TRAAPI.getRailODDailyTimetable("1002", "1004", "2018-11-21");
-        regionalRailStationList = RegionalRailStation.convert(railStationList);
-        //List<RailODFare> railODFares = TRAAPI.getRailODFare(originStation, destinationStation);
+        TRARailStationList = PTXAPI.getRailStation(PTXAPI.TRA);
+        RailStation.removeUnreservationStation(TRARailStationList);
+        TRARailGeneralTimetableList = PTXAPI.getRailGeneralTimetable(PTXAPI.TRA);
+        TRARailGeneralTrainInfoList = PTXAPI.getRailGeneralTrainInfo(PTXAPI.TRA);
+        TRARailODDailyTimetableList = PTXAPI.getRailODDailyTimetable(PTXAPI.TRA, "1002", "1004", "2018-11-22");
+        TRARegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
+        //List<RailODFare> TRARailODFares = TRAAPI.getRailODFare(PTXAPI.TRA, originStation, destinationStation);
+        TRARailODDailyTimetableList = RailODDailyTimetable.filter(TRARailODDailyTimetableList, "07:00", "01:00");
 
-        railODDailyTimetableList = RailODDailyTimetable.filter(railODDailyTimetableList, "07:00", "01:00");
+        THSRRailStationList = PTXAPI.getRailStation(PTXAPI.THSR);
+        THSRRailGeneralTimetableList = PTXAPI.getRailGeneralTimetable(PTXAPI.THSR);
+        THSRRailGeneralTrainInfoList = PTXAPI.getRailGeneralTrainInfo(PTXAPI.THSR);
+        THSRRailODDailyTimetableList = PTXAPI.getRailODDailyTimetable(PTXAPI.THSR, "1010", "1020", "2018-11-22");
+        THSRRegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
+        THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
 
-        textView.setText(railStationList.get(0).StationName.Zh_tw);
-        textView2.setText(railStationList.get(1).StationName.Zh_tw);
-        textView3.setText(railStationList.get(2).StationName.Zh_tw);
-        textView4.setText(railStationList.get(3).StationName.Zh_tw);
-        textView5.setText(railStationList.get(4).StationName.Zh_tw);
+
+
+        textView.setText(TRARailStationList.get(0).StationName.Zh_tw);
+        textView2.setText(TRARailStationList.get(1).StationName.Zh_tw);
+        textView3.setText(TRARailStationList.get(2).StationName.Zh_tw);
+        textView4.setText(TRARailStationList.get(3).StationName.Zh_tw);
+        textView5.setText(TRARailStationList.get(4).StationName.Zh_tw);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -100,9 +113,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String[] stationName = new String[railStationList.size()];
+        String[] stationName = new String[TRARailStationList.size()];
         for (int i = 0; i < stationName.length; i++) {
-            stationName[i] = railStationList.get(i).ReservationCode + railStationList.get(i).StationName.Zh_tw;
+            stationName[i] = TRARailStationList.get(i).ReservationCode + TRARailStationList.get(i).StationName.Zh_tw;
         }
 
         Spinner start_station = (Spinner)findViewById(R.id.start_station);
@@ -115,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         start_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                originStation = railStationList.get(position);
+                originStation = TRARailStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -126,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         arrive_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                destinationStation = railStationList.get(position);
+                destinationStation = TRARailStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
