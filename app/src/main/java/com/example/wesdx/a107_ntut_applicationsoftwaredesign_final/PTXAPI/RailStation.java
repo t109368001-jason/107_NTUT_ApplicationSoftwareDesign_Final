@@ -11,7 +11,7 @@ import java.util.List;
 public class RailStation  implements Comparable<RailStation> {
     public String StationID;
     public NameType  StationName;
-    public StationPositionC StationPosition;
+    public PointType StationPosition;
     public String StationAddress;
     public String StationPhone;
     public String StationClass;
@@ -104,8 +104,3 @@ public class RailStation  implements Comparable<RailStation> {
     }
 }
 
-class StationPositionC
-{
-    public String PositionLon;
-    public String PositionLat;
-}

@@ -16,9 +16,9 @@ import java.util.List;
  */
 public class RailODDailyTimetable {
     public String TrainDate;
-    public DailyTrainInfoC DailyTrainInfo;
-    public RailStopTimeC OriginStopTime;
-    public RailStopTimeC DestinationStopTime;
+    public DailyTrainInfo DailyTrainInfo;
+    public RailStopTime OriginStopTime;
+    public RailStopTime DestinationStopTime;
     public String UpdateTime;
     public String VersionID;
 
@@ -79,33 +79,6 @@ public class RailODDailyTimetable {
     }
 }
 
-class DailyTrainInfoC{
-    public String TrainNo;
-    public String Direction;
-    public String StartingStationID;
-    public NameType StartingStationName;
-    public String EndingStationID;
-    public NameType EndingStationName;
-    public String TripHeadsign;
-    public String TrainTypeID;
-    public String TrainTypeCode;
-    public NameType TrainTypeName;
-    public String TripLine;
-    public String OverNightStationID;
-    public String WheelchairFlag;
-    public String PackageServiceFlag;
-    public String DiningFlag;
-    public String BikeFlag;
-    public String BreastFeedingFlag;
-    public String DailyFlag;
-    public String ServiceAddedFlag;
-    public NameType Note;
-}
 
-class RailStopTimeC{
-    public String StopSequence;
-    public String StationID;
-    public NameType StationName;
-    public String ArrivalTime;
-    public String DepartureTime;
-}
+
+

@@ -8,12 +8,5 @@ public class StationOfLine
    public String UpdateTime;
 
 }
-class  LineStationC
-{
-   public String Sequence;
-   public String StationID;
-   public String StationName;
-   public String TraveledDistance;
 
-}
 

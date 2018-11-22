@@ -18,8 +18,4 @@ public class Network
     public String UpdateTime;
 
 }
-class Line_SimpleC
-{
-    public String LineNo;
-    public String LineID;
-}
+

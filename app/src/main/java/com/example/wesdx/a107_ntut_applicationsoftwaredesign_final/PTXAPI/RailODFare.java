@@ -22,8 +22,4 @@ public class RailODFare {
     public String VersionID;//高鐵
 }
 
-class  FareC{
-    public String TicketType;
-    public String Price;
-}
 
