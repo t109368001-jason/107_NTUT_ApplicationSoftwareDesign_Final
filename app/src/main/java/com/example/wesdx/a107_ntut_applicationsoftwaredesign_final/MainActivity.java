@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RailStation originStation;
     private RailStation destinationStation;
+
     private int TRAOrTHSR = 0;
     private int price = 0;
     private int arriveTimeFirst = 0;

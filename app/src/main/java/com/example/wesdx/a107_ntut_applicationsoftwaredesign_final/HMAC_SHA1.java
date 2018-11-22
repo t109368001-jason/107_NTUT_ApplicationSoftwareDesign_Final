@@ -1,7 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
 import java.security.SignatureException;
-import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
