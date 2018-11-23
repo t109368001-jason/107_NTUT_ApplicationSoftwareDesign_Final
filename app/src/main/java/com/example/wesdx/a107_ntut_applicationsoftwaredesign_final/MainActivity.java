@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox checkBox;
     private CheckBox checkBox2;
     private Button search;
+    private Button changeStation;
 
     private List<RailStation> TRARailStationList;
     private List<RailStation> THSRRailStationList;
@@ -66,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private int day = calendar.get(Calendar.DAY_OF_MONTH);
     private int hour = calendar.get(Calendar.HOUR_OF_DAY);
     private int minute = calendar.get(Calendar.MINUTE);
+    private int setArriveChangeTemp = 0;
+    private int setStartChangeTemp = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
         search = (Button)findViewById(R.id.search);
+        changeStation = (Button)findViewById(R.id.changeStation);
 
         TRARailStationList = API.getStation(API.TRA);
         RailStation.removeUnreservationStation(TRARailStationList);
@@ -97,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
         THSRRegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
         THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
 
-        textView.setText(TRARailStationList.get(0).StationName.Zh_tw);
-        textView2.setText(TRARailStationList.get(1).StationName.Zh_tw);
+        textView.setText(String.valueOf(year) + "-" + String.valueOf(month+1) + "-" + String.valueOf(day));
+        textView2.setText(hour + ":" + minute);
         textView3.setText(TRARailStationList.get(2).StationName.Zh_tw);
         textView4.setText(TRARailStationList.get(3).StationName.Zh_tw);
         textView5.setText(TRARailStationList.get(4).StationName.Zh_tw);
@@ -141,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
             stationName[i] = TRARailStationList.get(i).ReservationCode + TRARailStationList.get(i).StationName.Zh_tw;
         }
 
-        Spinner start_station = (Spinner)findViewById(R.id.start_station);
-        Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
+         Spinner start_station = (Spinner)findViewById(R.id.start_station);
+         Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
 
         myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
         start_station.setAdapter(transAdapter);
@@ -152,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 originStation = TRARailStationList.get(position);
+                setArriveChangeTemp = position;
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -163,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 destinationStation = TRARailStationList.get(position);
+                setStartChangeTemp = position;
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -208,6 +214,15 @@ public class MainActivity extends AppCompatActivity {
                 }, hour, minute, true).show();
             }
         });
+/*
+        changeStation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                arrive_station.setSelection (setArriveChangeTemp);
+                start_station.setSelection(setStartChangeTemp);
+            }
+        });
+        */
     }
 
     public  class myAdapter extends BaseAdapter{
