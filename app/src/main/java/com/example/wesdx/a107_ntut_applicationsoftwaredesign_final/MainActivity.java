@@ -3,17 +3,27 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 //https://github.com/ptxmotc/Sample-code
 //https://ptx.transportdata.tw/PTX/Topic/fbeac0a2-fc53-4ffa-8961-597b2d3e6bdd
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
@@ -22,6 +32,7 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailOD
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     private CheckBox checkBox;
     private CheckBox checkBox2;
+    private Button search;
 
     private List<RailStation> TRARailStationList;
     private List<RailStation> THSRRailStationList;
@@ -48,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
     private int TRAOrTHSR = 0;
     private int price = 0;
     private int arriveTimeFirst = 0;
+    private Calendar calendar = Calendar.getInstance();;
+    private int year = calendar.get(Calendar.YEAR);
+    private int month = calendar.get(Calendar.MONTH);
+    private int day = calendar.get(Calendar.DAY_OF_MONTH);
+    private int hour = calendar.get(Calendar.HOUR_OF_DAY);
+    private int minute = calendar.get(Calendar.MINUTE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
+        search = (Button)findViewById(R.id.search);
 
         TRARailStationList = API.getStation(API.TRA);
         RailStation.removeUnreservationStation(TRARailStationList);
@@ -83,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         textView3.setText(TRARailStationList.get(2).StationName.Zh_tw);
         textView4.setText(TRARailStationList.get(3).StationName.Zh_tw);
         textView5.setText(TRARailStationList.get(4).StationName.Zh_tw);
-
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -124,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Spinner start_station = (Spinner)findViewById(R.id.start_station);
-        final Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
+        Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
 
         myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
         start_station.setAdapter(transAdapter);
@@ -149,6 +167,45 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 destinationStation = null;
+            }
+        });
+
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ShowResult.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("mystring", "mystring123");
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        String dateNumber = String.valueOf(year) + "-" + String.valueOf(month+1) + "-" + String.valueOf(day);
+                        textView.setText(dateNumber);
+                    }
+
+                }, year, month, day).show();
+            }
+        });
+
+        textView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener(){
+                    @Override
+                    public void onTimeSet(TimePicker view, int hour, int minute) {
+                        String timeNumber = hour + ":" + minute;
+                        textView2.setText(timeNumber);
+                    }
+
+                }, hour, minute, true).show();
             }
         });
     }
@@ -185,5 +242,6 @@ public class MainActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
 }
 

@@ -14,7 +14,7 @@ public class Network
     public String OperatorNameZh;
     public String OperatorNameEn;
     public String NetworkMapUrl;
-    public Line_SimpleC Lines;
+    public Line_Simple Lines;
     public String UpdateTime;
 
 }
