@@ -4,7 +4,7 @@ import java.util.List;
 
 public class GeneralTimetable
 {
-    public GeneralTrainInfo GeneralTrainInfo;
+    public RailGeneralTrainInfo GeneralTrainInfo;
     public List<StopTime> StopTimes;
     public ServiceDay ServiceDay;
     public String SrcUpdateTime;

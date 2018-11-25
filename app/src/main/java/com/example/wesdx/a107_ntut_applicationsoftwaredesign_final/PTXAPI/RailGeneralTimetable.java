@@ -13,7 +13,7 @@ public class RailGeneralTimetable
     public String UpdateTime;
     public String EffectiveDate;//高鐵
     public String VersionID;
-    public RailGeneralTimetable GeneralTimetable;
+    public GeneralTimetable GeneralTimetable;
 }
 
 

@@ -10,11 +10,11 @@ import java.util.List;
  */
 public class RailODFare {
     public String OriginStationID;
-    NameType OriginStationName;
+    public NameType OriginStationName;
     public String DestinationStationID;
-    NameType DestinationStationName;
+    public NameType DestinationStationName;
     public String Direction;
-    List<FareC> Fares;
+    public List<Fare> Fares;
     public String UpdateTime;
 
 

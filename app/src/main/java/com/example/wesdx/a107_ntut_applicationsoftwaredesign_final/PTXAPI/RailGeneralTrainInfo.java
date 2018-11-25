@@ -9,12 +9,12 @@ public class RailGeneralTrainInfo {
     public String TrainNo;
     public String Direction;
     public String StartingStationID;
-    NameType StartingStationName;//前面宣告過了
+    public NameType StartingStationName;//前面宣告過了
     public  String EndingStationID;
-    NameType EndingStationName; //前面宣告過了
+    public NameType EndingStationName; //前面宣告過了
     public String TrainTypeID;
     public String TrainTypeCode;
-    NameType TrainTypeName; //前面宣告過了
+    public NameType TrainTypeName; //前面宣告過了
     public String TripLine;
     public String WheelchairFlag;
     public String PackageServiceFlag;
@@ -22,5 +22,5 @@ public class RailGeneralTrainInfo {
     public String BikeFlag;
     public String BreastFeedingFlag;
     public String DailyFlag;
-    NameType Note; //前面宣告過了
+    public NameType Note; //前面宣告過了
 }

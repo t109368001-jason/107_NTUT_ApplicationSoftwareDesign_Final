@@ -4,7 +4,7 @@ public class StationOfLine
 {
    public String LineNo;
    public String LineID;
-   public LineStationC Stations;
+   public LineStation Stations;
    public String UpdateTime;
 
 }

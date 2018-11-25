@@ -7,5 +7,4 @@ public class TrainType
     public String TrainTypeCode;
     public String UpdateTime;
     public String VersionID;
-
 }
