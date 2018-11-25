@@ -3,7 +3,6 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.HMAC_SHA1;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -196,44 +195,48 @@ public class API {
     //DailyTrainInfo/TrainDate/{TrainDate}
     //DailyTrainInfo/TrainNo/{TrainNo}/TrainDate{TrainDate}
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
+    public static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
         API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation) {
+    public static List<RailDailyTimetable> getDailyTimetable(String transportation) {
         String functionParameter = "Today";
         return getDailyTimetable(transportation, functionParameter);
     }
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key) {
+    public static List<RailDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key) {
         String functionParameter = "";
         if(serachBy == TRAIN_NO) {
-            functionParameter = "Today/TrainNo" + key;
+            functionParameter = "Today/TrainNo/" + key;
         } else if(serachBy == TRAIN_DATE){
-            functionParameter = "TrainDate" + key;
+            functionParameter = "TrainDate/" + key;
         }
         return getDailyTimetable(transportation, functionParameter);
     }
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key1, String key2) {
-        String functionParameter = "";
-        if(serachBy == TRAIN_NO_AND_TRAIN_DATE) {
-            functionParameter = "TrainNo/" + key1 + "/TrainDate/" + key2;
-        } else if(serachBy == STATION_ID_AND_TRAIN_DATE){
-            functionParameter = "TrainNo/" + key1 + "/" + key2;
-        }
+    public static List<RailDailyTimetable> getDailyTimetable(String transportation, String trainNo, String trainDate) {
+        String functionParameter = "TrainNo/" + trainNo + "/TrainDate/" + trainDate;
         return getDailyTimetable(transportation, functionParameter);
     }
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
+    public static List<RailStationTimetable> getStationTimetable(String transportation, String stationID, String trainDate) {
+        String functionParameter = "Station/" + stationID + "/" + trainDate;
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
+        API getAPI = (new API(apiurl.get()));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+    }
+
+    public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
         String functionParameter = "OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
-        return getDailyTimetable(transportation, functionParameter);
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
+        API getAPI = (new API(apiurl.get()));
+        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailODDailyTimetable> getDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
-        return getDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
+    public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
+        return getODDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
     }
 
     //取得當下UTC時間

@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import android.text.format.DateUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,16 +52,12 @@ public class RailODDailyTimetable {
                 Date temp = new Date(0);
                 temp = (new SimpleDateFormat("HH:mm")).parse(railODDailyTimetableList_new.get(i).DestinationStopTime.ArrivalTime);
 
-                if(temp.before(end)) {
+                if(temp.before(end)&&temp.after(start)) {
                     end = temp;
                 }
             }
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(end);
-            calendar.add(Calendar.HOUR, endAdd.getHours());
-            calendar.add(Calendar.MINUTE, endAdd.getMinutes());
-            end = calendar.getTime();
+            end = new Date(end.getTime() + endAdd.getTime());
 
             for(int i = 0; i < railODDailyTimetableList_new.size(); i++) {
                 Date temp = new Date(0);

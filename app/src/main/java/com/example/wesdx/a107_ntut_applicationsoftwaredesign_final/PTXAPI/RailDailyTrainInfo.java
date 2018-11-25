@@ -20,9 +20,9 @@ public class RailDailyTrainInfo
    public String TrainTypeCode;//台鐵
    public NameType TrainTypeName;//台鐵
    public String TripLine;//台鐵
-   public String OverNightStationID//台鐵;
+   public String OverNightStationID;//台鐵;
    public String WheelchairFlag;//台鐵
-   public String PackageServiceFlag//台鐵;
+   public String PackageServiceFlag;//台鐵;
    public String DiningFlag;//台鐵
    public String BikeFlag;//台鐵
    public String BreastFeedingFlag;//台鐵

@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTrainInfo;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailODDailyTimetable;
@@ -84,18 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
         TRARailStationList = API.getStation(API.TRA);
         RailStation.removeUnreservationStation(TRARailStationList);
-        TRARailGeneralTimetableList = API.getGeneralTimetable(API.TRA);
-        TRARailGeneralTrainInfoList = API.getGeneralTrainInfo(API.TRA);
-        TRARailODDailyTimetableList = API.getDailyTimetable(API.TRA, "1002", "1004", "2018-11-30");
-        TRARegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
-        //List<RailODFare> TRARailODFares = TRAAPI.getRailODFare(PTXAPI.TRA, originStation, destinationStation);
-        TRARailODDailyTimetableList = RailODDailyTimetable.filter(TRARailODDailyTimetableList, "07:00", "01:00");
-
-        THSRRailStationList = API.getStation(API.THSR);
-        THSRRailGeneralTimetableList = API.getGeneralTimetable(API.THSR);
-        THSRRailODDailyTimetableList = API.getDailyTimetable(API.THSR, "1010", "1020", "2018-11-30");
-        THSRRegionalRailStationList = RegionalRailStation.convert(TRARailStationList);
-        THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
 
         textView.setText(TRARailStationList.get(0).StationName.Zh_tw);
         textView2.setText(TRARailStationList.get(1).StationName.Zh_tw);
@@ -175,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ShowResult.class);
                 Bundle bundle = new Bundle();
+                List<RailDailyTimetable> railDailyTimetableList = Router.get(textView.getText().toString(), textView2.getText().toString(), originStation, destinationStation);
                 bundle.putString("mystring", "mystring123");
                 intent.putExtras(bundle);
                 startActivity(intent);
