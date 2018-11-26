@@ -18,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShowResult"></activity>
+        <activity android:name=".ShowResult" />
+        <activity android:name=".WelcomeActivity"></activity>
     </application>
 
 </manifest>

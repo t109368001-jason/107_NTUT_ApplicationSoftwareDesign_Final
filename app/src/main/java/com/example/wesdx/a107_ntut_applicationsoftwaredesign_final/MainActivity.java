@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,28 +33,23 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGe
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailODDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
+import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String PREFS_NAME = "MyPrefsFile";
 
     private TextView textView, textView2, textView3, textView4, textView5;
     private RadioGroup radioGroup;
     private CheckBox checkBox;
     private CheckBox checkBox2;
     private Button search;
+    private Button changeStation;
 
-    private List<RailStation> TRARailStationList;
-    private List<RailStation> THSRRailStationList;
-    private List<RailGeneralTimetable> TRARailGeneralTimetableList;
-    private List<RailGeneralTimetable> THSRRailGeneralTimetableList;
-    private List<RailGeneralTrainInfo> TRARailGeneralTrainInfoList;
-    private List<RailGeneralTrainInfo> THSRRailGeneralTrainInfoList;
-    private List<RailODDailyTimetable> TRARailODDailyTimetableList;
-    private List<RailODDailyTimetable> THSRRailODDailyTimetableList;
-    private List<RegionalRailStation> TRARegionalRailStationList;
-    private List<RegionalRailStation> THSRRegionalRailStationList;
+    private List<RailStation> railStationList;
 
     private RailStation originStation;
     private RailStation destinationStation;
@@ -61,12 +57,6 @@ public class MainActivity extends AppCompatActivity {
     private int TRAOrTHSR = 0;
     private int price = 0;
     private int arriveTimeFirst = 0;
-    private Calendar calendar = Calendar.getInstance();;
-    private int year = calendar.get(Calendar.YEAR);
-    private int month = calendar.get(Calendar.MONTH);
-    private int day = calendar.get(Calendar.DAY_OF_MONTH);
-    private int hour = calendar.get(Calendar.HOUR_OF_DAY);
-    private int minute = calendar.get(Calendar.MINUTE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,22 +65,18 @@ public class MainActivity extends AppCompatActivity {
 
         textView = (TextView) findViewById(R.id.textView);
         textView2 = (TextView) findViewById(R.id.textView2);
-        textView3 = (TextView) findViewById(R.id.textView3);
-        textView4 = (TextView) findViewById(R.id.textView4);
-        textView5 = (TextView) findViewById(R.id.textView5);
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
         search = (Button)findViewById(R.id.search);
+        changeStation = (Button) findViewById(R.id.changeStation);
 
-        TRARailStationList = API.getStation(API.TRA);
-        RailStation.removeUnreservationStation(TRARailStationList);
+        railStationList = API.getStation(API.TRA);
+        RailStation.removeUnreservationStation(railStationList);
 
-        textView.setText(TRARailStationList.get(0).StationName.Zh_tw);
-        textView2.setText(TRARailStationList.get(1).StationName.Zh_tw);
-        textView3.setText(TRARailStationList.get(2).StationName.Zh_tw);
-        textView4.setText(TRARailStationList.get(3).StationName.Zh_tw);
-        textView5.setText(TRARailStationList.get(4).StationName.Zh_tw);
+        textView.setText((new SimpleDateFormat("yyyy-MM-dd")).format(Calendar.getInstance().getTime()));
+        textView2.setText((new SimpleDateFormat("HH:mm")).format(Calendar.getInstance().getTime()));
+
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -125,13 +111,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String[] stationName = new String[TRARailStationList.size()];
+        String[] stationName = new String[railStationList.size()];
         for (int i = 0; i < stationName.length; i++) {
-            stationName[i] = TRARailStationList.get(i).ReservationCode + TRARailStationList.get(i).StationName.Zh_tw;
+            stationName[i] = railStationList.get(i).ReservationCode + railStationList.get(i).StationName.Zh_tw;
         }
 
-        Spinner start_station = (Spinner)findViewById(R.id.start_station);
-        Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
+        final Spinner start_station = (Spinner)findViewById(R.id.start_station);
+        final Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
 
         myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
         start_station.setAdapter(transAdapter);
@@ -140,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         start_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                originStation = TRARailStationList.get(position);
+                originStation = railStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -151,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         arrive_station.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                destinationStation = TRARailStationList.get(position);
+                destinationStation = railStationList.get(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -165,15 +151,29 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, ShowResult.class);
                 Bundle bundle = new Bundle();
                 List<RailDailyTimetable> railDailyTimetableList = Router.get(textView.getText().toString(), textView2.getText().toString(), originStation, destinationStation);
-                bundle.putString("mystring", "mystring123");
+
+                bundle.putString("railDailyTimetableListGson", (new Gson()).toJson(railDailyTimetableList));
                 intent.putExtras(bundle);
                 startActivity(intent);
+            }
+        });
+
+        changeStation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int tmp = start_station.getSelectedItemPosition();
+                start_station.setSelection(arrive_station.getSelectedItemPosition());
+                arrive_station.setSelection(tmp);
             }
         });
 
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Calendar calendar = Calendar.getInstance();
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
                 new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int day) {
@@ -188,6 +188,9 @@ public class MainActivity extends AppCompatActivity {
         textView2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
                 new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener(){
                     @Override
                     public void onTimeSet(TimePicker view, int hour, int minute) {
@@ -198,8 +201,34 @@ public class MainActivity extends AppCompatActivity {
                 }, hour, minute, true).show();
             }
         });
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String originStationID = settings.getString("originStationID", "");
+        String destinationStationID = settings.getString("destinationStationID", "");
+        for (int i = 0; i < railStationList.size(); i++) {
+            if (railStationList.get(i).StationID.equals(originStationID)) {
+                start_station.setSelection(i);
+            }
+            if (railStationList.get(i).StationID.equals(destinationStationID)) {
+                arrive_station.setSelection(i);
+            }
+        }
     }
 
+    @Override
+    protected void onStop(){
+        super.onStop();
+
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("originStationID", originStation.StationID);
+        editor.putString("destinationStationID", destinationStation.StationID);
+
+        // Commit the edits!
+        editor.apply();
+    }
     public  class myAdapter extends BaseAdapter{
         private String[] data;
         private int view;
