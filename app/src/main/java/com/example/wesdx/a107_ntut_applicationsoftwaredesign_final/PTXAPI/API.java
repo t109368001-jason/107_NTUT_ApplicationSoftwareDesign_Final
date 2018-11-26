@@ -60,91 +60,75 @@ public class API {
 
     private final String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
-    @SuppressLint("StaticFieldLeak")
-    AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
-        @Override
-        protected String doInBackground(String... APIUrl) {
-            HttpURLConnection connection = null;
+    public API() {
 
-            String xdate = getServerTime();
-            String SignDate = "x-date: " + xdate;
-
-            String Signature = "";
-
-            try {
-                Signature = HMAC_SHA1.Signature(SignDate, APPKey);
-            } catch (SignatureException e1) {
-                e1.printStackTrace();
-            }
-
-            System.out.println("Signature :" + Signature);
-            String sAuth = "hmac username=\"" + APPID + "\", algorithm=\"hmac-sha1\", headers=\"x-date\", signature=\"" + Signature + "\"";
-            System.out.println(sAuth);
-
-            try {
-                URL url = new URL(APIUrl[0]);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Authorization", sAuth);
-                connection.setRequestProperty("x-date", xdate);
-                connection.setRequestProperty("Accept-Encoding", "gzip");
-                connection.setDoInput(true);
-                //connection.setDoOutput(true);
-
-                //將InputStream轉換為Byte
-                InputStream inputStream = connection.getInputStream();
-                ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                byte[] buff = new byte[1024];
-                int bytesRead = 0;
-                while ((bytesRead = inputStream.read(buff)) != -1) {
-                    bao.write(buff, 0, bytesRead);
-                }
-
-                //解開GZIP
-                ByteArrayInputStream bais = new ByteArrayInputStream(bao.toByteArray());
-                GZIPInputStream gzis = new GZIPInputStream(bais);
-                InputStreamReader reader = new InputStreamReader(gzis);
-                BufferedReader in = new BufferedReader(reader);
-
-                //讀取回傳資料
-                String line, response = "";
-                while ((line = in.readLine()) != null) {
-                    response += (line + "\n");
-                }
-                return response;
-
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            return "";
-        }
-    };
-
-    public API(String APIUrl) {
-        task.execute(APIUrl);
     }
 
-    private String getAPIResponse() {
-        String result = "";
+    private String getAPIResponse(String APIUrl) {
+        HttpURLConnection connection = null;
+
+        String xdate = getServerTime();
+        String SignDate = "x-date: " + xdate;
+
+        String Signature = "";
+
         try {
-            result = task.get();
-        }catch (InterruptedException e) {
-            e.printStackTrace();
-        }catch (ExecutionException e) {
+            Signature = HMAC_SHA1.Signature(SignDate, APPKey);
+        } catch (SignatureException e1) {
+            e1.printStackTrace();
+        }
+
+        System.out.println("Signature :" + Signature);
+        String sAuth = "hmac username=\"" + APPID + "\", algorithm=\"hmac-sha1\", headers=\"x-date\", signature=\"" + Signature + "\"";
+        System.out.println(sAuth);
+
+        try {
+            URL url = new URL(APIUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", sAuth);
+            connection.setRequestProperty("x-date", xdate);
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setDoInput(true);
+            //connection.setDoOutput(true);
+
+            //將InputStream轉換為Byte
+            InputStream inputStream = connection.getInputStream();
+            ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            byte[] buff = new byte[1024];
+            int bytesRead = 0;
+            while ((bytesRead = inputStream.read(buff)) != -1) {
+                bao.write(buff, 0, bytesRead);
+            }
+
+            //解開GZIP
+            ByteArrayInputStream bais = new ByteArrayInputStream(bao.toByteArray());
+            GZIPInputStream gzis = new GZIPInputStream(bais);
+            InputStreamReader reader = new InputStreamReader(gzis);
+            BufferedReader in = new BufferedReader(reader);
+
+            //讀取回傳資料
+            String line, response = "";
+            while ((line = in.readLine()) != null) {
+                response += (line + "\n");
+            }
+            return response;
+
+        } catch (ProtocolException e) {
             e.printStackTrace();
         }
-        return result;
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     //Network
 
     public static List<RailStation> getStation(String transportation) {
         APIURL apiurl = new APIURL(transportation, "Station");
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailStation>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
     }
 
     //Line
@@ -154,8 +138,8 @@ public class API {
 
     public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) {
         APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailODFare>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
     public static List<RailODFare> getRailODFare(String transportation, RailStation originStation, RailStation destinationStation) {
@@ -164,8 +148,8 @@ public class API {
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) {
         if(transportation == THSR) return null;
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation) {
@@ -180,14 +164,14 @@ public class API {
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     //DailyTrainInfo/Today
@@ -197,8 +181,8 @@ public class API {
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation) {
@@ -224,15 +208,15 @@ public class API {
     public static List<RailStationTimetable> getStationTimetable(String transportation, String stationID, String trainDate) {
         String functionParameter = "Station/" + stationID + "/" + trainDate;
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
         String functionParameter = "OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API(apiurl.get()));
-        return (new Gson()).fromJson(getAPI.getAPIResponse(), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        API getAPI = (new API());
+        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {
