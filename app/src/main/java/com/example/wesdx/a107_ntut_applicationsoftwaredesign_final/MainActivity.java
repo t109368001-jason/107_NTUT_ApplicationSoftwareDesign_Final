@@ -145,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
             stationName[i] = TRARailStationList.get(i).ReservationCode + TRARailStationList.get(i).StationName.Zh_tw;
         }
 
-         Spinner start_station = (Spinner)findViewById(R.id.start_station);
-         Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
+         final Spinner start_station = (Spinner)findViewById(R.id.start_station);
+         final Spinner arrive_station = (Spinner)findViewById(R.id.arrive_station);
 
         myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
         start_station.setAdapter(transAdapter);
@@ -214,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
                 }, hour, minute, true).show();
             }
         });
-/*
         changeStation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 start_station.setSelection(setStartChangeTemp);
             }
         });
-        */
+
     }
 
     public  class myAdapter extends BaseAdapter{

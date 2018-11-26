@@ -14,7 +14,7 @@ public class RailODFare {
     public String DestinationStationID;
     NameType DestinationStationName;
     public String Direction;
-    List<FareC> Fares;
+    List<Fare> Fares;
     public String UpdateTime;
 
 
