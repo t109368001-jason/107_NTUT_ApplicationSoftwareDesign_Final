@@ -24,6 +24,7 @@ public class RailStation implements Comparable<RailStation> {
     public static void removeUnreservationStation(List<RailStation> list)
     {
         for(int i = 0; i < list.size(); i++) {
+            if(list.get(i).OperatorID.equals("THSR")) continue;
             if(list.get(i).ReservationCode == null)
             {
                 list.remove(i);
@@ -80,6 +81,7 @@ public class RailStation implements Comparable<RailStation> {
                 case "海端": case "關山": case "瑞和": case "瑞源": case "鹿野":
                 case "山里": case "臺東": case "康樂": case "知本": case "太麻里":
                 case "金崙": case "瀧溪": case "大武":
+                case "台北": case "台中": case "雲林":
                     continue;
                 default:
                     list.remove(i);

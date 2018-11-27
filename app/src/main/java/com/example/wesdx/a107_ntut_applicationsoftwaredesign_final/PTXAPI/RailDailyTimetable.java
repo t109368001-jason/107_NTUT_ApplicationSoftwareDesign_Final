@@ -37,7 +37,8 @@ public class RailDailyTimetable
   }
 
   public String getTripLineName() {
-    switch(this.DailyTrainInfo.TripLine) {
+    if(DailyTrainInfo.TripLine == null) return "";
+    switch(DailyTrainInfo.TripLine) {
       case "0":
         return "";
       case "1":
@@ -106,6 +107,8 @@ public class RailDailyTimetable
           railDailyTimetableList1_new.add(railDailyTimetableList.get(i));
         }
       }
+
+      if(railDailyTimetableList1_new.size() == 0) return null;
 
       end = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(0).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 

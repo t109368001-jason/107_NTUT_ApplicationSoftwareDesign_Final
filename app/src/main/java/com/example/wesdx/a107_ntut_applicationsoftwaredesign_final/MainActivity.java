@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     private RailStation originStation;
     private RailStation destinationStation;
 
+    private String transportation;
+
     private int TRAOrTHSR = 0;
     private int price = 0;
     private int arriveTimeFirst = 0;
@@ -79,18 +81,14 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         String str = bundle.getString("railStationListGson");
+        transportation = bundle.getString("transportation");
 
         railStationList = (new Gson()).fromJson(str, new TypeToken<List<RailStation>>() {}.getType());
 
         dateTextView.setText((new SimpleDateFormat("yyyy-MM-dd")).format(Calendar.getInstance().getTime()));
         timeTextView.setText((new SimpleDateFormat("HH:mm")).format(Calendar.getInstance().getTime()));
 
-        String[] stationName = new String[railStationList.size()];
-        for (int i = 0; i < stationName.length; i++) {
-            stationName[i] = railStationList.get(i).ReservationCode + railStationList.get(i).StationName.Zh_tw;
-        }
-
-        myAdapter transAdapter = new myAdapter(stationName,R.layout.rail_station_spinner_item);
+        myAdapter transAdapter = new myAdapter(railStationList, R.layout.rail_station_spinner_item);
         originStationSpinner.setAdapter(transAdapter);
         destinationStationSpinner.setAdapter(transAdapter);
 
@@ -160,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        railDailyTimetableList = Router.get(dateTextView.getText().toString(), timeTextView.getText().toString(), originStation, destinationStation);
+                        railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), originStation, destinationStation);
                         return null;
                     }
 
@@ -243,8 +241,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String originStationID = settings.getString("originStationID", "");
-        String destinationStationID = settings.getString("destinationStationID", "");
+        String originStationID = settings.getString(transportation + "originStationID", "");
+        String destinationStationID = settings.getString(transportation + "destinationStationID", "");
         for (int i = 0; i < railStationList.size(); i++) {
             if (railStationList.get(i).StationID.equals(originStationID)) {
                 originStationSpinner.setSelection(i);
@@ -260,28 +258,28 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("originStationID", originStation.StationID);
-        editor.putString("destinationStationID", destinationStation.StationID);
+        editor.putString(transportation + "originStationID", originStation.StationID);
+        editor.putString(transportation + "destinationStationID", destinationStation.StationID);
         editor.apply();
     }
 
     public class myAdapter extends BaseAdapter{
-        private String[] data;
+        private List<RailStation> data;
         private int view;
 
-        public myAdapter(String[] data, int view){
+        public myAdapter(List<RailStation> data, int view){
             this.data = data;
             this.view = view;
         }
 
         @Override
         public int getCount() {
-            return data.length;
+            return data.size();
         }
 
         @Override
-        public String getItem(int position) {
-            return data[position];
+        public RailStation getItem(int position) {
+            return data.get(position);
         }
 
         @Override
@@ -293,10 +291,10 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
             TextView name = (TextView) convertView.findViewById(R.id.name);
-            name.setText(data[position]);
+            String stationName = ((data.get(position).ReservationCode == null)? "" : data.get(position).ReservationCode) + data.get(position).StationName.Zh_tw;
+            name.setText(stationName);
             return convertView;
         }
     }
-
 }
 

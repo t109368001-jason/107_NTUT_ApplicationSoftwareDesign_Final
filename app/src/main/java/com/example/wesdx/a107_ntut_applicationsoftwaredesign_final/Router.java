@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Router {
-    public static List<RailDailyTimetable> get(String date, String time, RailStation originStation, RailStation destinationStation) {
+    public static List<RailDailyTimetable> get(String transportation, String date, String time, RailStation originStation, RailStation destinationStation) {
         List<RailDailyTimetable> railODDailyTimetableList = new ArrayList<>();
 
         //List<RailStation> TRARailStationList = API.getStation(API.TRA);
@@ -32,11 +32,11 @@ public class Router {
         //THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
 
         //List<RailGeneralTimetable> TRARailGeneralTimetableList = API.getGeneralTimetable(API.TRA);
-        List<RailDailyTimetable> TRARailDailyTimetableList = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);
-        TRARailDailyTimetableList = RailDailyTimetable.filter(TRARailDailyTimetableList, originStation, destinationStation);
-        TRARailDailyTimetableList = RailDailyTimetable.filter(TRARailDailyTimetableList, originStation, destinationStation, time, "24:00");
+        List<RailDailyTimetable> RailDailyTimetableList = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
+        RailDailyTimetableList = RailDailyTimetable.filter(RailDailyTimetableList, originStation, destinationStation);
+        RailDailyTimetableList = RailDailyTimetable.filter(RailDailyTimetableList, originStation, destinationStation, time, "24:00");
 
-        railODDailyTimetableList = TRARailDailyTimetableList;
+        railODDailyTimetableList = RailDailyTimetableList;
 
         return railODDailyTimetableList;
     }
