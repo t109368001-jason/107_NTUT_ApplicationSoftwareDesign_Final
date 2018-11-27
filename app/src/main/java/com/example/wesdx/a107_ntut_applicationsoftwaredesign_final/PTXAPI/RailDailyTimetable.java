@@ -36,6 +36,18 @@ public class RailDailyTimetable
     return null;
   }
 
+  public String getTripLineName() {
+    switch(this.DailyTrainInfo.TripLine) {
+      case "0":
+        return "";
+      case "1":
+        return "山線";
+      case "2":
+        return "海線";
+    }
+    return "";
+  }
+
   public Date getODTime(RailStation originStation, RailStation destinationStation) {
 
     try {
