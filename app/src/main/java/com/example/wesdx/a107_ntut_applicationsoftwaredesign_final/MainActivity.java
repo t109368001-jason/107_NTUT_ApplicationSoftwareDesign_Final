@@ -5,14 +5,18 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -47,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox checkBox2;
     private Button search;
     private Button changeStation;
-    private ProgressBar progressBar;
 
     private List<RailStation> railStationList;
     private List<RailDailyTimetable> railDailyTimetableList;
@@ -73,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
         search = (Button)findViewById(R.id.search);
         changeStation = (Button) findViewById(R.id.changeStation);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         Bundle bundle = getIntent().getExtras();
         String str = bundle.getString("railStationListGson");
@@ -152,8 +154,8 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View v) {
-                //railDailyTimetableList = Router.get(dateTextView.getText().toString(), timeTextView.getText().toString(), originStation, destinationStation);
-                AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+                new AsyncTask<Void, Void, Void>() {
+                    private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
 
                     @Override
                     protected Void doInBackground(Void... voids) {
@@ -164,13 +166,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     protected void onPreExecute() {
                         super.onPreExecute();
-                        progressBar.setVisibility(View.VISIBLE);
+                        dialog.setMessage("取得班次");
+                        dialog.setCancelable(false);
+                        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        dialog.show();
                     }
 
                     @Override
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
-                        progressBar.setVisibility(View.INVISIBLE);
+                        dialog.dismiss();
                         if(railDailyTimetableList != null) {
                             if(railDailyTimetableList.size() == 0) {
                                 Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
@@ -186,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }.execute();
-
             }
         });
 
