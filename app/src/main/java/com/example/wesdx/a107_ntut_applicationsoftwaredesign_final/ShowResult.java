@@ -20,6 +20,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class ShowResult extends AppCompatActivity {
@@ -85,6 +86,7 @@ public class ShowResult extends AppCompatActivity {
             textView11.setText(railDailyTimetableList.get(position).getStopTimeOfStopTimes(originStation).DepartureTime);
             TextView textView12 = (TextView) convertView.findViewById(R.id.textView12);
             textView12.setText(railDailyTimetableList.get(position).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+            Date a = railDailyTimetableList.get(position).getODTime(originStation, destinationStation);
             return convertView;
         }
     }

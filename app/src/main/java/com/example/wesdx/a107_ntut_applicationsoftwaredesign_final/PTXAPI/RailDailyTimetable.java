@@ -4,17 +4,21 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/DailyTimetable/Today
  *
  */
+import android.annotation.SuppressLint;
+import android.provider.ContactsContract;
 import android.widget.ListView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
-public class RailDailyTimetable implements Comparable<RailDailyTimetable>
+public class RailDailyTimetable
 {
   public String TrainDate;
   public RailDailyTrainInfo DailyTrainInfo;
@@ -22,21 +26,26 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
   public String  UpdateTime;
   public String  VersionID;
 
-  public int getRailStationIndexOfStopTimes(RailStation railStation) {
-    for(int i = 0; i < this.StopTimes.size(); i++) {
-      if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   public StopTime getStopTimeOfStopTimes(RailStation railStation) {
     for(int i = 0; i < this.StopTimes.size(); i++) {
       String s = StopTimes.get(i).StationID;
       if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
         return StopTimes.get(i);
       }
+    }
+    return null;
+  }
+
+  public Date getODTime(RailStation originStation, RailStation destinationStation) {
+
+    try {
+      Date originTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(originStation).DepartureTime);
+      Date destinationTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+      Date total = new Date(destinationTime.getTime() - originTime.getTime());
+      total.setHours(total.getHours() - TimeZone.getDefault().getRawOffset()/1000/60/60);
+      return total;
+    } catch (ParseException e) {
+      e.printStackTrace();
     }
     return null;
   }
@@ -64,7 +73,7 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
     return railDailyTimetableList1_new;
   }
 
-  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
+  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
     List<RailDailyTimetable> railDailyTimetableList1_new = new ArrayList<>();
     Date start = new Date(0);
     Date endAdd = new Date(0);
@@ -86,11 +95,11 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
         }
       }
 
-      end = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(0).StopTimes.get(railDailyTimetableList1_new.get(0).StopTimes.size()-1).ArrivalTime);
+      end = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(0).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
       for(int i = 0; i < railDailyTimetableList1_new.size(); i++) {
         Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).StopTimes.get(railDailyTimetableList1_new.get(i).StopTimes.size()-1).ArrivalTime);
+        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
         if(temp.before(end)&&temp.after(start)) {
           end = temp;
@@ -101,7 +110,7 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
 
       for(int i = 0; i < railDailyTimetableList1_new.size(); i++) {
         Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).StopTimes.get(railDailyTimetableList1_new.get(i).StopTimes.size()-1).ArrivalTime);
+        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
         if(temp.after(end)) {
           railDailyTimetableList1_new.remove(i);
@@ -115,6 +124,7 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
 
     return railDailyTimetableList1_new;
   }
+
   public static void sort(List<RailDailyTimetable> railDailyTimetableList, final RailStation originStation) {
     Collections.sort(railDailyTimetableList, new Comparator<RailDailyTimetable>(){
       public int compare(RailDailyTimetable obj1, RailDailyTimetable obj2) {
@@ -134,23 +144,5 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
         return 0;
       }
     });
-  }
-
-  @Override
-  public int compareTo(RailDailyTimetable f) {
-    try {
-        if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).after((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
-          return 1;
-        }
-        else if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
-          return -1;
-        }
-        else {
-          return 0;
-        }
-    } catch (ParseException e) {
-        e.printStackTrace();
-    }
-    return 0;
   }
 }
