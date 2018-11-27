@@ -8,7 +8,7 @@ import java.util.List;
  *
  */
 
-public class RailStation  implements Comparable<RailStation> {
+public class RailStation implements Comparable<RailStation> {
     public String StationID;
     public NameType  StationName;
     public PointType StationPosition;
@@ -88,6 +88,7 @@ public class RailStation  implements Comparable<RailStation> {
             }
         }
     }
+
     @Override
     public int compareTo(RailStation f) {
 

@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ShowResult extends AppCompatActivity {
@@ -35,35 +36,30 @@ public class ShowResult extends AppCompatActivity {
 
         List<RailDailyTimetable> railDailyTimetableList = (new Gson()).fromJson(str, new TypeToken<List<RailDailyTimetable>>() {}.getType());
 
-        List<String> stringList = new ArrayList<>();
+        Collections.sort(railDailyTimetableList);
 
-        for(int i = 0; i < railDailyTimetableList.size(); i++) {
-            stringList.add(railDailyTimetableList.get(i).DailyTrainInfo.TrainNo);
-        }
-
-
-        myAdapter transAdapter = new myAdapter(stringList,R.layout.rail_station_spinner_item);
+        myAdapter transAdapter = new myAdapter(railDailyTimetableList,R.layout.show_result_listview_item);
         listView.setAdapter(transAdapter);
 
     }
 
     public  class myAdapter extends BaseAdapter {
-        private List<String> data;
+        private List<RailDailyTimetable> railDailyTimetableList;
         private int view;
 
-        public myAdapter(List<String> data, int view){
-            this.data = data;
+        public myAdapter(List<RailDailyTimetable> railDailyTimetableList, int view){
+            this.railDailyTimetableList = railDailyTimetableList;
             this.view = view;
         }
 
         @Override
         public int getCount() {
-            return data.size();
+            return railDailyTimetableList.size();
         }
 
         @Override
-        public String getItem(int position) {
-            return data.get(position);
+        public RailDailyTimetable getItem(int position) {
+            return railDailyTimetableList.get(position);
         }
 
         @Override
@@ -74,8 +70,14 @@ public class ShowResult extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
-            TextView name = (TextView) convertView.findViewById(R.id.name);
-            name.setText(data.get(position));
+            TextView textView9 = (TextView) convertView.findViewById(R.id.textView9);
+            textView9.setText(railDailyTimetableList.get(position).StopTimes.get(0).StationName.Zh_tw);
+            TextView textView10 = (TextView) convertView.findViewById(R.id.textView10);
+            textView10.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).StationName.Zh_tw);
+            TextView textView11 = (TextView) convertView.findViewById(R.id.textView11);
+            textView11.setText(railDailyTimetableList.get(position).StopTimes.get(0).DepartureTime);
+            TextView textView12 = (TextView) convertView.findViewById(R.id.textView12);
+            textView12.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).ArrivalTime);
             return convertView;
         }
     }

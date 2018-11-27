@@ -38,6 +38,7 @@ import com.google.gson.reflect.TypeToken;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -53,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private Button changeStation;
 
     private List<RailStation> railStationList;
-    private List<RailDailyTimetable> railDailyTimetableList;
 
     private RailStation originStation;
     private RailStation destinationStation;
@@ -156,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 new AsyncTask<Void, Void, Void>() {
                     private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+                    private List<RailDailyTimetable> railDailyTimetableList;
 
                     @Override
                     protected Void doInBackground(Void... voids) {
@@ -213,10 +214,10 @@ public class MainActivity extends AppCompatActivity {
                 new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int day) {
-                        String dateNumber = String.valueOf(year) + "-" + String.valueOf(month+1) + "-" + String.valueOf(day);
-                        timeTextView.setText(dateNumber);
+                        Calendar calendar1 = Calendar.getInstance();
+                        calendar1.set(year, month, day, 0, 0);
+                        timeTextView.setText(new SimpleDateFormat("yyyy-MM-dd").format(calendar1.getTime()));
                     }
-
                 }, year, month, day).show();
             }
         });
@@ -230,8 +231,9 @@ public class MainActivity extends AppCompatActivity {
                 new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener(){
                     @Override
                     public void onTimeSet(TimePicker view, int hour, int minute) {
-                        String timeNumber = hour + ":" + minute;
-                        timeTextView.setText(timeNumber);
+                        Calendar calendar1 = Calendar.getInstance();
+                        calendar1.set(0, 0, 0, hour, minute);
+                        timeTextView.setText(new SimpleDateFormat("HH:mm").format(calendar1.getTime()));
                     }
 
                 }, hour, minute, true).show();

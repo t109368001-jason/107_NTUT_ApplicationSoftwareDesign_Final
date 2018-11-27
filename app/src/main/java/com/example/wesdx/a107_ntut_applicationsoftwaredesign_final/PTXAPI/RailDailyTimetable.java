@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class RailDailyTimetable
+public class RailDailyTimetable implements Comparable<RailDailyTimetable>
 {
   public String TrainDate;
   public RailDailyTrainInfo DailyTrainInfo;
@@ -27,7 +27,7 @@ public class RailDailyTimetable
         if(!originFind) {
           if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(originStation.StationID)) {
             originFind = true;
-            j = 0;
+            //j = 0;
           }
         } else {
           if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(destinationStation.StationID)) {
@@ -91,5 +91,22 @@ public class RailDailyTimetable
     }
 
     return railDailyTimetableList1_new;
+  }
+  @Override
+  public int compareTo(RailDailyTimetable f) {
+    try {
+        if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).after((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
+            return 1;
+        }
+    else if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    } catch (ParseException e) {
+        e.printStackTrace();
+    }
+    return 0;
   }
 }
