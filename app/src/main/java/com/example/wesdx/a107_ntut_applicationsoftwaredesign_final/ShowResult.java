@@ -1,10 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.session.MediaSession;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +12,8 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDa
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
+import org.w3c.dom.Text;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -70,14 +66,20 @@ public class ShowResult extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
-            TextView textView9 = (TextView) convertView.findViewById(R.id.textView9);
-            textView9.setText(railDailyTimetableList.get(position).StopTimes.get(0).StationName.Zh_tw);
-            TextView textView10 = (TextView) convertView.findViewById(R.id.textView10);
-            textView10.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).StationName.Zh_tw);
-            TextView textView11 = (TextView) convertView.findViewById(R.id.textView11);
-            textView11.setText(railDailyTimetableList.get(position).StopTimes.get(0).DepartureTime);
-            TextView textView12 = (TextView) convertView.findViewById(R.id.textView12);
-            textView12.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).ArrivalTime);
+            TextView oriStationTextView = convertView.findViewById(R.id.oriStationTextView);
+            oriStationTextView.setText(railDailyTimetableList.get(position).StopTimes.get(0).StationName.Zh_tw);
+            TextView destStationTextView = convertView.findViewById(R.id.destStationTextView);
+            destStationTextView.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).StationName.Zh_tw);
+            TextView oriTimeTextView = convertView.findViewById(R.id.oriTimeTextView);
+            oriTimeTextView.setText(railDailyTimetableList.get(position).StopTimes.get(0).DepartureTime);
+            TextView destTimeTextView = convertView.findViewById(R.id.destTimeTextView);
+            destTimeTextView.setText(railDailyTimetableList.get(position).StopTimes.get(railDailyTimetableList.get(position).StopTimes.size()-1).ArrivalTime);
+            TextView trainNo = convertView.findViewById(R.id.trainNo);
+            trainNo.setText(railDailyTimetableList.get(position).DailyTrainInfo.TrainNo);
+            TextView tripLine = convertView.findViewById(R.id.tripLine);
+            tripLine.setText(railDailyTimetableList.get(position).DailyTrainInfo.TripLine);
+            TextView ODTime = convertView.findViewById(R.id.ODTime);
+            //ODTime.setText();
             return convertView;
         }
     }
