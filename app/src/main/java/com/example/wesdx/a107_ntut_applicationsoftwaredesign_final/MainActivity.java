@@ -184,6 +184,8 @@ public class MainActivity extends AppCompatActivity {
                                 Intent intent = new Intent(MainActivity.this, ShowResult.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("railDailyTimetableListGson", (new Gson()).toJson(railDailyTimetableList));
+                                bundle.putString("originStationGson", (new Gson()).toJson(originStation));
+                                bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                             }

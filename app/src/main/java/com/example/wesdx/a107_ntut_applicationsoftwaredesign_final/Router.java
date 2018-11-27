@@ -33,8 +33,8 @@ public class Router {
 
         //List<RailGeneralTimetable> TRARailGeneralTimetableList = API.getGeneralTimetable(API.TRA);
         List<RailDailyTimetable> TRARailDailyTimetableList = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);
-        TRARailDailyTimetableList = RailDailyTimetable.filter(TRARailDailyTimetableList, time, "24:00");
         TRARailDailyTimetableList = RailDailyTimetable.filter(TRARailDailyTimetableList, originStation, destinationStation);
+        TRARailDailyTimetableList = RailDailyTimetable.filter(TRARailDailyTimetableList, originStation, time, "24:00");
 
         railODDailyTimetableList = TRARailDailyTimetableList;
 

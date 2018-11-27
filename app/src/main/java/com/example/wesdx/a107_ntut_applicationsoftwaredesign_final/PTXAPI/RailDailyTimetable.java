@@ -4,9 +4,13 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/DailyTimetable/Today
  *
  */
+import android.widget.ListView;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +21,25 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
   public List<StopTime> StopTimes;
   public String  UpdateTime;
   public String  VersionID;
+
+  public int getRailStationIndexOfStopTimes(RailStation railStation) {
+    for(int i = 0; i < this.StopTimes.size(); i++) {
+      if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  public StopTime getStopTimeOfStopTimes(RailStation railStation) {
+    for(int i = 0; i < this.StopTimes.size(); i++) {
+      String s = StopTimes.get(i).StationID;
+      if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
+        return StopTimes.get(i);
+      }
+    }
+    return null;
+  }
 
   public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation) {
     List<RailDailyTimetable> railDailyTimetableList1_new = new ArrayList<>();
@@ -41,7 +64,7 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
     return railDailyTimetableList1_new;
   }
 
-  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
+  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
     List<RailDailyTimetable> railDailyTimetableList1_new = new ArrayList<>();
     Date start = new Date(0);
     Date endAdd = new Date(0);
@@ -56,7 +79,7 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
 
       for(int i = 0; i < railDailyTimetableList.size(); i++) {
         Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList.get(i).StopTimes.get(0).DepartureTime);
+        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList.get(i).getStopTimeOfStopTimes(originStation).DepartureTime);
 
         if(temp.after(start)) {
           railDailyTimetableList1_new.add(railDailyTimetableList.get(i));
@@ -92,17 +115,38 @@ public class RailDailyTimetable implements Comparable<RailDailyTimetable>
 
     return railDailyTimetableList1_new;
   }
+  public static void sort(List<RailDailyTimetable> railDailyTimetableList, final RailStation originStation) {
+    Collections.sort(railDailyTimetableList, new Comparator<RailDailyTimetable>(){
+      public int compare(RailDailyTimetable obj1, RailDailyTimetable obj2) {
+        try {
+          if ((new SimpleDateFormat("HH:mm").parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).after((new SimpleDateFormat("HH:mm").parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime))))) {
+            return 1;
+          }
+          else if ((new SimpleDateFormat("HH:mm").parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime))))) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        } catch (ParseException e) {
+          e.printStackTrace();
+        }
+        return 0;
+      }
+    });
+  }
+
   @Override
   public int compareTo(RailDailyTimetable f) {
     try {
         if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).after((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
-            return 1;
+          return 1;
         }
-    else if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
-            return -1;
+        else if ((new SimpleDateFormat("HH:mm").parse(this.StopTimes.get(0).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(f.StopTimes.get(0).DepartureTime))))) {
+          return -1;
         }
         else {
-            return 0;
+          return 0;
         }
     } catch (ParseException e) {
         e.printStackTrace();
