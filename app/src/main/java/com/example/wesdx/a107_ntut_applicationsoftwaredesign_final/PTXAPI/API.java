@@ -56,15 +56,11 @@ public class API {
     public final static int TRAIN_NO_AND_TRAIN_DATE = 3;
     public final static int STATION_ID_AND_TRAIN_DATE = 4;
 
-    private final String APPID = "6066d2cbc3324183bbaf01e2515df9df";
+    private final static String APPID = "6066d2cbc3324183bbaf01e2515df9df";
 
-    private final String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
+    private final static String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
-    public API() {
-
-    }
-
-    private String getAPIResponse(String APIUrl) {
+    private final static String getAPIResponse(String APIUrl) {
         HttpURLConnection connection = null;
 
         String xdate = getServerTime();
@@ -127,8 +123,7 @@ public class API {
 
     public static List<RailStation> getStation(String transportation) {
         APIURL apiurl = new APIURL(transportation, "Station");
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
     }
 
     //Line
@@ -138,8 +133,7 @@ public class API {
 
     public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) {
         APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailODFare>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
     public static List<RailODFare> getRailODFare(String transportation, RailStation originStation, RailStation destinationStation) {
@@ -148,8 +142,7 @@ public class API {
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) {
         if(transportation == THSR) return null;
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation) {
@@ -164,14 +157,12 @@ public class API {
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     //DailyTrainInfo/Today
@@ -181,8 +172,7 @@ public class API {
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation) {
