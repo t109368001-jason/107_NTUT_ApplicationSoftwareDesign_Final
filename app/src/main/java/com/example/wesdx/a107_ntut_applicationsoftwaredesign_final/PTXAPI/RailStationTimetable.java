@@ -4,8 +4,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/TRA/DailyTimetable/Station/{StationID}/{TrainDate}
  *
  */
-public class RailStationTimetable
-{
+public class RailStationTimetable {
    public String TrainDate;
    public String StationID;
    public NameType StationName;
@@ -14,7 +13,7 @@ public class RailStationTimetable
    public String TripLine;
    public String TrainTypeID;
    public String TrainTypeCode;
-   public String TrainTypeName;
+   public NameType TrainTypeName;
    public String StartingStationID;
    public String StartingStationName;
    public String EndingStationID;
@@ -23,5 +22,4 @@ public class RailStationTimetable
    public String DepartureTime;
    public String UpdateTime;
    public String VersionID;
-
 }

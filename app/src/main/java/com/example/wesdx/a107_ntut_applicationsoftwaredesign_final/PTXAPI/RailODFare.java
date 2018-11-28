@@ -16,7 +16,6 @@ public class RailODFare {
     public String Direction;
     public List<Fare> Fares;
     public String UpdateTime;
-
     public String SrcUpdateTime;//高鐵
     public String VersionID;//高鐵
 }

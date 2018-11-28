@@ -6,8 +6,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * 20181120 1342 完成
  *
  */
-public class RailGeneralTimetable
-{
+public class RailGeneralTimetable {
     public String UpdateTime;
     public String EffectiveDate;//高鐵
     public String VersionID;

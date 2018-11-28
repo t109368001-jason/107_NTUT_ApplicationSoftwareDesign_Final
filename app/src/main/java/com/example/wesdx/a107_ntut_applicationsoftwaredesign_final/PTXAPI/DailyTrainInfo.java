@@ -1,6 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
-public class DailyTrainInfo{
+public class DailyTrainInfo {
     public String TrainNo;
     public String Direction;
     public String StartingStationID;

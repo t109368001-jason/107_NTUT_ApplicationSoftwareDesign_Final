@@ -4,8 +4,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/AlertInfo
  *台鐵沒有
  */
-public class AlertInfo
-{
+public class AlertInfo {
    public  String Level;
    public  String Status;
    public  String Title;

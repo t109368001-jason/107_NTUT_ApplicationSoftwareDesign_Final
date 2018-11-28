@@ -2,8 +2,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import java.util.List;
 
-public class GeneralTimetable
-{
+public class GeneralTimetable {
     public RailGeneralTrainInfo GeneralTrainInfo;
     public List<StopTime> StopTimes;
     public ServiceDay ServiceDay;

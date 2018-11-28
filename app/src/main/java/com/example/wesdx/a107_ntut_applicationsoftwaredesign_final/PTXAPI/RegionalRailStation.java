@@ -256,6 +256,5 @@ public class RegionalRailStation  implements Comparable<RegionalRailStation> {
         else {
             return 0;
         }
-
     }
 }

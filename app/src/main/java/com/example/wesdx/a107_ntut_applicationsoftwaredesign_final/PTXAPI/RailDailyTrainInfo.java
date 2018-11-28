@@ -7,8 +7,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/TRA/DailyTimetable/Today
  *
  */
-public class RailDailyTrainInfo
-{
+public class RailDailyTrainInfo {
    public String TrainNo;//高鐵
    public String Direction;//高鐵
    public String StartingStationID;//高鐵
@@ -29,5 +28,4 @@ public class RailDailyTrainInfo
    public String DailyFlag;//台鐵
    public String ServiceAddedFlag;//台鐵
    public NameType Note;
-
 }

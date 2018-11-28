@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -40,37 +39,32 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView dateTextView, timeTextView;
     private Spinner originStationSpinner, destinationStationSpinner;
-    private RadioGroup radioGroup;
-    private CheckBox checkBox;
-    private CheckBox checkBox2;
-    private Button search;
-    private Button changeStation;
-
-    private List<RailStation> railStationList;
-
-    private RailStation originStation;
-    private RailStation destinationStation;
+    private CheckBox priceFirstCheckBox;
+    private CheckBox useTimeAsDesTimeCheckBox;
+    private Button searchButton;
+    private Button changeStationButton;
 
     private String transportation;
+    private RailStation originStation;
+    private RailStation destinationStation;
+    private List<RailStation> railStationList;
 
-    private int TRAOrTHSR = 0;
-    private int price = 0;
-    private int arriveTimeFirst = 0;
+    private int priceFirst = 0;
+    private int useTimeAsDesTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dateTextView = (TextView) findViewById(R.id.textView);
-        timeTextView = (TextView) findViewById(R.id.textView2);
-        originStationSpinner = (Spinner)findViewById(R.id.start_station);
-        destinationStationSpinner = (Spinner)findViewById(R.id.arrive_station);
-        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
-        checkBox = (CheckBox) findViewById(R.id.checkBox);
-        checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
-        search = (Button)findViewById(R.id.search);
-        changeStation = (Button) findViewById(R.id.changeStation);
+        dateTextView = (TextView) findViewById(R.id.dateTextView);
+        timeTextView = (TextView) findViewById(R.id.timeTextView);
+        originStationSpinner = (Spinner)findViewById(R.id.originStationSpinner);
+        destinationStationSpinner = (Spinner)findViewById(R.id.destinationStationSpinner);
+        priceFirstCheckBox = (CheckBox) findViewById(R.id.priceFirstCheckBox);
+        useTimeAsDesTimeCheckBox = (CheckBox) findViewById(R.id.useTimeAsDesTimeCheckBox);
+        searchButton = (Button)findViewById(R.id.searchButton);
+        changeStationButton = (Button) findViewById(R.id.changeStationButton);
 
         Bundle bundle = getIntent().getExtras();
         String railStationListGson = bundle.getString("railStationListGson");
@@ -85,37 +79,17 @@ public class MainActivity extends AppCompatActivity {
         originStationSpinner.setAdapter(transAdapter);
         destinationStationSpinner.setAdapter(transAdapter);
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        priceFirstCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId) {
-                    case R.id.radioButton:
-                        TRAOrTHSR = 1;
-                        break;
-                    case R.id.radioButton2:
-                        TRAOrTHSR = 2;
-                        break;
-                    case R.id.radioButton3:
-                        TRAOrTHSR = 3;
-                        break;
-                    default:
-                        TRAOrTHSR = 0;
-                        break;
-                }
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                priceFirst = (isChecked)? 1: 0;
             }
         });
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        useTimeAsDesTimeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                price = (isChecked)? 1: 0;
-            }
-        });
-
-        checkBox2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                arriveTimeFirst = (isChecked)? 1: 0;
+                useTimeAsDesTime = (isChecked)? 1: 0;
             }
         });
 
@@ -141,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        search.setOnClickListener(new View.OnClickListener() {
+        searchButton.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View v) {
@@ -151,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), originStation, destinationStation);
+                        railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
                         return null;
                     }
 
@@ -188,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        changeStation.setOnClickListener(new View.OnClickListener() {
+        changeStationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int tmp = originStationSpinner.getSelectedItemPosition();
@@ -247,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
@@ -256,11 +230,11 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    private class myAdapter extends BaseAdapter{
+    private class myAdapter extends BaseAdapter {
         private List<RailStation> data;
         private int view;
 
-        public myAdapter(List<RailStation> data, int view){
+        public myAdapter(List<RailStation> data, int view) {
             this.data = data;
             this.view = view;
         }

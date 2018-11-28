@@ -7,9 +7,7 @@ import java.util.List;
  *GET /v2/Rail/THSR/AvailableSeatStatusList/{StationID}
  *
  */
-public class AvailableSeatStatusList
-{
+public class AvailableSeatStatusList {
    public String UpdateTime;
    public List<AvailableSeat> AvailableSeats;
-
 }

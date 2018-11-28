@@ -49,11 +49,8 @@ public class API {
     public final static String THSR = "THSR";
     public final static int TRAIN_NO = 1;
     public final static int TRAIN_DATE = 2;
-    public final static int TRAIN_NO_AND_TRAIN_DATE = 3;
-    public final static int STATION_ID_AND_TRAIN_DATE = 4;
 
     private final static String APPID = "6066d2cbc3324183bbaf01e2515df9df";
-
     private final static String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
     private final static String getAPIResponse(String APIUrl) {
@@ -188,21 +185,20 @@ public class API {
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, String trainNo, String trainDate) {
         String functionParameter = "TrainNo/" + trainNo + "/TrainDate/" + trainDate;
-        return getDailyTimetable(transportation, functionParameter);
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailStationTimetable> getStationTimetable(String transportation, String stationID, String trainDate) {
         String functionParameter = "Station/" + stationID + "/" + trainDate;
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStationTimetable>>() {}.getType());
     }
 
     public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) {
         String functionParameter = "OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        API getAPI = (new API());
-        return (new Gson()).fromJson(getAPI.getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) {

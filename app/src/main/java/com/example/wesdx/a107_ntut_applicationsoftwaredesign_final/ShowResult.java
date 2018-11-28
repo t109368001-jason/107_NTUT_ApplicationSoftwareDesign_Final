@@ -1,6 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -19,9 +18,9 @@ import java.util.List;
 
 public class ShowResult extends AppCompatActivity {
     private ListView listView;
-    private TextView ODName, dataOver50TextView;
-    RailStation originStation;
-    RailStation destinationStation;
+    private TextView ODNameTextView, dataOver50TextView;
+    private RailStation originStation;
+    private RailStation destinationStation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +28,7 @@ public class ShowResult extends AppCompatActivity {
         setContentView(R.layout.activity_show_result);
 
         listView = (ListView) findViewById(R.id.listView);
-        ODName = (TextView) findViewById(R.id.ODName);
+        ODNameTextView = (TextView) findViewById(R.id.ODNameTextView);
         dataOver50TextView = (TextView) findViewById(R.id.dataOver50TextView);
 
         Bundle bundle = getIntent().getExtras();
@@ -46,17 +45,18 @@ public class ShowResult extends AppCompatActivity {
         myAdapter transAdapter = new myAdapter(railDailyTimetableList,R.layout.show_result_listview_item);
         listView.setAdapter(transAdapter);
 
-        if((railDailyTimetableList != null ? railDailyTimetableList.size() : 0) == 50) {
-            dataOver50TextView.setText("(前50筆)");
+        ODNameTextView.setText(originStation.StationName.Zh_tw + " → " + destinationStation.StationName.Zh_tw);
+
+        if((railDailyTimetableList != null ? railDailyTimetableList.size() : 0) == 30) {
+            dataOver50TextView.setText("(前30筆)");
         }
-        ODName.setText(originStation.StationName.Zh_tw + " → " + destinationStation.StationName.Zh_tw);
     }
 
     public  class myAdapter extends BaseAdapter {
         private List<RailDailyTimetable> railDailyTimetableList;
         private int view;
 
-        public myAdapter(List<RailDailyTimetable> railDailyTimetableList, int view){
+        public myAdapter(List<RailDailyTimetable> railDailyTimetableList, int view) {
             this.railDailyTimetableList = railDailyTimetableList;
             this.view = view;
         }
@@ -80,21 +80,13 @@ public class ShowResult extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
             RailDailyTimetable railDailyTimetable = railDailyTimetableList.get(position);
-            TextView oriStationTextView = convertView.findViewById(R.id.oriStationTextView);
-            oriStationTextView.setText(railDailyTimetable.StopTimes.get(0).StationName.Zh_tw);
-            TextView destStationTextView = convertView.findViewById(R.id.destStationTextView);
-            destStationTextView.setText(railDailyTimetable.StopTimes.get(railDailyTimetable.StopTimes.size()-1).StationName.Zh_tw);
-            TextView oriTimeTextView = convertView.findViewById(R.id.oriTimeTextView);
-            oriTimeTextView.setText(railDailyTimetable.getStopTimeOfStopTimes(originStation).DepartureTime);
-            TextView destTimeTextView = convertView.findViewById(R.id.destTimeTextView);
-            destTimeTextView.setText(railDailyTimetable.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
-            TextView trainNo = convertView.findViewById(R.id.trainNo);
-            trainNo.setText(railDailyTimetable.DailyTrainInfo.TrainNo);
-            TextView tripLine = convertView.findViewById(R.id.tripLine);
-            tripLine.setText(railDailyTimetable.getTripLineName());
-            TextView ODTime = convertView.findViewById(R.id.ODTime);
-            ODTime.setText((new SimpleDateFormat("HH小時mm分").format(railDailyTimetable.getODTime(originStation, destinationStation))));
-
+            ((TextView)convertView.findViewById(R.id.oriStationTextView)).setText(railDailyTimetable.DailyTrainInfo.StartingStationName.Zh_tw);
+            ((TextView)convertView.findViewById(R.id.destStationTextView)).setText(railDailyTimetable.DailyTrainInfo.EndingStationName.Zh_tw);
+            ((TextView)convertView.findViewById(R.id.oriTimeTextView)).setText(railDailyTimetable.getStopTimeOfStopTimes(originStation).DepartureTime);
+            ((TextView)convertView.findViewById(R.id.destTimeTextView)).setText(railDailyTimetable.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+            ((TextView)convertView.findViewById(R.id.trainNo)).setText(railDailyTimetable.DailyTrainInfo.TrainNo);
+            ((TextView)convertView.findViewById(R.id.tripLine)).setText(railDailyTimetable.getTripLineName());
+            ((TextView)convertView.findViewById(R.id.ODTime)).setText((new SimpleDateFormat("HH小時mm分").format(railDailyTimetable.getODTime(originStation, destinationStation))));
             return convertView;
         }
     }

@@ -1,5 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 台鐵車站基本資料
@@ -18,8 +19,50 @@ public class RailStation implements Comparable<RailStation> {
     public String ReservationCode;
     public String UpdateTime;
     public String VersionID;
-
     public String OperatorID;//高鐵
+
+    public static List<RailStation> split(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
+        List<RailStation> railStationList_new = new ArrayList<>();
+
+        boolean find = false;
+        if(Integer.parseInt(originStation.ReservationCode) < Integer.parseInt(destinationStation.ReservationCode)) {
+            for(int i = 0; i < railStationList.size(); i++) {
+                if(!find) {
+                    if(railStationList.get(i).StationID.equals(originStation.StationID)) {
+                        find = true;
+                        railStationList_new.add(railStationList.get(i));
+                    }
+                } else {
+                    railStationList_new.add(railStationList.get(i));
+                    if(railStationList.get(i).StationID.equals(destinationStation.StationID)) {
+                        break;
+                    }
+                }
+            }
+        } else if(Integer.parseInt(originStation.ReservationCode) > Integer.parseInt(destinationStation.ReservationCode)) {
+            for(int i = railStationList.size(); i > 0; i--) {
+                if(!find) {
+                    if(railStationList.get(i).StationID.equals(originStation.StationID)) {
+                        find = true;
+                        railStationList_new.add(railStationList.get(i));
+                    }
+                } else {
+                    railStationList_new.add(railStationList.get(i));
+                    if(railStationList.get(i).StationID.equals(destinationStation.StationID)) {
+                        break;
+                    }
+                }
+                if(i == 1) {
+                    if(!railStationList.get(0).StationID.equals(destinationStation.StationID)) {
+                        railStationList_new.add(railStationList.get(0));
+                    }
+                }
+            }
+        } else {
+            return null;
+        }
+        return railStationList_new;
+    }
 
     public static void removeUnreservationStation(List<RailStation> list)
     {
@@ -93,7 +136,6 @@ public class RailStation implements Comparable<RailStation> {
 
     @Override
     public int compareTo(RailStation f) {
-
         if (Integer.parseInt(ReservationCode) > Integer.parseInt(f.ReservationCode)) {
             return 1;
         }
@@ -103,7 +145,6 @@ public class RailStation implements Comparable<RailStation> {
         else {
             return 0;
         }
-
     }
 }
 

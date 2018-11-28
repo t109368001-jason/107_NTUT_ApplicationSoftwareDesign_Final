@@ -69,7 +69,6 @@ public class RailODDailyTimetable {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
         return railODDailyTimetableList_new;
     }
 }

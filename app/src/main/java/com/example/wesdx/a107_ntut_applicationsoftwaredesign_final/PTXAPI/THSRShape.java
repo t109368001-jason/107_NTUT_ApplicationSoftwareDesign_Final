@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.NameType;
 
@@ -7,11 +7,9 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.NameTy
  *GET /v2/Rail/THSR/Shape
  *
  */
-public class THSRShape
-{
+public class THSRShape {
     public String LineID;
     public NameType LineName;
     public String Geometry;
     public String UpdateTime;
-
 }

@@ -7,27 +7,27 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:text="yyyy-MM-dd"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/timeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
-        app:layout_constraintStart_toEndOf="@+id/textView"
+        android:text="HH:mm"
+        app:layout_constraintStart_toEndOf="@+id/dateTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/start_station"
+        android:id="@+id/originStationSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -35,7 +35,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView6"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/timeTextView" />
 
     <TextView
         android:id="@+id/textView6"
@@ -43,12 +43,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="出發站"
-        app:layout_constraintBottom_toBottomOf="@+id/start_station"
+        app:layout_constraintBottom_toBottomOf="@+id/originStationSpinner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/start_station" />
+        app:layout_constraintTop_toTopOf="@+id/originStationSpinner" />
 
     <Spinner
-        android:id="@+id/arrive_station"
+        android:id="@+id/destinationStationSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -57,7 +57,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/textView7"
-        app:layout_constraintTop_toBottomOf="@+id/changeStation" />
+        app:layout_constraintTop_toBottomOf="@+id/changeStationButton" />
 
     <TextView
         android:id="@+id/textView7"
@@ -65,78 +65,45 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="到達站"
-        app:layout_constraintBottom_toBottomOf="@+id/arrive_station"
+        app:layout_constraintBottom_toBottomOf="@+id/destinationStationSpinner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/arrive_station"
+        app:layout_constraintTop_toTopOf="@+id/destinationStationSpinner"
         app:layout_constraintVertical_bias="0.6" />
 
     <CheckBox
-        android:id="@+id/checkBox"
+        android:id="@+id/priceFirstCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:text="價格優先"
+        app:layout_constraintBottom_toBottomOf="@+id/useTimeAsDesTimeCheckBox"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+        app:layout_constraintTop_toTopOf="@+id/useTimeAsDesTimeCheckBox" />
 
     <CheckBox
-        android:id="@+id/checkBox2"
+        android:id="@+id/useTimeAsDesTimeCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="使用到達時間"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkBox" />
-
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/arrive_station">
-
-        <RadioButton
-            android:id="@+id/radioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="台鐵" />
-
-        <RadioButton
-            android:id="@+id/radioButton2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="高鐵" />
-
-        <RadioButton
-            android:id="@+id/radioButton3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="雙鐵" />
-    </RadioGroup>
+        app:layout_constraintStart_toEndOf="@+id/priceFirstCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/destinationStationSpinner" />
 
     <Button
-        android:id="@+id/search"
+        android:id="@+id/searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="查詢"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkBox2" />
+        app:layout_constraintTop_toBottomOf="@+id/useTimeAsDesTimeCheckBox" />
 
     <Button
-        android:id="@+id/changeStation"
+        android:id="@+id/changeStationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

@@ -4,8 +4,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/TRA/LiveBoard
  *
  */
-public class RailLiveBoard
-{
+public class RailLiveBoard {
     public String StationID;
     public NameType StationName;
     public String TrainNo;
@@ -21,5 +20,4 @@ public class RailLiveBoard
     public String DelayTime;
     public String SrcUpdateTime;
     public String UpdateTime;
-
 }

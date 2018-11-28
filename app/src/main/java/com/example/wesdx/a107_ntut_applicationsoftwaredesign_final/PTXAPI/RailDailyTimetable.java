@@ -13,8 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-public class RailDailyTimetable
-{
+public class RailDailyTimetable {
   public String TrainDate;
   public RailDailyTrainInfo DailyTrainInfo;
   public List<StopTime> StopTimes;
@@ -45,7 +44,6 @@ public class RailDailyTimetable
   }
 
   public Date getODTime(RailStation originStation, RailStation destinationStation) {
-
     try {
       Date originTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(originStation).DepartureTime);
       Date destinationTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
@@ -131,7 +129,6 @@ public class RailDailyTimetable
     } catch (ParseException e) {
       e.printStackTrace();
     }
-
     return railDailyTimetableList1_new;
   }
 

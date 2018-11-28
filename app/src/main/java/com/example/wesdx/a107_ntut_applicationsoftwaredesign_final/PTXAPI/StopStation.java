@@ -4,8 +4,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  *GET /v2/Rail/THSR/AvailableSeatStatusList/{StationID}
  *
  */
-public class StopStation
-{
+public class StopStation {
     public String StationID;
     public NameType StationName;
     public String StandardSeatStatus;
