@@ -1,13 +1,8 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.DailyTrainInfo;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTrainInfo;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailODDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,21 +9,17 @@ import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,11 +32,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
     public static final String PREFS_NAME = "MyPrefsFile";
@@ -80,10 +73,10 @@ public class MainActivity extends AppCompatActivity {
         changeStation = (Button) findViewById(R.id.changeStation);
 
         Bundle bundle = getIntent().getExtras();
-        String str = bundle.getString("railStationListGson");
+        String railStationListGson = bundle.getString("railStationListGson");
         transportation = bundle.getString("transportation");
 
-        railStationList = (new Gson()).fromJson(str, new TypeToken<List<RailStation>>() {}.getType());
+        railStationList = (new Gson()).fromJson(railStationListGson, new TypeToken<List<RailStation>>() {}.getType());
 
         dateTextView.setText((new SimpleDateFormat("yyyy-MM-dd")).format(Calendar.getInstance().getTime()));
         timeTextView.setText((new SimpleDateFormat("HH:mm")).format(Calendar.getInstance().getTime()));
@@ -263,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    public class myAdapter extends BaseAdapter{
+    private class myAdapter extends BaseAdapter{
         private List<RailStation> data;
         private int view;
 

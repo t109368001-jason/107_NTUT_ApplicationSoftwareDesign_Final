@@ -4,14 +4,9 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/DailyTimetable/Today
  *
  */
-import android.annotation.SuppressLint;
-import android.provider.ContactsContract;
-import android.widget.ListView;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;

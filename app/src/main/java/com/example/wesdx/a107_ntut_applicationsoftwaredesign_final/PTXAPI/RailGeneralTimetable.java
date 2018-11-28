@@ -1,7 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
-import java.util.List;
-
 /**
  * 臺鐵定期時刻表資料
  *

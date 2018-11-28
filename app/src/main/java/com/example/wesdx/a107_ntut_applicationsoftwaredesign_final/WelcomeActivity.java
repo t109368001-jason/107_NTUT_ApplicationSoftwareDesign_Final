@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private Button TRAButton, THSRButton;
+    private ImageButton TRAButton, THSRButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +69,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 dialog.dismiss();
                 if(railStationList != null) {
                     if(railStationList.size() == 0) {
-                        Toast.makeText(WelcomeActivity.this, "Error : 無法連線至API", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WelcomeActivity.this, "Error : 無法取得車站資料", Toast.LENGTH_SHORT).show();
                     } else {
                         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
                         Bundle bundle = new Bundle();
@@ -78,7 +79,7 @@ public class WelcomeActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 } else {
-                    Toast.makeText(WelcomeActivity.this, "Error : 無法連線至API", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WelcomeActivity.this, "Error : 無法取得車站資料", Toast.LENGTH_SHORT).show();
                 }
             }
         }.execute();

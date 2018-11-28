@@ -13,11 +13,7 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailSt
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.w3c.dom.Text;
-
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class ShowResult extends AppCompatActivity {
