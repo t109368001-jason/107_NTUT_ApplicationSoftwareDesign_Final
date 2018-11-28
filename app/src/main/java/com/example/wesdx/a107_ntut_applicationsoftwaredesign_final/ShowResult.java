@@ -1,5 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class ShowResult extends AppCompatActivity {
     private ListView listView;
-    private TextView ODName;
+    private TextView ODName, dataOver50TextView;
     RailStation originStation;
     RailStation destinationStation;
 
@@ -29,6 +30,7 @@ public class ShowResult extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.listView);
         ODName = (TextView) findViewById(R.id.ODName);
+        dataOver50TextView = (TextView) findViewById(R.id.dataOver50TextView);
 
         Bundle bundle = getIntent().getExtras();
         String railDailyTimetableListGson = bundle.getString("railDailyTimetableListGson");
@@ -44,6 +46,9 @@ public class ShowResult extends AppCompatActivity {
         myAdapter transAdapter = new myAdapter(railDailyTimetableList,R.layout.show_result_listview_item);
         listView.setAdapter(transAdapter);
 
+        if((railDailyTimetableList != null ? railDailyTimetableList.size() : 0) == 50) {
+            dataOver50TextView.setText("(前50筆)");
+        }
         ODName.setText(originStation.StationName.Zh_tw + " → " + destinationStation.StationName.Zh_tw);
     }
 

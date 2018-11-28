@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Router {
     public static List<RailDailyTimetable> get(String transportation, String date, String time, RailStation originStation, RailStation destinationStation) {
-        List<RailDailyTimetable> railODDailyTimetableList = new ArrayList<>();
+        List<RailDailyTimetable> railDailyTimetableList_new = new ArrayList<>();
 
         //List<RailStation> TRARailStationList = API.getStation(API.TRA);
         //RailStation.removeUnreservationStation(TRARailStationList);
@@ -27,12 +27,18 @@ public class Router {
         //THSRRailODDailyTimetableList = RailODDailyTimetable.filter(THSRRailODDailyTimetableList, "07:00", "01:00");
 
         //List<RailGeneralTimetable> TRARailGeneralTimetableList = API.getGeneralTimetable(API.TRA);
-        List<RailDailyTimetable> RailDailyTimetableList = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
-        RailDailyTimetableList = RailDailyTimetable.filter(RailDailyTimetableList, originStation, destinationStation);
-        RailDailyTimetableList = RailDailyTimetable.filter(RailDailyTimetableList, originStation, destinationStation, time, "24:00");
+        List<RailDailyTimetable> railDailyTimetableList = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
+        railDailyTimetableList = RailDailyTimetable.filter(railDailyTimetableList, originStation, destinationStation);
+        railDailyTimetableList = RailDailyTimetable.filter(railDailyTimetableList, originStation, destinationStation, time, "24:00");
+        RailDailyTimetable.sort(railDailyTimetableList, originStation);
 
-        railODDailyTimetableList = RailDailyTimetableList;
+        for(int i = 50; i < railDailyTimetableList.size(); i++) {
+            railDailyTimetableList.remove(i);
+            i--;
+        }
 
-        return railODDailyTimetableList;
+        railDailyTimetableList_new = railDailyTimetableList;
+
+        return railDailyTimetableList_new;
     }
 }
