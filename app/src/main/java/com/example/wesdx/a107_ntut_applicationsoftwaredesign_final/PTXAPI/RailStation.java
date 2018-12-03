@@ -21,6 +21,15 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
+    public static RailStation find(List<RailStation> railStationList, String StationID) {
+        for(int i = 0; i < railStationList.size(); i++) {
+            if(railStationList.get(i).StationID.equals(StationID)) {
+                return railStationList.get(i);
+            }
+        }
+        return null;
+    }
+
     public static List<RailStation> split(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
         List<RailStation> railStationList_new = new ArrayList<>();
 

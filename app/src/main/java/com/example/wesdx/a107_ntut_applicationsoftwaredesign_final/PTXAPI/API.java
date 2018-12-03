@@ -120,9 +120,28 @@ public class API {
     }
 
     //Line
+    public static List<Line> getLine(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "Line");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<Line>>() {}.getType());
+    }
+
     //StationOfLine
+    public static List<StationOfLine> getStationOfLine(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "StationOfLine");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<StationOfLine>>() {}.getType());
+    }
+
     //TrainType
+    public static List<TrainType> getTrainType(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "TrainType");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<TrainType>>() {}.getType());
+    }
+
     //Shape
+    public static List<TRAShape> getTRAShape(String transportation) {
+        APIURL apiurl = new APIURL(transportation, "Shape");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<TRAShape>>() {}.getType());
+    }
 
     public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) {
         APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
