@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -19,12 +20,14 @@ import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
     private ImageButton TRAButton, THSRButton;
+    private Button TRA_AND_THSRButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         TRAButton = findViewById(R.id.TRAButton);
         THSRButton = findViewById(R.id.THSRButton);
+        TRA_AND_THSRButton = findViewById(R.id.TRA_AND_THSRButton);
 
         TRAButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -32,7 +35,12 @@ public class WelcomeActivity extends AppCompatActivity {
                 task(API.TRA);
             }
         });
-
+        TRA_AND_THSRButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                task(API.TRA_AND_THSR);
+            }
+        });
         THSRButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,7 +56,15 @@ public class WelcomeActivity extends AppCompatActivity {
             private List<RailStation> railStationList = new ArrayList<>();
             @Override
             protected Void doInBackground(Void... voids) {
-                railStationList = API.getStation(transportation);
+                if(transportation.equals(API.TRA_AND_THSR)) {
+                    List<RailStation> temp = API.getStation(API.THSR);
+                    railStationList = API.getStation(API.TRA);
+                    for( RailStation railStation:temp) {
+                        railStationList.add(railStation);
+                    }
+                } else {
+                    railStationList = API.getStation(transportation);
+                }
                 RailStation.removeUnreservationStation(railStationList);
                 return null;
             }

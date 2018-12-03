@@ -21,6 +21,57 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
+    public static  RailStation transferStation(List<RailStation> railStationList, RailStation railStation) {
+        String name = railStation.StationName.Zh_tw;
+
+        switch (name){
+            case "臺北":
+                name = "台北";
+                break;
+            case "台北":
+                name = "臺北";
+                break;
+            case "新竹":
+                name = "六家";
+                break;
+            case "六家":
+                name = "新竹";
+                break;
+            case "苗栗":
+                name = "豐富";
+                break;
+            case "豐富":
+                name = "苗栗";
+                break;
+            case "新烏日":
+                name = "台中";
+                break;
+            case "台中":
+                name = "新烏日";
+                break;
+            case "台南":
+                name = "沙崙";
+                break;
+            case "沙崙":
+                name = "台南";
+                break;
+            case "高雄":
+                name = "新左營";
+                break;
+            case "新左營":
+                name = "高雄";
+                break;
+        }
+
+        for(RailStation railStation1_temp:railStationList){
+            //if((!(railStation1_temp.OperatorID == null ? "TRA" : railStation1_temp.OperatorID).equals((railStation.OperatorID == null ? "TRA" : railStation.OperatorID)))&&(railStation1_temp.StationName.Zh_tw.equals(name))){
+            if((!railStation1_temp.OperatorID.equals(railStation.OperatorID))&&(railStation1_temp.StationName.Zh_tw.equals(name))){
+                return railStation1_temp;
+            }
+        }
+        return null;
+    }
+
     public static List<RailStation> split(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
         List<RailStation> railStationList_new = new ArrayList<>();
 

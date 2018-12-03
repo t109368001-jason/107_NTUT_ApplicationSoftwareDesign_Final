@@ -36,4 +36,17 @@
         app:layout_constraintVertical_bias="0.217"
         app:srcCompat="@drawable/tra" />
 
+    <Button
+        android:id="@+id/TRA_AND_THSRButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="308dp"
+        android:layout_marginEnd="8dp"
+        android:text="TRA_AND_THSR"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

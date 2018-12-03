@@ -125,7 +125,8 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
+                        RailStation.transferStation(railStationList, originStation);
+                        //railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
                         return null;
                     }
 

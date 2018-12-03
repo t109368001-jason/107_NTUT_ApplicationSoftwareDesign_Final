@@ -47,6 +47,7 @@ class APIURL {
 public class API {
     public final static String TRA = "TRA";
     public final static String THSR = "THSR";
+    public final static String TRA_AND_THSR = "TRA_AND_THSR";
     public final static int TRAIN_NO = 1;
     public final static int TRAIN_DATE = 2;
 
