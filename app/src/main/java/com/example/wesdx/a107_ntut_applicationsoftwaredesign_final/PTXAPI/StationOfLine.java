@@ -52,6 +52,18 @@ public class StationOfLine {
       return -1;
    }
 
+   public static void fixB_LJProblem(List<StationOfLine> stationOfLineList) {
+      StationOfLine B_NW = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
+
+      for(int i = 0; i < stationOfLineList.size(); i++) {
+         if(stationOfLineList.get(i).LineNo.equals(StationOfLine.B_LJ)) {
+            for(int j = 0; j < 3; j++) {
+               stationOfLineList.get(i).Stations.add(j, B_NW.Stations.get(j));
+            }
+         }
+      }
+   }
+
    public static StationOfLine getStationIndexOfStationsByLineNo(List<StationOfLine> stationOfLineList, String lineNo) {
       for(StationOfLine stationOfLine:stationOfLineList) {
          if(stationOfLine.LineNo.equals(lineNo)) {

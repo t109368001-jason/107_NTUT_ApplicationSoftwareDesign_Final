@@ -29,6 +29,23 @@ public class Router {
                 List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
                 List<RailDailyTimetable> railDailyTimetableList_all = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
 
+                for(int i = 0; i < railStationList_List.size(); i++) {
+                    for(int j = i+1; j < railStationList_List.size(); j++) {
+                        boolean same = true;
+                        if(railStationList_List.get(i).size() == railStationList_List.get(j).size()) {
+                            for(int k = 0; k < railStationList_List.get(i).size(); k++) {
+                                if(!railStationList_List.get(i).get(k).StationID.equals(railStationList_List.get(j).get(k).StationID)) {
+                                    same = false;
+                                    break;
+                                }
+                            }
+                            if(same) {
+                                railStationList_List.remove(j);
+                            }
+                        }
+                    }
+                }
+
                 for(List<RailStation> railStationList_current:railStationList_List) {
                     List<RailDailyTimetable> railDailyTimetableList = RailDailyTimetable.filterByPath(railDailyTimetableList_all, railStationList_current, true, 2);
 

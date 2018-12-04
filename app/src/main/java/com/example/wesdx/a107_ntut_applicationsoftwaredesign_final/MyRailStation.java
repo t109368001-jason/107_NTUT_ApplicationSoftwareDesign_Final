@@ -26,6 +26,8 @@ public class MyRailStation {
             if(stationOfLineList == null) return null;
         }
 
+        StationOfLine.fixB_LJProblem(stationOfLineList);
+
         StationOfLine originStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, originStation.StationID);
         StationOfLine destinationStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, destinationStation.StationID);
 
@@ -66,6 +68,9 @@ public class MyRailStation {
                         }
                     }
                 }
+            }
+            if(!originInStationsIsStart) {
+                Collections.reverse(railStationList_same);
             }
             out = new ArrayList<>();
             out.add(railStationList_same);
