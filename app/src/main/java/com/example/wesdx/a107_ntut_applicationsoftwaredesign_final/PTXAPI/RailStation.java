@@ -24,7 +24,7 @@ public class RailStation implements Comparable<RailStation> {
     public static  RailStation transferStation(List<RailStation> railStationList, RailStation railStation) {
         String name = railStation.StationName.Zh_tw;
 
-        switch (name){
+        switch (name) {
             case "臺北":
                 name = "台北";
                 break;
@@ -63,10 +63,18 @@ public class RailStation implements Comparable<RailStation> {
                 break;
         }
 
-        for(RailStation railStation1_temp:railStationList){
+        for (RailStation railStation1_temp : railStationList) {
             //if((!(railStation1_temp.OperatorID == null ? "TRA" : railStation1_temp.OperatorID).equals((railStation.OperatorID == null ? "TRA" : railStation.OperatorID)))&&(railStation1_temp.StationName.Zh_tw.equals(name))){
-            if((!railStation1_temp.OperatorID.equals(railStation.OperatorID))&&(railStation1_temp.StationName.Zh_tw.equals(name))){
+            if ((!railStation1_temp.OperatorID.equals(railStation.OperatorID)) && (railStation1_temp.StationName.Zh_tw.equals(name))) {
                 return railStation1_temp;
+            }
+        }
+        return null;
+    }
+    public static RailStation find(List<RailStation> railStationList, String StationID) {
+        for(int i = 0; i < railStationList.size(); i++) {
+            if(railStationList.get(i).StationID.equals(StationID)) {
+                return railStationList.get(i);
             }
         }
         return null;

@@ -20,10 +20,51 @@ public class RailDailyTimetable {
   public String  UpdateTime;
   public String  VersionID;
 
+  public boolean beforeOverNightStation(String stationID) {
+    if(DailyTrainInfo.OverNightStationID == null) return true;
+    for(StopTime stopTime:StopTimes) {
+      if(stopTime.StationID.equals(stationID)) return true;
+      if(stopTime.StationID.equals(DailyTrainInfo.OverNightStationID)) return false;
+    }
+    return true;
+  }
+
+  public StopTime findStopTime(List<RailStation> railStationList) {
+    for(int i = 0; i < this.StopTimes.size(); i++) {
+      for(int j = 0; j < railStationList.size(); j++) {
+        if(this.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
+          return this.StopTimes.get(i);
+        }
+      }
+    }
+    return null;
+  }
+
+  public StopTime findLastStopTime(List<RailStation> railStationList) {
+    for(int i = (this.StopTimes.size()-1); i >= 0; i--) {
+      for(int j = (railStationList.size()-1); j >= 0; j--) {
+        if(this.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
+          return this.StopTimes.get(i);
+        }
+      }
+    }
+    return null;
+  }
+
   public StopTime getStopTimeOfStopTimes(RailStation railStation) {
     for(int i = 0; i < this.StopTimes.size(); i++) {
       String s = StopTimes.get(i).StationID;
       if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
+        return StopTimes.get(i);
+      }
+    }
+    return null;
+  }
+
+  public StopTime getStopTimeOfStopTimes(String StationID) {
+    for(int i = 0; i < this.StopTimes.size(); i++) {
+      String s = StopTimes.get(i).StationID;
+      if(StopTimes.get(i).StationID.equals(StationID)) {
         return StopTimes.get(i);
       }
     }
@@ -54,6 +95,25 @@ public class RailDailyTimetable {
       e.printStackTrace();
     }
     return null;
+  }
+
+  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, int num) {
+    List<RailDailyTimetable> railDailyTimetableList_new = new ArrayList<>();
+    for(int i = 0; i < railDailyTimetableList.size(); i++) {
+      int stopTimes = 0;
+      for(int j = 0; j < railDailyTimetableList.get(i).StopTimes.size(); j++) {
+        for(int k = 0; k < railStationList.size(); k++) {
+          if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(railStationList.get(k).StationID)) {
+            stopTimes++;
+          }
+        }
+        if(stopTimes >= num) {
+          railDailyTimetableList_new.add(railDailyTimetableList.get(i));
+          break;
+        }
+      }
+    }
+    return railDailyTimetableList_new;
   }
 
   public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation) {
