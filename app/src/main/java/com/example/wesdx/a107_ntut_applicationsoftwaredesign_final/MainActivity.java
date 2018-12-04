@@ -121,11 +121,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 new AsyncTask<Void, Void, Void>() {
                     private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
-                    private List<RailDailyTimetable> railDailyTimetableList;
+                    private List<TrainPath> trainPathList;
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        railDailyTimetableList = Router.get(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
+                        trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
                         return null;
                     }
 
@@ -142,13 +142,13 @@ public class MainActivity extends AppCompatActivity {
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
                         dialog.dismiss();
-                        if(railDailyTimetableList != null) {
-                            if(railDailyTimetableList.size() == 0) {
+                        if(trainPathList != null) {
+                            if(trainPathList.size() == 0) {
                                 Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
                             } else {
                                 Intent intent = new Intent(MainActivity.this, ShowResult.class);
                                 Bundle bundle = new Bundle();
-                                bundle.putString("railDailyTimetableListGson", (new Gson()).toJson(railDailyTimetableList));
+                                bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
                                 bundle.putString("originStationGson", (new Gson()).toJson(originStation));
                                 bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
                                 intent.putExtras(bundle);

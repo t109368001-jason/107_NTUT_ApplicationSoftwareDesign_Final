@@ -18,11 +18,11 @@ import java.util.List;
 public class Router {
     public static long TRANSFER_TIME = 10 * 60 * 1000;
     public static List<TrainPath> getTranserPath(String transportation, String date, String takeTimeString, List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
+        final SimpleDateFormat simpleDateFormat_HHmm = new SimpleDateFormat("HH:mm");
         List<TrainPath> trainPathList = new ArrayList<>();
 
         if(transportation.equals(API.TRA)) {
             try {
-                SimpleDateFormat simpleDateFormat_HHmm = new SimpleDateFormat("HH:mm");
                 Date takeTime = simpleDateFormat_HHmm.parse(takeTimeString);
                 List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
                 List<RailDailyTimetable> railDailyTimetableList_all = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
@@ -58,6 +58,10 @@ public class Router {
                         }
 
                         if(firstTime.after(lastTime)) {
+                            continue;
+                        }
+
+                        if(firstTime.before(takeTime)) {
                             continue;
                         }
 
@@ -191,12 +195,18 @@ public class Router {
                 Collections.sort(trainPathList, new Comparator<TrainPath>(){
                     public int compare(TrainPath obj1, TrainPath obj2) {
                         try {
-                            StopTime obj1StopTime = obj1.trainPathPartList.get(obj1.trainPathPartList.size()-1).railDailyTimetable.getStopTimeOfStopTimes(obj1.trainPathPartList.get(obj1.trainPathPartList.size()-1).destinationStation.StationID);
-                            StopTime obj2StopTime = obj2.trainPathPartList.get(obj2.trainPathPartList.size()-1).railDailyTimetable.getStopTimeOfStopTimes(obj2.trainPathPartList.get(obj2.trainPathPartList.size()-1).destinationStation.StationID);
-                            if ((new SimpleDateFormat("HH:mm").parse(obj1StopTime.ArrivalTime).after((new SimpleDateFormat("HH:mm").parse(obj2StopTime.ArrivalTime))))) {
+                            Date obj1ArrivalTime = simpleDateFormat_HHmm.parse(obj1.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(obj1.getLastItem().destinationStation).ArrivalTime);
+                            Date obj2ArrivalTime = simpleDateFormat_HHmm.parse(obj2.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(obj2.getLastItem().destinationStation).ArrivalTime);
+                            if(!obj1.getLastItem().railDailyTimetable.beforeOverNightStation(obj1.getLastItem().destinationStation.StationID)) {
+                                obj1ArrivalTime.setDate(obj1ArrivalTime.getDate() + 1);
+                            }
+                            if(!obj2.getLastItem().railDailyTimetable.beforeOverNightStation(obj2.getLastItem().destinationStation.StationID)) {
+                                obj2ArrivalTime.setDate(obj2ArrivalTime.getDate() + 1);
+                            }
+                            if (obj1ArrivalTime.after(obj2ArrivalTime)) {
                                 return 1;
                             }
-                            else if ((new SimpleDateFormat("HH:mm").parse(obj1StopTime.ArrivalTime).before((new SimpleDateFormat("HH:mm").parse(obj2StopTime.ArrivalTime))))) {
+                            else if (obj1ArrivalTime.before(obj2ArrivalTime)) {
                                 return -1;
                             }
                             else {
@@ -234,6 +244,11 @@ public class Router {
 
         }
         if(trainPathList.size() == 0) return null;
+        for(int i = 10; i < (trainPathList != null ? trainPathList.size() : 0); i++) {
+            trainPathList.remove(i);
+            i--;
+        }
+
         return trainPathList;
     }
 
