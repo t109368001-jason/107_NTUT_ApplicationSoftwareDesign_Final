@@ -23,156 +23,170 @@ public class Router {
         if(transportation.equals(API.TRA)) {
             try {
                 SimpleDateFormat simpleDateFormat_HHmm = new SimpleDateFormat("HH:mm");
-                List<RailStation> railStationList_all;
-                List<RailDailyTimetable> railDailyTimetableList_all, railDailyTimetableList_all_TC;
                 Date takeTime = simpleDateFormat_HHmm.parse(takeTimeString);
+                List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
+                List<RailDailyTimetable> railDailyTimetableList_all = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
 
-                //railStationList_all = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
-                railStationList_all = RailStation.split(railStationList, originStation, destinationStation);
-                if(railStationList_all == null) return null;
-                railDailyTimetableList_all = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
+                for(List<RailStation> railStationList_current:railStationList_List) {
+                    List<RailDailyTimetable> railDailyTimetableList = RailDailyTimetable.filterByPath(railDailyTimetableList_all, railStationList_current, true, 2);
 
-                //移除停靠站數少於2的列車
-                railDailyTimetableList_all = RailDailyTimetable.filter(railDailyTimetableList_all, railStationList_all, 2);
-
-
-                //取得是自強的班次
-                railDailyTimetableList_all_TC = new ArrayList<>();
-                for(int i = 0; i < railDailyTimetableList_all.size(); i++) {
-                    if(railDailyTimetableList_all.get(i).DailyTrainInfo.TrainTypeName.Zh_tw.contains("自強")) {
-                        railDailyTimetableList_all_TC.add(railDailyTimetableList_all.get(i));
-                    }
-                }
-
-                for(RailDailyTimetable railDailyTimetable_TC:railDailyTimetableList_all_TC) {
-                    TrainPath trainPath = new TrainPath();
-                    trainPath.trainPathPartList = new ArrayList<>();
-
-                    RailStation firstRailStation, lastRailStation;
-                    StopTime firstStopTime, lastStopTime;
-                    Date firstTime, lastTime, firstTimeThreshold, lastTimeThreshold;
-
-                    firstStopTime = railDailyTimetable_TC.findStopTime(railStationList_all);
-                    lastStopTime = railDailyTimetable_TC.findLastStopTime(railStationList_all);
-                    if((firstStopTime == null)||(lastStopTime == null)) continue;
-                    firstTime = simpleDateFormat_HHmm.parse(firstStopTime.DepartureTime);
-                    if(!railDailyTimetable_TC.beforeOverNightStation(firstStopTime.StationID)) {
-                        firstTime.setDate(firstTime.getDate() + 1);
-                    }
-                    lastTime = simpleDateFormat_HHmm.parse(lastStopTime.DepartureTime);
-                    if(!railDailyTimetable_TC.beforeOverNightStation(lastStopTime.StationID)) {
-                        lastTime.setDate(lastTime.getDate() + 1);
+                    if(railDailyTimetableList == null) {
+                        continue;
                     }
 
-                    if(firstTime.after(lastTime)) continue;
+                    for(RailDailyTimetable railDailyTimetable_mid:railDailyTimetableList) {
+                        TrainPath trainPath = new TrainPath();
+                        trainPath.trainPathPartList = new ArrayList<>();
 
-                    firstTimeThreshold = new Date(firstTime.getTime() - TRANSFER_TIME);
-                    lastTimeThreshold = new Date(lastTime.getTime() + TRANSFER_TIME);
-                    firstRailStation = RailStation.find(railStationList_all, firstStopTime.StationID);
-                    lastRailStation = RailStation.find(railStationList_all, lastStopTime.StationID);
-                    if((firstRailStation == null)||(lastRailStation == null)) continue;
+                        RailStation firstRailStation, lastRailStation;
+                        StopTime firstStopTime, lastStopTime;
+                        Date firstTime, lastTime, firstTimeThreshold, lastTimeThreshold;
 
-                    if(!firstStopTime.StationID.equals(originStation.StationID)) {
-                        RailDailyTimetable railDailyTimetable_best = null;
-                        Date arrivalFirstTime_best = null;
+                        firstStopTime = railDailyTimetable_mid.findStopTime(railStationList_current);
+                        lastStopTime = railDailyTimetable_mid.findLastStopTime(railStationList_current);
+                        if((firstStopTime == null)||(lastStopTime == null)) {
+                            continue;
+                        }
 
-                        for(RailDailyTimetable railDailyTimetable_first:railDailyTimetableList_all) {
-                            StopTime originStopTime, arrivalFirstStopTime;
-                            Date originTime, arrivalFirstTime;
+                        firstTime = simpleDateFormat_HHmm.parse(firstStopTime.DepartureTime);
+                        if(!railDailyTimetable_mid.beforeOverNightStation(firstStopTime.StationID)) {
+                            firstTime.setDate(firstTime.getDate() + 1);
+                        }
+                        lastTime = simpleDateFormat_HHmm.parse(lastStopTime.DepartureTime);
+                        if(!railDailyTimetable_mid.beforeOverNightStation(lastStopTime.StationID)) {
+                            lastTime.setDate(lastTime.getDate() + 1);
+                        }
 
-                            originStopTime = railDailyTimetable_first.getStopTimeOfStopTimes(originStation.StationID);
-                            arrivalFirstStopTime = railDailyTimetable_first.getStopTimeOfStopTimes(firstStopTime.StationID);
-                            if((originStopTime == null)||(arrivalFirstStopTime == null)) continue;
-                            originTime = simpleDateFormat_HHmm.parse(originStopTime.DepartureTime);
-                            if(!railDailyTimetable_first.beforeOverNightStation(originStopTime.StationID)) {
-                                originTime.setDate(originTime.getDate() + 1);
-                            }
-                            arrivalFirstTime = simpleDateFormat_HHmm.parse(arrivalFirstStopTime.DepartureTime);
-                            if(!railDailyTimetable_first.beforeOverNightStation(arrivalFirstStopTime.StationID)) {
-                                arrivalFirstTime.setDate(arrivalFirstTime.getDate() + 1);
-                            }
+                        if(firstTime.after(lastTime)) {
+                            continue;
+                        }
 
-                            if(originTime.after(arrivalFirstTime)) continue;
+                        firstTimeThreshold = new Date(firstTime.getTime() - TRANSFER_TIME);
+                        lastTimeThreshold = new Date(lastTime.getTime() + TRANSFER_TIME);
+                        firstRailStation = RailStation.find(railStationList_current, firstStopTime.StationID);
+                        lastRailStation = RailStation.find(railStationList_current, lastStopTime.StationID);
+                        if((firstRailStation == null)||(lastRailStation == null)) {
+                            continue;
+                        }
 
-                            if(originTime.before(takeTime)) continue;
+                        if(!firstStopTime.StationID.equals(originStation.StationID)) {
+                            RailDailyTimetable railDailyTimetable_best = null;
+                            Date arrivalFirstTime_best = null;
 
-                            if(arrivalFirstTime.after(firstTimeThreshold)) continue;
+                            for(RailDailyTimetable railDailyTimetable_first:railDailyTimetableList) {
+                                StopTime originStopTime, arrivalFirstStopTime;
+                                Date originTime, arrivalFirstTime;
 
-                            if(railDailyTimetable_best == null) {
-                                railDailyTimetable_best = railDailyTimetable_first;
-                                arrivalFirstTime_best = arrivalFirstTime;
-                            } else {
-                                if(arrivalFirstTime.after(arrivalFirstTime_best)) {
+                                originStopTime = railDailyTimetable_first.getStopTimeOfStopTimes(originStation.StationID);
+                                arrivalFirstStopTime = railDailyTimetable_first.getStopTimeOfStopTimes(firstStopTime.StationID);
+                                if((originStopTime == null)||(arrivalFirstStopTime == null)) {
+                                    continue;
+                                }
+                                originTime = simpleDateFormat_HHmm.parse(originStopTime.DepartureTime);
+                                if(!railDailyTimetable_first.beforeOverNightStation(originStopTime.StationID)) {
+                                    originTime.setDate(originTime.getDate() + 1);
+                                }
+                                arrivalFirstTime = simpleDateFormat_HHmm.parse(arrivalFirstStopTime.DepartureTime);
+                                if(!railDailyTimetable_first.beforeOverNightStation(arrivalFirstStopTime.StationID)) {
+                                    arrivalFirstTime.setDate(arrivalFirstTime.getDate() + 1);
+                                }
+
+                                if(originTime.after(arrivalFirstTime)) {
+                                    continue;
+                                }
+
+                                if(originTime.before(takeTime)) {
+                                    continue;
+                                }
+
+                                if(arrivalFirstTime.after(firstTimeThreshold)) {
+                                    continue;
+                                }
+
+                                if(railDailyTimetable_best == null) {
                                     railDailyTimetable_best = railDailyTimetable_first;
                                     arrivalFirstTime_best = arrivalFirstTime;
+                                } else {
+                                    if(arrivalFirstTime.after(arrivalFirstTime_best)) {
+                                        railDailyTimetable_best = railDailyTimetable_first;
+                                        arrivalFirstTime_best = arrivalFirstTime;
+                                    }
                                 }
                             }
-                        }
 
-                        if(railDailyTimetable_best != null) {
-                            TrainPath.TrainPathPart trainPathPart_first = new TrainPath.TrainPathPart();
-                            trainPathPart_first.originStation = originStation;
-                            trainPathPart_first.destinationStation = firstRailStation;
-                            trainPathPart_first.railDailyTimetable = railDailyTimetable_best;
-                            trainPath.trainPathPartList.add(trainPathPart_first);
-                        } else {
-                            continue;
-                        }
-                    }
-
-                    TrainPath.TrainPathPart trainPathPart_mid = new TrainPath.TrainPathPart();
-                    trainPathPart_mid.originStation = firstRailStation;
-                    trainPathPart_mid.destinationStation = lastRailStation;
-                    trainPathPart_mid.railDailyTimetable = railDailyTimetable_TC;
-                    trainPath.trainPathPartList.add(trainPathPart_mid);
-
-                    if(!lastRailStation.StationID.equals(destinationStation.StationID)) {
-                        RailDailyTimetable railDailyTimetable_best = null;
-                        Date destinationTime_best = null;
-
-                        for(RailDailyTimetable railDailyTimetable_last:railDailyTimetableList_all) {
-                            StopTime departureLastStopTime, destinationStopTime;
-                            Date departureLastTime, destinationTime;
-
-                            departureLastStopTime = railDailyTimetable_last.getStopTimeOfStopTimes(lastRailStation.StationID);
-                            destinationStopTime = railDailyTimetable_last.getStopTimeOfStopTimes(destinationStation.StationID);
-                            if((departureLastStopTime == null)||(destinationStopTime == null)) continue;
-                            departureLastTime = simpleDateFormat_HHmm.parse(departureLastStopTime.DepartureTime);
-                            if(!railDailyTimetable_last.beforeOverNightStation(departureLastStopTime.StationID)) {
-                                departureLastTime.setDate(departureLastTime.getDate() + 1);
-                            }
-                            destinationTime = simpleDateFormat_HHmm.parse(destinationStopTime.DepartureTime);
-                            if(!railDailyTimetable_last.beforeOverNightStation(destinationStopTime.StationID)) {
-                                destinationTime.setDate(destinationTime.getDate() + 1);
-                            }
-
-                            if(departureLastTime.after(destinationTime)) continue;
-
-                            if(departureLastTime.before(lastTimeThreshold)) continue;
-
-                            if(railDailyTimetable_best == null) {
-                                railDailyTimetable_best = railDailyTimetable_last;
-                                destinationTime_best = destinationTime;
+                            if(railDailyTimetable_best != null) {
+                                TrainPath.TrainPathPart trainPathPart_first = new TrainPath.TrainPathPart();
+                                trainPathPart_first.originStation = originStation;
+                                trainPathPart_first.destinationStation = firstRailStation;
+                                trainPathPart_first.railDailyTimetable = railDailyTimetable_best;
+                                trainPath.trainPathPartList.add(trainPathPart_first);
                             } else {
-                                if(destinationTime.before(destinationTime_best)) {
+                                continue;
+                            }
+                        }
+
+                        TrainPath.TrainPathPart trainPathPart_mid = new TrainPath.TrainPathPart();
+                        trainPathPart_mid.originStation = firstRailStation;
+                        trainPathPart_mid.destinationStation = lastRailStation;
+                        trainPathPart_mid.railDailyTimetable = railDailyTimetable_mid;
+                        trainPath.trainPathPartList.add(trainPathPart_mid);
+
+                        if(!lastRailStation.StationID.equals(destinationStation.StationID)) {
+                            RailDailyTimetable railDailyTimetable_best = null;
+                            Date destinationTime_best = null;
+
+                            for(RailDailyTimetable railDailyTimetable_last:railDailyTimetableList) {
+                                StopTime departureLastStopTime, destinationStopTime;
+                                Date departureLastTime, destinationTime;
+
+                                departureLastStopTime = railDailyTimetable_last.getStopTimeOfStopTimes(lastRailStation.StationID);
+                                destinationStopTime = railDailyTimetable_last.getStopTimeOfStopTimes(destinationStation.StationID);
+                                if((departureLastStopTime == null)||(destinationStopTime == null)) {
+                                    continue;
+                                }
+                                departureLastTime = simpleDateFormat_HHmm.parse(departureLastStopTime.DepartureTime);
+                                if(!railDailyTimetable_last.beforeOverNightStation(departureLastStopTime.StationID)) {
+                                    departureLastTime.setDate(departureLastTime.getDate() + 1);
+                                }
+                                destinationTime = simpleDateFormat_HHmm.parse(destinationStopTime.DepartureTime);
+                                if(!railDailyTimetable_last.beforeOverNightStation(destinationStopTime.StationID)) {
+                                    destinationTime.setDate(destinationTime.getDate() + 1);
+                                }
+
+                                if(departureLastTime.after(destinationTime)) {
+                                    continue;
+                                }
+
+                                if(departureLastTime.before(lastTimeThreshold)) {
+                                    continue;
+                                }
+
+                                if(railDailyTimetable_best == null) {
                                     railDailyTimetable_best = railDailyTimetable_last;
                                     destinationTime_best = destinationTime;
+                                } else {
+                                    if(destinationTime.before(destinationTime_best)) {
+                                        railDailyTimetable_best = railDailyTimetable_last;
+                                        destinationTime_best = destinationTime;
+                                    }
                                 }
                             }
-                        }
 
-                        if(railDailyTimetable_best != null) {
-                            TrainPath.TrainPathPart trainPathPart_last = new TrainPath.TrainPathPart();
-                            trainPathPart_last.originStation = lastRailStation;
-                            trainPathPart_last.destinationStation = destinationStation;
-                            trainPathPart_last.railDailyTimetable = railDailyTimetable_best;
-                            trainPath.trainPathPartList.add(trainPathPart_last);
-                        } else {
-                            continue;
+                            if(railDailyTimetable_best != null) {
+                                TrainPath.TrainPathPart trainPathPart_last = new TrainPath.TrainPathPart();
+                                trainPathPart_last.originStation = lastRailStation;
+                                trainPathPart_last.destinationStation = destinationStation;
+                                trainPathPart_last.railDailyTimetable = railDailyTimetable_best;
+                                trainPath.trainPathPartList.add(trainPathPart_last);
+                            } else {
+                                continue;
+                            }
                         }
+                        trainPathList.add(trainPath);
                     }
-                    trainPathList.add(trainPath);
                 }
+
+                trainPathList = TrainPath.filter(trainPathList);
 
                 Collections.sort(trainPathList, new Comparator<TrainPath>(){
                     public int compare(TrainPath obj1, TrainPath obj2) {
@@ -239,7 +253,7 @@ public class Router {
         railDailyTimetableList_new = railDailyTimetableList;
 
 
-        List<List<RailStation>> railStationListList = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
+        List<TrainPath> trainPathList = getTranserPath(transportation, date, takeTimeString, railStationList, originStation, destinationStation);
 
 
         return railDailyTimetableList_new;
