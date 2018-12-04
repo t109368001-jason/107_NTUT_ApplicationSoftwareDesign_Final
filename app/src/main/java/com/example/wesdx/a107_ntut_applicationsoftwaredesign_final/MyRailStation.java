@@ -337,7 +337,7 @@ public class MyRailStation {
                         switch (currentStationOfLine_WC.LineNo) {
                             case StationOfLine.W_TL_C:
                             case StationOfLine.W_TL_M:
-                                currentStationOfLine_WC = W_TL_N;
+                                currentStationOfLine_WC = new StationOfLine(W_TL_N);
                                 break;
                             case StationOfLine.W_TL_N:
                                 currentStationOfLine_WC = new StationOfLine(E_EL);
@@ -585,6 +585,15 @@ public class MyRailStation {
                 out.add(temp_CCC);
             }
 
+        }
+
+        for(List<RailStation> railStationList_temp:out) {
+            for(int i = 0; i < railStationList_temp.size()-1; i++) {
+                if(railStationList_temp.get(i).StationID.equals(railStationList_temp.get(i+1).StationID)) {
+                    railStationList_temp.remove(i);
+                    i--;
+                }
+            }
         }
 
 

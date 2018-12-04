@@ -20,6 +20,39 @@ public class RailDailyTimetable {
   public String  UpdateTime;
   public String  VersionID;
 
+  public static List<RailDailyTimetable> filterByPath(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes) {
+    List<RailDailyTimetable> railDailyTimetableList_new = null;
+    for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+      int stopTimeStartIndex = 0;
+      int railStationStartIndex = 0;
+      boolean findStart = false;
+      int totalStopTimes = 0;
+      boolean next = false;
+      for(int i = stopTimeStartIndex; i < railDailyTimetable.StopTimes.size(); i++) {
+        for(int j = railStationStartIndex; j < railStationList.size(); j++) {
+          if(railDailyTimetable.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
+            totalStopTimes += 1;
+            if(!findStart) {
+              findStart = true;
+              if(isDirectional) {
+                stopTimeStartIndex = i + 1;
+                railStationStartIndex = j + 1;
+              }
+            }
+            if(totalStopTimes >= stopTimes) {
+              if(railDailyTimetableList_new == null) railDailyTimetableList_new = new ArrayList<>();
+              railDailyTimetableList_new.add(railDailyTimetable);
+              next = true;
+              break;
+            }
+          }
+        }
+        if(next) break;
+      }
+    }
+    return railDailyTimetableList_new;
+  }
+
   public boolean beforeOverNightStation(String stationID) {
     if(DailyTrainInfo.OverNightStationID == null) return true;
     for(StopTime stopTime:StopTimes) {
