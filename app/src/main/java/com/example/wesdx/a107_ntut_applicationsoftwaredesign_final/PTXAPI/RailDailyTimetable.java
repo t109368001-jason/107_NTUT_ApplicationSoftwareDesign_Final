@@ -20,6 +20,32 @@ public class RailDailyTimetable {
   public String  UpdateTime;
   public String  VersionID;
 
+  public static List<RailDailyTimetable> filterByOD(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, boolean isDirectional) {
+    List<RailDailyTimetable> railDailyTimetableList_new = null;
+
+    for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+      boolean findBeg = false;
+      boolean findEnd = false;
+      for(int i = 0; i < railDailyTimetable.StopTimes.size(); i++) {
+        if(railDailyTimetable.StopTimes.get(i).StationID.equals(destinationStation.StationID)) {
+          if((!findBeg)&&isDirectional) {
+            break;
+          }
+          findEnd = true;
+        }
+        if(railDailyTimetable.StopTimes.get(i).StationID.equals(originStation.StationID)) {
+          findBeg = true;
+        }
+        if(findBeg&&findEnd) {
+          if(railDailyTimetableList_new == null) railDailyTimetableList_new = new ArrayList<>();
+          railDailyTimetableList_new.add(railDailyTimetable);
+          break;
+        }
+      }
+    }
+    return railDailyTimetableList_new;
+  }
+
   public static List<RailDailyTimetable> filterByPath(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes) {
     List<RailDailyTimetable> railDailyTimetableList_new = null;
     for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
