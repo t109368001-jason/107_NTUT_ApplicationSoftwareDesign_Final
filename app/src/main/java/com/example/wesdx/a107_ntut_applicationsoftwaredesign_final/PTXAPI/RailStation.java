@@ -21,47 +21,13 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
-    public static List<RailStation> split(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
-        List<RailStation> railStationList_new = new ArrayList<>();
-
-        boolean find = false;
-        if(Integer.parseInt(originStation.ReservationCode) < Integer.parseInt(destinationStation.ReservationCode)) {
-            for(int i = 0; i < railStationList.size(); i++) {
-                if(!find) {
-                    if(railStationList.get(i).StationID.equals(originStation.StationID)) {
-                        find = true;
-                        railStationList_new.add(railStationList.get(i));
-                    }
-                } else {
-                    railStationList_new.add(railStationList.get(i));
-                    if(railStationList.get(i).StationID.equals(destinationStation.StationID)) {
-                        break;
-                    }
-                }
+    public static RailStation find(List<RailStation> railStationList, String StationID) {
+        for(int i = 0; i < railStationList.size(); i++) {
+            if(railStationList.get(i).StationID.equals(StationID)) {
+                return railStationList.get(i);
             }
-        } else if(Integer.parseInt(originStation.ReservationCode) > Integer.parseInt(destinationStation.ReservationCode)) {
-            for(int i = railStationList.size(); i > 0; i--) {
-                if(!find) {
-                    if(railStationList.get(i).StationID.equals(originStation.StationID)) {
-                        find = true;
-                        railStationList_new.add(railStationList.get(i));
-                    }
-                } else {
-                    railStationList_new.add(railStationList.get(i));
-                    if(railStationList.get(i).StationID.equals(destinationStation.StationID)) {
-                        break;
-                    }
-                }
-                if(i == 1) {
-                    if(!railStationList.get(0).StationID.equals(destinationStation.StationID)) {
-                        railStationList_new.add(railStationList.get(0));
-                    }
-                }
-            }
-        } else {
-            return null;
         }
-        return railStationList_new;
+        return null;
     }
 
     public static void removeUnreservationStation(List<RailStation> list)
@@ -123,7 +89,7 @@ public class RailStation implements Comparable<RailStation> {
                 case "枋寮": case "加祿": case "內獅": case "枋山": case "池上":
                 case "海端": case "關山": case "瑞和": case "瑞源": case "鹿野":
                 case "山里": case "臺東": case "康樂": case "知本": case "太麻里":
-                case "金崙": case "瀧溪": case "大武":
+                case "金崙": case "瀧溪": case "大武": case "古莊": case "富貴":
                 case "台北": case "台中": case "雲林":
                     continue;
                 default:
