@@ -288,39 +288,6 @@ public class Router {
             i--;
         }
 
-        List<RailStation> railStationList_temp = null;
-        List<RailStation> railStationList_temp2 = null;
-        for(StationOfLine stationOfLine:MyRailStation.stationOfLineList) {
-            for(LineStation lineStation:stationOfLine.Stations) {
-                if(RailStation.find(railStationList, lineStation.StationID) != null) {
-                    if(railStationList_temp == null) railStationList_temp = new ArrayList<>();
-                    railStationList_temp.add(RailStation.find(railStationList, lineStation.StationID));
-                }
-            }
-        }
-        for(int i = 0; i < railStationList_temp.size(); i++) {
-            for(int j = i + 1; j < railStationList_temp.size(); j++) {
-                if(railStationList_temp.get(i).StationID.equals(railStationList_temp.get(j).StationID)) {
-                    railStationList_temp.remove(j);
-                    j--;
-                }
-            }
-        }
-        for(RailStation railStation_temp1:railStationList) {
-            boolean find = false;
-            for(RailStation railStation_tmep2:railStationList_temp) {
-                if(railStation_temp1.StationID.equals(railStation_tmep2.StationID)) {
-                    find = true;
-                    break;
-                }
-            }
-            if(!find) {
-                if(railStationList_temp2 == null) railStationList_temp2 = new ArrayList<>();
-                railStationList_temp2.add(railStation_temp1);
-            }
-        }
-
-
         return trainPathList;
     }
 
