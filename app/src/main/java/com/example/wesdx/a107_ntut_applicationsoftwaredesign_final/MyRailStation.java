@@ -26,7 +26,7 @@ public class MyRailStation {
             if(stationOfLineList == null) return null;
         }
 
-        StationOfLine.fixB_LJProblem(stationOfLineList);
+        StationOfLine.fixMissing15StationProblem(stationOfLineList);
 
         StationOfLine originStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, originStation.StationID);
         StationOfLine destinationStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, destinationStation.StationID);
