@@ -1,6 +1,8 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.google.gson.Gson;
@@ -28,28 +31,35 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class ShowResult extends AppCompatActivity {
-    private ListView listView;
-    private TextView ODNameTextView, dataOver50TextView;
-    private RailStation originStation;
-    private RailStation destinationStation;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_result);
 
-        listView = (ListView) findViewById(R.id.listView);
-        ODNameTextView = (TextView) findViewById(R.id.ODNameTextView);
-        dataOver50TextView = (TextView) findViewById(R.id.dataOver50TextView);
+        ListView listView = (ListView) findViewById(R.id.listView);
+        TextView ODNameTextView = (TextView) findViewById(R.id.ODNameTextView);
+        TextView dataOver50TextView = (TextView) findViewById(R.id.dataOver50TextView);
 
         Bundle bundle = getIntent().getExtras();
-        String trainPathListGson = bundle.getString("trainPathListGson");
-        String originStationGson = bundle.getString("originStationGson");
-        String destinationStationGson = bundle.getString("destinationStationGson");
+        String trainPathListGson = null;
+        String originStationGson = null;
+        String destinationStationGson = null;
+        if (bundle != null) {
+            trainPathListGson = bundle.getString("trainPathListGson");
+            originStationGson = bundle.getString("originStationGson");
+            destinationStationGson = bundle.getString("destinationStationGson");
+        } else {
+            Toast.makeText(ShowResult.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         List<TrainPath> trainPathList = (new Gson()).fromJson(trainPathListGson, new TypeToken<List<TrainPath>>() {}.getType());
-        originStation = (new Gson()).fromJson(originStationGson, new TypeToken<RailStation>() {}.getType());
-        destinationStation = (new Gson()).fromJson(destinationStationGson, new TypeToken<RailStation>() {}.getType());
+        RailStation originStation = (new Gson()).fromJson(originStationGson, new TypeToken<RailStation>() {
+        }.getType());
+        RailStation destinationStation = (new Gson()).fromJson(destinationStationGson, new TypeToken<RailStation>() {
+        }.getType());
 
         final TrainPathAdapter trainPathAdapter = new TrainPathAdapter(trainPathList, R.layout.trainpath_listview_item);
         listView.setAdapter(trainPathAdapter);
@@ -94,6 +104,7 @@ public class ShowResult extends AppCompatActivity {
             return 0;
         }
 
+        @SuppressLint({"ViewHolder", "SimpleDateFormat"})
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
@@ -105,11 +116,14 @@ public class ShowResult extends AppCompatActivity {
             Date originTime = null;
             Date destinationTime = null;
             try {
-                originTime = (new SimpleDateFormat("HH:mm")).parse(trainPath.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(trainPath.trainPathPartList.get(0).originStation.StationID).DepartureTime);
-                destinationTime = (new SimpleDateFormat("HH:mm")).parse(trainPath.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(trainPath.getLastItem().destinationStation.StationID).ArrivalTime);
+                originTime = API.timeFormat.parse(trainPath.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(trainPath.trainPathPartList.get(0).originStation.StationID).DepartureTime);
+                destinationTime = API.timeFormat.parse(trainPath.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(trainPath.getLastItem().destinationStation.StationID).ArrivalTime);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+
+            if(originTime == null || destinationTime == null) throw new NullPointerException();
+
             Date total = new Date(destinationTime.getTime() - originTime.getTime());
             total.setHours(total.getHours() - TimeZone.getDefault().getRawOffset()/1000/60/60);
             ((TextView)convertView.findViewById(R.id.totalTimeTextView)).setText((new SimpleDateFormat("HH小時mm分").format(total)));
@@ -117,7 +131,6 @@ public class ShowResult extends AppCompatActivity {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowResult.this, LinearLayoutManager.HORIZONTAL, false);
             ((RecyclerView)convertView.findViewById(R.id.recyclerView)).setAdapter(new TrainPathPartAdapter(trainPath.trainPathPartList, R.layout.trainpath_recyclerview_item));
             ((RecyclerView)convertView.findViewById(R.id.recyclerView)).setLayoutManager(linearLayoutManager);
-            //((RecyclerView)convertView.findViewById(R.id.recyclerView)).addItemDecoration(new DividerItemDecoration(((RecyclerView)convertView.findViewById(R.id.recyclerView)).getContext(), DividerItemDecoration.HORIZONTAL));
             return convertView;
         }
     }
@@ -139,8 +152,9 @@ public class ShowResult extends AppCompatActivity {
                 this.view = view;
             }
 
+            @NonNull
             @Override
-            public TrainPathPartAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            public TrainPathPartAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View v = (View) LayoutInflater.from(parent.getContext()).inflate(view, parent, false);
 
                 MyViewHolder vh = new MyViewHolder(v);
@@ -148,7 +162,7 @@ public class ShowResult extends AppCompatActivity {
             }
 
             @Override
-            public void onBindViewHolder(MyViewHolder holder, int position) {
+            public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
                 TrainPath.TrainPathPart trainPathPart = trainPathPartList.get(position);
                 if(position == 0) {
                     ((TextView)holder.mView.findViewById(R.id.leftArrowTextView)).setText("");
@@ -166,44 +180,4 @@ public class ShowResult extends AppCompatActivity {
                 return trainPathPartList.size();
             }
         }
-
-    public  class myAdapter extends BaseAdapter {
-        private List<RailDailyTimetable> railDailyTimetableList;
-        private int view;
-
-        public myAdapter(List<RailDailyTimetable> railDailyTimetableList, int view) {
-            this.railDailyTimetableList = railDailyTimetableList;
-            this.view = view;
-        }
-
-        @Override
-        public int getCount() {
-            return railDailyTimetableList.size();
-        }
-
-        @Override
-        public RailDailyTimetable getItem(int position) {
-            return railDailyTimetableList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            convertView = getLayoutInflater().inflate(view, parent, false);
-            RailDailyTimetable railDailyTimetable = railDailyTimetableList.get(position);
-            ((TextView)convertView.findViewById(R.id.oriStationTextView)).setText(railDailyTimetable.DailyTrainInfo.StartingStationName.Zh_tw);
-            ((TextView)convertView.findViewById(R.id.destStationTextView)).setText(railDailyTimetable.DailyTrainInfo.EndingStationName.Zh_tw);
-            ((TextView)convertView.findViewById(R.id.oriTimeTextView)).setText(railDailyTimetable.getStopTimeOfStopTimes(originStation).DepartureTime);
-            ((TextView)convertView.findViewById(R.id.destTimeTextView)).setText(railDailyTimetable.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
-            ((TextView)convertView.findViewById(R.id.trainNoTextView)).setText(railDailyTimetable.DailyTrainInfo.TrainNo);
-            ((TextView)convertView.findViewById(R.id.tripLine)).setText(railDailyTimetable.getTripLineName());
-            ((TextView)convertView.findViewById(R.id.ODTime)).setText((new SimpleDateFormat("HH小時mm分").format(railDailyTimetable.getODTime(originStation, destinationStation))));
-            return convertView;
-        }
-    }
-
 }

@@ -70,26 +70,6 @@
         app:layout_constraintTop_toTopOf="@+id/destinationStationSpinner"
         app:layout_constraintVertical_bias="0.6" />
 
-    <CheckBox
-        android:id="@+id/priceFirstCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="價格優先"
-        app:layout_constraintBottom_toBottomOf="@+id/useTimeAsDesTimeCheckBox"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/useTimeAsDesTimeCheckBox" />
-
-    <CheckBox
-        android:id="@+id/useTimeAsDesTimeCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="使用到達時間"
-        app:layout_constraintStart_toEndOf="@+id/priceFirstCheckBox"
-        app:layout_constraintTop_toBottomOf="@+id/destinationStationSpinner" />
-
     <Button
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"
@@ -100,7 +80,7 @@
         android:text="查詢"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/useTimeAsDesTimeCheckBox" />
+        app:layout_constraintTop_toBottomOf="@+id/destinationStationSpinner" />
 
     <Button
         android:id="@+id/changeStationButton"

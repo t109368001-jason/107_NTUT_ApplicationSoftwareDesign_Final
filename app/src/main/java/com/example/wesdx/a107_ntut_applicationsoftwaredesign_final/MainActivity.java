@@ -12,25 +12,23 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -39,59 +37,42 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView dateTextView, timeTextView;
     private Spinner originStationSpinner, destinationStationSpinner;
-    private CheckBox priceFirstCheckBox;
-    private CheckBox useTimeAsDesTimeCheckBox;
-    private Button searchButton;
-    private Button changeStationButton;
 
     private String transportation;
     private RailStation originStation;
     private RailStation destinationStation;
     private List<RailStation> railStationList;
 
-    private int priceFirst = 0;
-    private int useTimeAsDesTime = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dateTextView = (TextView) findViewById(R.id.dateTextView);
-        timeTextView = (TextView) findViewById(R.id.timeTextView);
-        originStationSpinner = (Spinner)findViewById(R.id.originStationSpinner);
-        destinationStationSpinner = (Spinner)findViewById(R.id.destinationStationSpinner);
-        priceFirstCheckBox = (CheckBox) findViewById(R.id.priceFirstCheckBox);
-        useTimeAsDesTimeCheckBox = (CheckBox) findViewById(R.id.useTimeAsDesTimeCheckBox);
-        searchButton = (Button)findViewById(R.id.searchButton);
-        changeStationButton = (Button) findViewById(R.id.changeStationButton);
+        dateTextView = findViewById(R.id.dateTextView);
+        timeTextView = findViewById(R.id.timeTextView);
+        originStationSpinner = findViewById(R.id.originStationSpinner);
+        destinationStationSpinner = findViewById(R.id.destinationStationSpinner);
+        Button searchButton = findViewById(R.id.searchButton);
+        Button changeStationButton = findViewById(R.id.changeStationButton);
 
         Bundle bundle = getIntent().getExtras();
-        String railStationListGson = bundle.getString("railStationListGson");
-        transportation = bundle.getString("transportation");
+        String railStationListGson = null;
+        if (bundle != null) {
+            railStationListGson = bundle.getString("railStationListGson");
+            transportation = bundle.getString("transportation");
+        } else {
+            Toast.makeText(MainActivity.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         railStationList = (new Gson()).fromJson(railStationListGson, new TypeToken<List<RailStation>>() {}.getType());
 
-        dateTextView.setText((new SimpleDateFormat("yyyy-MM-dd")).format(Calendar.getInstance().getTime()));
-        timeTextView.setText((new SimpleDateFormat("HH:mm")).format(Calendar.getInstance().getTime()));
+        dateTextView.setText(API.dateFormat.format(Calendar.getInstance().getTime()));
+        timeTextView.setText(API.timeFormat.format(Calendar.getInstance().getTime()));
 
         myAdapter transAdapter = new myAdapter(railStationList, R.layout.rail_station_spinner_item);
         originStationSpinner.setAdapter(transAdapter);
         destinationStationSpinner.setAdapter(transAdapter);
-
-        priceFirstCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                priceFirst = (isChecked)? 1: 0;
-            }
-        });
-
-        useTimeAsDesTimeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                useTimeAsDesTime = (isChecked)? 1: 0;
-            }
-        });
 
         originStationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -125,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
+/*
+                        for(int i = 0; i < railStationList.size(); i++) {   //海瑞
+                            for(int j = i + 1; j < railStationList.size(); j++) {
+                                trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), "00:01", railStationList, railStationList.get(i), railStationList.get(j));
+                                Log.d("DEBUG", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                            }
+                        }
+*/
                         trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
                         return null;
                     }
@@ -183,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onDateSet(DatePicker view, int year, int month, int day) {
                         Calendar calendar1 = Calendar.getInstance();
                         calendar1.set(year, month, day, 0, 0);
-                        timeTextView.setText(new SimpleDateFormat("yyyy-MM-dd").format(calendar1.getTime()));
+                        dateTextView.setText(API.dateFormat.format(calendar1.getTime()));
                     }
                 }, year, month, day).show();
             }
@@ -200,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onTimeSet(TimePicker view, int hour, int minute) {
                         Calendar calendar1 = Calendar.getInstance();
                         calendar1.set(0, 0, 0, hour, minute);
-                        timeTextView.setText(new SimpleDateFormat("HH:mm").format(calendar1.getTime()));
+                        timeTextView.setText(API.timeFormat.format(calendar1.getTime()));
                     }
 
                 }, hour, minute, true).show();
@@ -254,10 +243,11 @@ public class MainActivity extends AppCompatActivity {
             return 0;
         }
 
+        @SuppressLint("ViewHolder")
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = getLayoutInflater().inflate(view, parent, false);
-            TextView name = (TextView) convertView.findViewById(R.id.name);
+            TextView name = convertView.findViewById(R.id.name);
             String stationName = ((data.get(position).ReservationCode == null)? "" : data.get(position).ReservationCode) + data.get(position).StationName.Zh_tw;
             name.setText(stationName);
             return convertView;

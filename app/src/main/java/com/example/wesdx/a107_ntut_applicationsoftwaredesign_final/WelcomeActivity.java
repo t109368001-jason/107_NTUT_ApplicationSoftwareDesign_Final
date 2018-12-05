@@ -18,13 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private ImageButton TRAButton, THSRButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-        TRAButton = findViewById(R.id.TRAButton);
-        THSRButton = findViewById(R.id.THSRButton);
+        ImageButton TRAButton = findViewById(R.id.TRAButton);
+        ImageButton THSRButton = findViewById(R.id.THSRButton);
 
         TRAButton.setOnClickListener(new View.OnClickListener() {
             @Override

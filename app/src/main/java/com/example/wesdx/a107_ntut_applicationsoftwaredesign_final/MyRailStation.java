@@ -1,12 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.app.LauncherActivity;
-import android.content.SharedPreferences;
-import android.icu.text.ListFormatter;
-import android.util.Log;
-
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.Line;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
@@ -14,30 +7,22 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.Statio
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
 public class MyRailStation {
-    public static List<StationOfLine> stationOfLineList;
 
     public static List<List<RailStation>> getRailStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
         List<List<RailStation>> out = null;
-        if(stationOfLineList == null) {
-            stationOfLineList = API.getStationOfLine(API.TRA);
-            if(stationOfLineList == null) return null;
-        }
 
-        StationOfLine.fixMissing15StationProblem(stationOfLineList);
+        final StationOfLine originStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, originStation.StationID);
+        final StationOfLine destinationStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, destinationStation.StationID);
 
-        StationOfLine originStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, originStation.StationID);
-        StationOfLine destinationStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, destinationStation.StationID);
-
-        StationOfLine E_EL = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.E_EL));
-        StationOfLine W_TL_N = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.W_TL_N));
-        StationOfLine W_TL_M = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.W_TL_M));
-        StationOfLine W_TL_C = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.W_TL_C));
-        StationOfLine W_TL_S = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.W_TL_S));
-        StationOfLine W_PL = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.W_PL));
-        StationOfLine S_SL = new StationOfLine(StationOfLine.getStationIndexOfStationsByLineNo(stationOfLineList, StationOfLine.S_SL));
+        final StationOfLine E_EL = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.E_EL);
+        final StationOfLine W_TL_N = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.W_TL_N);
+        final StationOfLine W_TL_M = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.W_TL_M);
+        final StationOfLine W_TL_C = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.W_TL_C);
+        final StationOfLine W_TL_S = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.W_TL_S);
+        final StationOfLine W_PL = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.W_PL);
+        final StationOfLine S_SL = StationOfLine.getStationIndexOfStationsByLineNo(Router.stationOfLineList, StationOfLine.S_SL);
 
         if(originStationOfLine.LineNo.equals(destinationStationOfLine.LineNo)) {
             boolean startAddToNewList = false;
@@ -103,8 +88,8 @@ public class MyRailStation {
                 return null;
             }
 
-            StationOfLine begStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, beginOfMainLine.StationID);
-            StationOfLine endStationOfLine = StationOfLine.getStationOfLine(stationOfLineList, endOfMainLine.StationID);
+            final StationOfLine begStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, beginOfMainLine.StationID);
+            final StationOfLine endStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, endOfMainLine.StationID);
 
             if(begStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||begStationOfLine.LineNo.equals(StationOfLine.W_TL_M)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_M)) {
                 List<RailStation> railStationList_C = new ArrayList<>();
@@ -112,14 +97,16 @@ public class MyRailStation {
 
                 StationOfLine currentStationOfLine_C = new StationOfLine(begStationOfLine);
                 StationOfLine currentStationOfLine_CC = new StationOfLine(begStationOfLine);
+
                 boolean C_finish = false;
                 boolean CC_finish = false;
                 boolean C_ori_pass = false;
                 boolean CC_ori_pass = false;
+
                 while(!(C_finish&&CC_finish)) {
                     if(!C_finish) {
-                        int begIndex_C = 0;
-                        int endIndex_C = 0;
+                        int begIndex_C;
+                        int endIndex_C;
                         switch (currentStationOfLine_C.LineNo) {
                             case StationOfLine.W_TL_N:
                                 Collections.reverse(currentStationOfLine_C.Stations);
@@ -157,7 +144,7 @@ public class MyRailStation {
 
                         for(int i = begIndex_C; i <= endIndex_C; i++) {
                             railStationList_C.add(RailStation.find(railStationList, currentStationOfLine_C.Stations.get(i).StationID));
-                            if((currentStationOfLine_C.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_C.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_C.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 C_finish = true;
                                 break;
                             }
@@ -166,7 +153,7 @@ public class MyRailStation {
                         switch (currentStationOfLine_C.LineNo) {
                             case StationOfLine.W_TL_C:
                             case StationOfLine.W_TL_M:
-                                currentStationOfLine_C = W_TL_N;
+                                currentStationOfLine_C = new StationOfLine(W_TL_N);
                                 break;
                             case StationOfLine.W_TL_N:
                                 currentStationOfLine_C = new StationOfLine(E_EL);
@@ -180,11 +167,6 @@ public class MyRailStation {
                             case StationOfLine.W_PL:
                                 currentStationOfLine_C = new StationOfLine(W_TL_S);
                                 break;
-                                /*
-                            case StationOfLine.W_TL_S:
-                                currentStationOfLine_C = new StationOfLine(S_SL);
-                                break;
-                                */
                             default:
                                 currentStationOfLine_C = new StationOfLine(endStationOfLine);
                                 break;
@@ -192,8 +174,8 @@ public class MyRailStation {
                     }
                     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if(!CC_finish) {
-                        int begIndex_CC = 0;
-                        int endIndex_CC = 0;
+                        int begIndex_CC;
+                        int endIndex_CC;
 
                         switch (currentStationOfLine_CC.LineNo) {
                             case StationOfLine.W_TL_N:
@@ -225,8 +207,7 @@ public class MyRailStation {
                         }
                         for(int i = begIndex_CC; i <= endIndex_CC; i++) {
                             railStationList_CC.add(RailStation.find(railStationList, currentStationOfLine_CC.Stations.get(i).StationID));
-                            //if(currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
-                                if((currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_CC.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 CC_finish = true;
                                 break;
                             }
@@ -259,16 +240,12 @@ public class MyRailStation {
                 out = new ArrayList<>();
                 List<RailStation> temp_C = new ArrayList<>(railStationList_front);
                 List<RailStation> temp_CC = new ArrayList<>(railStationList_front);
-                for(RailStation railStation:railStationList_C) {
-                    temp_C.add(railStation);
-                }
-                for(RailStation railStation:railStationList_CC) {
-                    temp_CC.add(railStation);
-                }
-                for(RailStation railStation:railStationList_tail) {
-                    temp_C.add(railStation);
-                    temp_CC.add(railStation);
-                }
+
+                temp_C.addAll(railStationList_C);
+                temp_CC.addAll(railStationList_CC);
+                temp_C.addAll(railStationList_tail);
+                temp_CC.addAll(railStationList_tail);
+
                 out.add(temp_C);
                 out.add(temp_CC);
             } else {
@@ -277,10 +254,10 @@ public class MyRailStation {
                 List<RailStation> railStationList_CC = new ArrayList<>();
                 List<RailStation> railStationList_CCC = new ArrayList<>();
 
-                StationOfLine currentStationOfLine_WC = new StationOfLine(begStationOfLine);
-                StationOfLine currentStationOfLine_WCC = new StationOfLine(begStationOfLine);
-                StationOfLine currentStationOfLine_CC = new StationOfLine(begStationOfLine);
-                StationOfLine currentStationOfLine_CCC = new StationOfLine(begStationOfLine);
+                StationOfLine currentStationOfLine_WC = begStationOfLine;
+                StationOfLine currentStationOfLine_WCC = begStationOfLine;
+                StationOfLine currentStationOfLine_CC = begStationOfLine;
+                StationOfLine currentStationOfLine_CCC = begStationOfLine;
                 boolean WC_finish = false;
                 boolean WCC_finish = false;
                 boolean CC_finish = false;
@@ -293,8 +270,8 @@ public class MyRailStation {
 
                 while(!(WC_finish&&WCC_finish&&CC_finish&&CCC_finish)) {
                     if(!WC_finish) {
-                        int begIndex_WC = 0;
-                        int endIndex_WC = 0;
+                        int begIndex_WC;
+                        int endIndex_WC;
                         switch (currentStationOfLine_WC.LineNo) {
                             case StationOfLine.W_TL_N:
                                 Collections.reverse(currentStationOfLine_WC.Stations);
@@ -332,8 +309,7 @@ public class MyRailStation {
 
                         for(int i = begIndex_WC; i <= endIndex_WC; i++) {
                             railStationList_WC.add(RailStation.find(railStationList, currentStationOfLine_WC.Stations.get(i).StationID));
-                            //if(currentStationOfLine_WC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
-                                if((currentStationOfLine_WC.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_WC.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_WC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 WC_finish = true;
                                 break;
                             }
@@ -363,8 +339,8 @@ public class MyRailStation {
                     }
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if(!CC_finish) {
-                        int begIndex_CC = 0;
-                        int endIndex_CC = 0;
+                        int begIndex_CC;
+                        int endIndex_CC;
                         switch (currentStationOfLine_CC.LineNo) {
                             case StationOfLine.W_TL_N:
                                 Collections.reverse(currentStationOfLine_CC.Stations);
@@ -402,8 +378,7 @@ public class MyRailStation {
 
                         for(int i = begIndex_CC; i <= endIndex_CC; i++) {
                             railStationList_CC.add(RailStation.find(railStationList, currentStationOfLine_CC.Stations.get(i).StationID));
-                            //if(currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
-                                if((currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_CC.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 CC_finish = true;
                                 break;
                             }
@@ -412,7 +387,7 @@ public class MyRailStation {
                         switch (currentStationOfLine_CC.LineNo) {
                             case StationOfLine.W_TL_C:
                             case StationOfLine.W_TL_M:
-                                currentStationOfLine_CC = W_TL_N;
+                                currentStationOfLine_CC = new StationOfLine(W_TL_N);
                                 break;
                             case StationOfLine.W_TL_N:
                                 currentStationOfLine_CC = new StationOfLine(E_EL);
@@ -433,8 +408,8 @@ public class MyRailStation {
                     }
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if(!WCC_finish) {
-                        int begIndex_WCC = 0;
-                        int endIndex_WCC = 0;
+                        int begIndex_WCC;
+                        int endIndex_WCC;
 
                         switch (currentStationOfLine_WCC.LineNo) {
                             case StationOfLine.W_TL_N:
@@ -466,8 +441,7 @@ public class MyRailStation {
                         }
                         for(int i = begIndex_WCC; i <= endIndex_WCC; i++) {
                             railStationList_WCC.add(RailStation.find(railStationList, currentStationOfLine_WCC.Stations.get(i).StationID));
-                            //if(currentStationOfLine_WCC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
-                            if((currentStationOfLine_WCC.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_WCC.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_WCC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 WCC_finish = true;
                                 break;
                             }
@@ -497,8 +471,8 @@ public class MyRailStation {
                     }
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if(!CCC_finish) {
-                        int begIndex_CCC = 0;
-                        int endIndex_CCC = 0;
+                        int begIndex_CCC;
+                        int endIndex_CCC;
 
                         switch (currentStationOfLine_CCC.LineNo) {
                             case StationOfLine.W_TL_N:
@@ -530,8 +504,7 @@ public class MyRailStation {
                         }
                         for(int i = begIndex_CCC; i <= endIndex_CCC; i++) {
                             railStationList_CCC.add(RailStation.find(railStationList, currentStationOfLine_CCC.Stations.get(i).StationID));
-                            //if(currentStationOfLine_CCC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
-                            if((currentStationOfLine_CCC.Stations.get(i).StationID.equals(endOfMainLine.StationID))||(currentStationOfLine_CCC.Stations.get(i).StationName.equals(endOfMainLine.StationName.Zh_tw))) {
+                            if(currentStationOfLine_CCC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
                                 CCC_finish = true;
                                 break;
                             }
@@ -566,24 +539,17 @@ public class MyRailStation {
                 List<RailStation> temp_WCC = new ArrayList<>(railStationList_front);
                 List<RailStation> temp_CC = new ArrayList<>(railStationList_front);
                 List<RailStation> temp_CCC = new ArrayList<>(railStationList_front);
-                for(RailStation railStation:railStationList_WC) {
-                    temp_WC.add(railStation);
-                }
-                for(RailStation railStation:railStationList_WCC) {
-                    temp_WCC.add(railStation);
-                }
-                for(RailStation railStation:railStationList_CC) {
-                    temp_CC.add(railStation);
-                }
-                for(RailStation railStation:railStationList_CCC) {
-                    temp_CCC.add(railStation);
-                }
-                for(RailStation railStation:railStationList_tail) {
-                    temp_WC.add(railStation);
-                    temp_WCC.add(railStation);
-                    temp_CC.add(railStation);
-                    temp_CCC.add(railStation);
-                }
+
+                temp_WC.addAll(railStationList_WC);
+                temp_WCC.addAll(railStationList_WCC);
+                temp_CC.addAll(railStationList_CC);
+                temp_CCC.addAll(railStationList_CCC);
+
+                temp_WC.addAll(railStationList_tail);
+                temp_WCC.addAll(railStationList_tail);
+                temp_CC.addAll(railStationList_tail);
+                temp_CCC.addAll(railStationList_tail);
+
                 out.add(temp_WC);
                 out.add(temp_WCC);
                 out.add(temp_CC);
@@ -599,24 +565,6 @@ public class MyRailStation {
                     i--;
                 }
             }
-        }
-
-
-        Log.d("trainPathList", "/////////////////////////////////////");
-        Log.d("trainPathList", "/////////////////////////////////////");
-        Log.d("trainPathList", "/////////////////////////////////////");
-        Log.d("trainPathList", "/////////////////////////////////////");
-        Log.d("trainPathList", "/////////////////////////////////////");
-        Log.d("trainPathList", "/////////////////////////////////////");
-        for(List<RailStation> railStationList_temp:out) {
-            String info = "/////////////////////////////////////////////\n";
-            for(RailStation railStation_temp:railStationList_temp) {
-                if(railStation_temp == null) continue;
-                info += railStation_temp.StationName.Zh_tw;
-                info += " → ";
-            }
-
-            Log.d("trainPathList", info);
         }
 
         return out;

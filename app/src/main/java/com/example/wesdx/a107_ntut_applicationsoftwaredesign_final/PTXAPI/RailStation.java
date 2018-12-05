@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -20,6 +22,16 @@ public class RailStation implements Comparable<RailStation> {
     public String UpdateTime;
     public String VersionID;
     public String OperatorID;//高鐵
+
+    public static void logD(List<RailStation> railStationList) {
+        StringBuffer sb = new StringBuffer();
+
+        for(RailStation railStation:railStationList) {
+            sb.append(railStation.StationName.Zh_tw);
+            sb.append("→");
+        }
+        Log.d("DEBUG", sb.toString());
+    }
 
     public static List<RailStation> getStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
         List<RailStation> railStationList_new = null;
@@ -120,15 +132,7 @@ public class RailStation implements Comparable<RailStation> {
 
     @Override
     public int compareTo(RailStation f) {
-        if (Integer.parseInt(ReservationCode) > Integer.parseInt(f.ReservationCode)) {
-            return 1;
-        }
-        else if (Integer.parseInt(ReservationCode) < Integer.parseInt(f.ReservationCode)) {
-            return -1;
-        }
-        else {
-            return 0;
-        }
+        return Integer.compare(Integer.parseInt(ReservationCode), Integer.parseInt(f.ReservationCode));
     }
 }
 

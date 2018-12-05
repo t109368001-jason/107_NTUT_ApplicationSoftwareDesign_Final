@@ -1,15 +1,17 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import android.annotation.SuppressLint;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
@@ -53,7 +55,12 @@ public class API {
     private final static String APPID = "6066d2cbc3324183bbaf01e2515df9df";
     private final static String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
-    private final static String getAPIResponse(String APIUrl) {
+    @SuppressLint("SimpleDateFormat")
+    public static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+    @SuppressLint("SimpleDateFormat")
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static String getAPIResponse(String APIUrl) {
         HttpURLConnection connection = null;
 
         String xdate = getServerTime();
@@ -85,7 +92,7 @@ public class API {
             InputStream inputStream = connection.getInputStream();
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             byte[] buff = new byte[1024];
-            int bytesRead = 0;
+            int bytesRead;
             while ((bytesRead = inputStream.read(buff)) != -1) {
                 bao.write(buff, 0, bytesRead);
             }
@@ -97,16 +104,13 @@ public class API {
             BufferedReader in = new BufferedReader(reader);
 
             //讀取回傳資料
-            String line, response = "";
+            String line;StringBuilder response = new StringBuilder();
             while ((line = in.readLine()) != null) {
-                response += (line + "\n");
+                response.append(line).append("\n");
             }
-            return response;
+            return response.toString();
 
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-        catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return "";
@@ -182,7 +186,7 @@ public class API {
     //DailyTrainInfo/TrainDate/{TrainDate}
     //DailyTrainInfo/TrainNo/{TrainNo}/TrainDate{TrainDate}
 
-    public static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
+    private static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) {
         APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }

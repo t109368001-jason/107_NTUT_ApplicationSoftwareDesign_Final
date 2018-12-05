@@ -7,86 +7,88 @@
 
     <TextView
         android:id="@+id/originStationNameTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="起站"
-        app:layout_constraintEnd_toEndOf="@+id/originDepartureTimeTextView"
-        app:layout_constraintStart_toStartOf="@+id/originDepartureTimeTextView"
+        android:gravity="center"
+        android:text="起站起站"
+        app:layout_constraintStart_toEndOf="@+id/leftArrowTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/destinationStationNameTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="訖站"
-        app:layout_constraintEnd_toEndOf="@+id/destinationArrivalTimeTextView"
-        app:layout_constraintStart_toStartOf="@+id/destinationArrivalTimeTextView"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:gravity="center"
+        android:text="訖站訖站"
+        app:layout_constraintBottom_toBottomOf="@+id/originStationNameTextView"
+        app:layout_constraintStart_toEndOf="@+id/textView11"
+        app:layout_constraintTop_toTopOf="@+id/originStationNameTextView" />
 
     <TextView
         android:id="@+id/textView4"
-        android:layout_width="18dp"
-        android:layout_height="23dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text=" → "
         app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
-        app:layout_constraintStart_toEndOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintStart_toEndOf="@+id/originStationNameTextView"
         app:layout_constraintTop_toTopOf="@+id/originStationNameTextView"
-        app:layout_constraintVertical_bias="0.285" />
+        app:layout_constraintVertical_bias="0.539" />
 
     <TextView
         android:id="@+id/textView11"
-        android:layout_width="18dp"
-        android:layout_height="23dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text=" → "
-        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
         app:layout_constraintStart_toEndOf="@+id/trainIconImageView"
-        app:layout_constraintTop_toTopOf="@+id/textView4"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="@+id/originStationNameTextView" />
 
     <TextView
         android:id="@+id/originDepartureTimeTextView"
-        android:layout_width="42dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="99:99"
-        app:layout_constraintStart_toEndOf="@+id/leftArrowTextView"
+        app:layout_constraintEnd_toEndOf="@+id/originStationNameTextView"
+        app:layout_constraintStart_toStartOf="@+id/originStationNameTextView"
         app:layout_constraintTop_toBottomOf="@+id/originStationNameTextView" />
 
     <TextView
         android:id="@+id/destinationArrivalTimeTextView"
-        android:layout_width="42dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="99:99"
-        app:layout_constraintStart_toEndOf="@+id/textView11"
-        app:layout_constraintTop_toBottomOf="@+id/destinationStationNameTextView" />
+        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintEnd_toEndOf="@+id/destinationStationNameTextView"
+        app:layout_constraintStart_toStartOf="@+id/destinationStationNameTextView"
+        app:layout_constraintTop_toTopOf="@+id/originDepartureTimeTextView" />
 
     <ImageView
         android:id="@+id/trainIconImageView"
         android:layout_width="40dp"
         android:layout_height="24dp"
-        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/trainNoTextView"
         app:layout_constraintStart_toEndOf="@+id/textView4"
-        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/tra" />
 
     <TextView
         android:id="@+id/trainNoTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:text="9999"
+        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
         app:layout_constraintEnd_toEndOf="@+id/trainIconImageView"
         app:layout_constraintStart_toStartOf="@+id/trainIconImageView"
-        app:layout_constraintTop_toBottomOf="@+id/originStationNameTextView" />
+        app:layout_constraintTop_toTopOf="@+id/originDepartureTimeTextView" />
 
     <TextView
         android:id="@+id/leftArrowTextView"

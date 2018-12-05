@@ -10,10 +10,10 @@ public class StationOfLine {
    public String UpdateTime;
 
    public StationOfLine(StationOfLine obj) {
-        LineNo = new String(obj.LineNo);
-        LineID = new String(obj.LineID);
+        LineNo = obj.LineNo;
+        LineID = obj.LineID;
         Stations = new ArrayList<>(obj.Stations);
-        UpdateTime = new String(obj.UpdateTime);
+        UpdateTime = obj.UpdateTime;
    }
 
    public final static String E_EL = "E-EL";    //東部幹線  八堵-臺東
@@ -53,12 +53,13 @@ public class StationOfLine {
    }
 
    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) {
-       StationOfLine B_NW = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
+       StationOfLine B_NW_StationOfLine = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
+       if(B_NW_StationOfLine == null) throw new NullPointerException();
 
       for(int i = 0; i < stationOfLineList.size(); i++) {
          if(stationOfLineList.get(i).LineNo.equals(StationOfLine.B_LJ)) {
             for(int j = 0; j < 3; j++) {
-               stationOfLineList.get(i).Stations.add(j, B_NW.Stations.get(j));
+               stationOfLineList.get(i).Stations.add(j, B_NW_StationOfLine.Stations.get(j));
             }
          }
           if(stationOfLineList.get(i).LineNo.equals(StationOfLine.E_EL)) {
@@ -227,21 +228,6 @@ public class StationOfLine {
       return getStationOfLineList(stationOfLineList, railStation.StationID);
    }
 
-   public static StationOfLine getMainLine(List<StationOfLine> stationOfLineList) {
-      for(StationOfLine stationOfLine:stationOfLineList) {
-         switch (stationOfLine.LineNo) {
-            case E_EL:
-            case W_TL_N:
-            case W_TL_M:
-            case W_TL_C:
-            case W_TL_S:
-            case W_PL:
-            case S_SL:
-               return stationOfLine;
-         }
-      }
-      return null;
-   }
 }
 
 
