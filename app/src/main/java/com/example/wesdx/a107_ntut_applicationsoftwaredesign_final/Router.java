@@ -3,8 +3,10 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 import android.util.Log;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 
 import java.text.ParseException;
@@ -27,7 +29,25 @@ public class Router {
             try {
                 Date takeTime = simpleDateFormat_HHmm.parse(takeTimeString);
                 List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
+
                 List<RailDailyTimetable> railDailyTimetableList_all = API.getDailyTimetable(transportation, API.TRAIN_DATE, date);
+
+                for(int i = 0; i < railStationList_List.size(); i++) {
+                    for(int j = i+1; j < railStationList_List.size(); j++) {
+                        boolean same = true;
+                        if(railStationList_List.get(i).size() == railStationList_List.get(j).size()) {
+                            for(int k = 0; k < railStationList_List.get(i).size(); k++) {
+                                if(!railStationList_List.get(i).get(k).StationID.equals(railStationList_List.get(j).get(k).StationID)) {
+                                    same = false;
+                                    break;
+                                }
+                            }
+                            if(same) {
+                                railStationList_List.remove(j);
+                            }
+                        }
+                    }
+                }
 
                 for(List<RailStation> railStationList_current:railStationList_List) {
                     List<RailDailyTimetable> railDailyTimetableList = RailDailyTimetable.filterByPath(railDailyTimetableList_all, railStationList_current, true, 2);
@@ -267,6 +287,39 @@ public class Router {
             trainPathList.remove(i);
             i--;
         }
+
+        List<RailStation> railStationList_temp = null;
+        List<RailStation> railStationList_temp2 = null;
+        for(StationOfLine stationOfLine:MyRailStation.stationOfLineList) {
+            for(LineStation lineStation:stationOfLine.Stations) {
+                if(RailStation.find(railStationList, lineStation.StationID) != null) {
+                    if(railStationList_temp == null) railStationList_temp = new ArrayList<>();
+                    railStationList_temp.add(RailStation.find(railStationList, lineStation.StationID));
+                }
+            }
+        }
+        for(int i = 0; i < railStationList_temp.size(); i++) {
+            for(int j = i + 1; j < railStationList_temp.size(); j++) {
+                if(railStationList_temp.get(i).StationID.equals(railStationList_temp.get(j).StationID)) {
+                    railStationList_temp.remove(j);
+                    j--;
+                }
+            }
+        }
+        for(RailStation railStation_temp1:railStationList) {
+            boolean find = false;
+            for(RailStation railStation_tmep2:railStationList_temp) {
+                if(railStation_temp1.StationID.equals(railStation_tmep2.StationID)) {
+                    find = true;
+                    break;
+                }
+            }
+            if(!find) {
+                if(railStationList_temp2 == null) railStationList_temp2 = new ArrayList<>();
+                railStationList_temp2.add(railStation_temp1);
+            }
+        }
+
 
         return trainPathList;
     }
