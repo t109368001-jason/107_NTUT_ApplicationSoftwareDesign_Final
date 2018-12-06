@@ -139,7 +139,7 @@ public class Router {
 
                 if(( (originStation_TRA.OperatorID.equals("THSR")) && ((destinationStation_TRA.OperatorID.equals("THSR")) || (destinationStation_THSR != null ))) ||
                         ((originStation_THSR != null ) && ((destinationStation_THSR != null) || (destinationStation_TRA.OperatorID.equals("THSR"))) )) {//如果起站跟終站都是高鐵的話不轉乘
-                    return getTranserPath(API.THSR, date, takeTimeString, railStationList_THSR_ALL, originStation_THSR, destinationStation_THSR, true);
+                    trainPathList = getTranserPath(API.THSR, date, takeTimeString, railStationList_THSR_ALL, originStation_THSR, destinationStation_THSR, true);
                 } else if((originStation_TRA.OperatorID.equals("THSR"))||(originStation_THSR != null)){//如果起站是高鐵終站是臺鐵的話一段轉乘
                     if(originStation_THSR != null){//如果起站是高鐵而且同時有臺鐵的話
                         List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation_TRA, destinationStation_TRA);//台鐵的起站到終站的所有班次裡的所有站
@@ -149,6 +149,12 @@ public class Router {
                             List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
                             List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);//在該路徑下含有台鐵的高鐵最遠可以走的班次表
 
+                            for(int i = 0; i<railDailyTimetableList_THSR.size(); i++){
+                                if((railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR) == null)||(railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR).getDepartureTimeDate().before(originDepartureTime))){
+                                    railDailyTimetableList_THSR.remove(i);
+                                    i--;
+                                }
+                            }
 
                             for(RailDailyTimetable railDailyTimetableList_THSR_temp:railDailyTimetableList_THSR){
                                 StopTime THSR_LastStopTime = railDailyTimetableList_THSR_temp.findLastStopTime(railStationList_THSR);
@@ -165,7 +171,16 @@ public class Router {
                                 for(TrainPath TRA_trainPath_temp:TRA_trainPath){
                                     if(best == null) best = TRA_trainPath_temp;
                                     else {
-                                        if(API.timeFormat.parse(TRA_trainPath_temp.getDestinationArrivalTime()).before(API.timeFormat.parse(best.getDestinationArrivalTime()))){
+                                        Date tempTime = API.timeFormat.parse(TRA_trainPath_temp.getDestinationArrivalTime());
+                                        Date bestTime = best.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(best.getLastItem().destinationStation).getDepartureTimeDate();
+
+                                        if (TRA_trainPath_temp.getLastItem().railDailyTimetable.afterOverNightStation(TRA_trainPath_temp.getLastItem().destinationStation.StationID)) {
+                                            tempTime.setDate(tempTime.getDate() + 1);
+                                        }
+                                        if (best.getLastItem().railDailyTimetable.afterOverNightStation(best.getLastItem().destinationStation.StationID)) {
+                                            bestTime.setDate(bestTime.getDate() + 1);
+                                        }
+                                        if(tempTime.before(bestTime)){
                                             best = TRA_trainPath_temp;
                                         }
                                     }
@@ -302,7 +317,7 @@ public class Router {
                     }
                 }
             } else if(transportation.equals(API.THSR)) {
-                return getTranserPath(transportation, date, takeTimeString, railStationList, originStation, destinationStation, true);
+                trainPathList =  getTranserPath(transportation, date, takeTimeString, railStationList, originStation, destinationStation, true);
             }
         }
 
