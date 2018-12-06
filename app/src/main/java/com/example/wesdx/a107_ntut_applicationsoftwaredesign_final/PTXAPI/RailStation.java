@@ -23,15 +23,32 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
+    public static List<RailStation> filterTHSR(List<RailStation> railStationList, List<RailStation> mix) {
+        List<RailStation> railStationList_new = null;
+        for(RailStation railStation:railStationList) {
+            if(transferStation(mix, railStation) != null) {
+                if(railStationList_new == null) railStationList_new = new ArrayList<>();
+                railStationList_new.add(transferStation(mix, railStation));
+            }
+        }
+        return  railStationList_new;
+    }
+
     public static  RailStation transferStation(List<RailStation> railStationList, RailStation railStation) {
         String name = railStation.StationName.Zh_tw;
 
         switch (name) {
+            case "南港":
+                name = "南港";
+                break;
             case "臺北":
                 name = "台北";
                 break;
             case "台北":
                 name = "臺北";
+                break;
+            case "板橋":
+                name = "板橋";
                 break;
             case "新竹":
                 name = "六家";

@@ -30,10 +30,57 @@ public class Router {
             StationOfLine.fixMissing15StationProblem(stationOfLineList);
             if(stationOfLineList == null) return null;
         }
+        try {
+            Date takeTime = API.timeFormat.parse(takeTimeString);
+            if (transportation.equals(API.TRA_AND_THSR)) {
+                List<RailStation> railStationList_THSR_ALL = API.getStation(API.THSR);//匯入高鐵所有站
 
-        if(transportation.equals(API.TRA)) {
-            try {
-                Date takeTime = API.timeFormat.parse(takeTimeString);
+                List<RailDailyTimetable> railDailyTimetableList_TRA_ALL = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);//當天台鐵的所有班次
+                List<RailDailyTimetable> railDailyTimetableList_THSR_ALL = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, date);//當天高鐵的所有班次
+
+                RailStation originStation_THSR = ((originStation.OperatorID.equals("TAR")))?RailStation.transferStation(railStationList, originStation):null;//把輸入車站一律轉換成高鐵，若無法轉換則為null
+                RailStation destinationStation_THSR = (destinationStation.OperatorID.equals("TAR"))?RailStation.transferStation(railStationList, destinationStation):null;
+
+                if(( (originStation.OperatorID.equals("THSR")) && ((destinationStation.OperatorID.equals("THSR")) || (destinationStation_THSR!=(null)))) ||
+                        ((originStation_THSR!=(null)) && ((destinationStation_THSR!=(null)) || (destinationStation.OperatorID.equals("THSR"))) )) {//如果起站跟終站都是高鐵的話不轉乘
+
+
+                } else if((originStation.OperatorID.equals("THSR"))||(originStation_THSR != null)){//如果起站是高鐵終站是臺鐵的話一段轉乘
+                    if(originStation_THSR != null){//如果起站是高鐵而且同時有臺鐵的話
+                        List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);//台鐵的起站到終站的所有班次裡的所有站
+
+                        for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天班次裡會經過2站以上的班次篩選出來
+                            List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
+                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+                            List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);
+                        }
+                    } else {//如果起站是高鐵但沒有臺鐵的話
+
+                    }
+                } else if(destinationStation.OperatorID.equals("THSR")||(destinationStation_THSR!=(null))){//如果起站是臺鐵終站是高鐵的話一段轉乘
+                    if(destinationStation_THSR!=(null)){//如果終站是高鐵而且同時有臺鐵的話
+                        List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);//台鐵的起站到終站的所有班次裡的所有站
+
+                        for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天班次裡會經過2站以上的班次篩選出來
+                            List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
+                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+                            List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);
+                        }
+                    } else {//如果終站是高鐵但沒有臺鐵的話
+
+                    }
+                } else {//如果起站跟終站都是臺鐵的話二段轉乘
+                    //遞迴賢杰功能
+                    List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);//台鐵的起站到終站的所有班次裡的所有站
+
+                    for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天班次裡會經過2站以上的班次篩選出來
+                        List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
+                        List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+                        List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);
+                    }
+                }
+            } else if(transportation.equals(API.TRA)) {
+
                 List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation);
 
                 List<RailDailyTimetable> railDailyTimetableList_all;
@@ -231,10 +278,6 @@ public class Router {
                         trainPathList.add(trainPath);
                     }
                 }
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return null;
-            }
 
         } else if(transportation.equals(API.THSR)) {
             List<RailDailyTimetable> railDailyTimetableList;
@@ -250,8 +293,6 @@ public class Router {
                 THSRRailDailyTimetableListCacheDate = date;
                 THSRRailDailyTimetableListCache = railDailyTimetableList;
             }
-
-
             railDailyTimetableList = RailDailyTimetable.filterByOD(railDailyTimetableList, originStation, destinationStation, true);
 
             for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
@@ -264,6 +305,10 @@ public class Router {
                 trainPath.trainPathPartList.add(trainPathPart);
                 trainPathList.add(trainPath);
             }
+        }
+} catch (ParseException e) {
+        e.printStackTrace();
+        return null;
         }
 
         trainPathList = TrainPath.filter(trainPathList);
