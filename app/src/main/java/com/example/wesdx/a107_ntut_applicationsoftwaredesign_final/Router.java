@@ -90,7 +90,7 @@ public class Router {
         Date originDepartureTime = API.timeFormat.parse(takeTimeString);
 
         if(isDirectArrival) {
-            return getDirectArrivalTrainPath(transportation, date, originDepartureTime, null, originStation, destinationStation, isDirectArrival);
+            trainPathList = getDirectArrivalTrainPath(transportation, date, originDepartureTime, null, originStation, destinationStation, isDirectArrival);
         } else {
             if (transportation.equals(API.TRA_AND_THSR)) {
                 List<RailStation> railStationList_THSR_ALL = API.getStation(API.THSR);//匯入高鐵所有站
@@ -171,7 +171,7 @@ public class Router {
                                 for(TrainPath TRA_trainPath_temp:TRA_trainPath){
                                     if(best == null) best = TRA_trainPath_temp;
                                     else {
-                                        Date tempTime = API.timeFormat.parse(TRA_trainPath_temp.getDestinationArrivalTime());
+                                        Date tempTime = TRA_trainPath_temp.getDestinationArrivalTimeDate();
                                         Date bestTime = best.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(best.getLastItem().destinationStation).getDepartureTimeDate();
 
                                         if (TRA_trainPath_temp.getLastItem().railDailyTimetable.afterOverNightStation(TRA_trainPath_temp.getLastItem().destinationStation.StationID)) {
@@ -245,10 +245,8 @@ public class Router {
                     for (RailDailyTimetable railDailyTimetable_mid : railDailyTimetableList) {
                         TrainPath trainPath = new TrainPath();
                         trainPath.trainPathPartList = new ArrayList<>();
-                        RailDailyTimetable railDailyTimetable_first = null;
                         TrainPath trainPath_first = null;
                         TrainPath trainPath_last = null;
-                        RailDailyTimetable railDailyTimetable_last = null;
 
                         Date firstTime, lastTime;
                         StopTime firstStopTime, lastStopTime;

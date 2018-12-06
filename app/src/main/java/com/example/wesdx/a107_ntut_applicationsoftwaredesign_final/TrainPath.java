@@ -29,6 +29,14 @@ public class TrainPath {
             this.railDailyTimetable = railDailyTimetable;
         }
 
+        public Date getOriginDepartureTimeDate() throws ParseException {
+            return railDailyTimetable.getDepartureTimeDateByStationID(originStation.StationID);
+        }
+
+        public Date getDestinationArrivalTimeDate() throws ParseException {
+            return railDailyTimetable.getArrivalTimeDateByStationID(destinationStation.StationID);
+        }
+
         public StopTime getOriginStopTime() {
             return this.railDailyTimetable.getStopTimeOfStopTimes(this.originStation);
         }
@@ -54,18 +62,18 @@ public class TrainPath {
     }
 
     public Date getOriginDepartureTimeDate() throws ParseException {
-        return this.trainPathPartList.get(0).getOriginStopTime().getDepartureTimeDate();
+        return this.trainPathPartList.get(0).getOriginDepartureTimeDate();
     }
 
     public Date getDestinationArrivalTimeDate() throws ParseException {
-        return this.getLastItem().geDestinationStopTime().getArrivalTimeDate();
+        return this.getLastItem().getDestinationArrivalTimeDate();
     }
 
-    public String getOrigeinDepartureTime() {
+    private String getOrigeinDepartureTime() {
         return this.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(this.trainPathPartList.get(0).originStation).DepartureTime;
     }
 
-    public String getDestinationArrivalTime() {
+    private String getDestinationArrivalTime() {
         return this.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(this.getLastItem().destinationStation).ArrivalTime;
     }
 

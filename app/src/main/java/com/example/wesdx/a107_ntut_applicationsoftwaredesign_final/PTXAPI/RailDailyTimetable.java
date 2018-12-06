@@ -19,6 +19,24 @@ public class RailDailyTimetable {
     public String  UpdateTime;
     public String  VersionID;
 
+    public Date getDepartureTimeDateByStationID(String stationID) throws ParseException {
+        Date time = this.getStopTimeOfStopTimes(stationID).getDepartureTimeDate();
+
+        if(this.afterOverNightStation(stationID)) {
+            time.setDate(time.getDate() + 1);
+        }
+        return time;
+    }
+
+    public Date getArrivalTimeDateByStationID(String stationID) throws ParseException {
+        Date time = this.getStopTimeOfStopTimes(stationID).getArrivalTimeDate();
+
+        if(this.afterOverNightStation(stationID)) {
+            time.setDate(time.getDate() + 1);
+        }
+        return time;
+    }
+
     public static List<RailDailyTimetable> filterByOD(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, Date originDepartureTime, Date destinationArrivalTime, boolean isDirectional) throws ParseException {
         List<RailDailyTimetable> railDailyTimetableList_new = null;
 
