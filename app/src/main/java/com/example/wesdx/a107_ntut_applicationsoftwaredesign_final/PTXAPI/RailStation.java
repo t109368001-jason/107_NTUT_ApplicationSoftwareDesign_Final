@@ -23,6 +23,28 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
+    public static List<List<RailStation>> removeRepeatedRailStationList(final List<List<RailStation>> railStationList_List) {
+        List<List<RailStation>> railStationList_List_new = new ArrayList<>(railStationList_List);
+        for (int i = 0; i < railStationList_List_new.size(); i++) {
+            for (int j = i + 1; j < railStationList_List_new.size(); j++) {
+                boolean same = true;
+                if (railStationList_List_new.get(i).size() == railStationList_List_new.get(j).size()) {
+                    for (int k = 0; k < railStationList_List_new.get(i).size(); k++) {
+                        if (!railStationList_List_new.get(i).get(k).StationID.equals(railStationList_List_new.get(j).get(k).StationID)) {
+                            same = false;
+                            break;
+                        }
+                    }
+                    if (same) {
+                        railStationList_List_new.remove(j);
+                    }
+                }
+            }
+        }
+        if(railStationList_List_new.size() == 0) return null;
+        return railStationList_List_new;
+    }
+
     public static List<RailStation> filterTHSR(List<RailStation> railStationList, List<RailStation> mix) {
         List<RailStation> railStationList_new = null;
         for(RailStation railStation:railStationList) {

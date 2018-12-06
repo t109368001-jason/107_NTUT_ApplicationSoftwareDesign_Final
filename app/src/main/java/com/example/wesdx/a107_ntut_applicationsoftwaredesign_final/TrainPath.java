@@ -15,9 +15,34 @@ public class TrainPath {
         RailStation originStation;
         RailStation destinationStation;
         RailDailyTimetable railDailyTimetable;
+
+        public TrainPathPart() {
+            this.originStation = null;
+            this.destinationStation = null;
+            this.railDailyTimetable = null;
+        }
+
+        public TrainPathPart(RailStation originStation, RailStation destinationStation, RailDailyTimetable railDailyTimetable) {
+            this.originStation = originStation;
+            this.destinationStation = destinationStation;
+            this.railDailyTimetable = railDailyTimetable;
+        }
     }
 
     List<TrainPathPart> trainPathPartList;
+
+    public TrainPath() {
+        this.trainPathPartList = null;
+    }
+
+    public TrainPath(List<TrainPathPart> trainPathPartList) {
+        this.trainPathPartList = trainPathPartList;
+    }
+
+    public TrainPath(TrainPathPart trainPathPart) {
+        this.trainPathPartList = new ArrayList<>();
+        this.trainPathPartList.add(trainPathPart);
+    }
 
     public String getOrigeinDepartureTime() {
         return this.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(this.trainPathPartList.get(0).originStation).DepartureTime;

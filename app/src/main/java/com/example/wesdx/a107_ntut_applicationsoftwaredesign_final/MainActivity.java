@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,6 +30,7 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailSt
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private RailStation destinationStation;
     private List<RailStation> railStationList;
 
+    private boolean isDirectArrival;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,15 +58,20 @@ public class MainActivity extends AppCompatActivity {
         destinationStationSpinner = findViewById(R.id.destinationStationSpinner);
         Button searchButton = findViewById(R.id.searchButton);
         Button changeStationButton = findViewById(R.id.changeStationButton);
+        final CheckBox isDirectArrivalCheckBox = findViewById(R.id.directArrivalCheckBox);
 
         Bundle bundle = getIntent().getExtras();
         String railStationListGson = null;
         if (bundle != null) {
             railStationListGson = bundle.getString("railStationListGson");
             transportation = bundle.getString("transportation");
-        } else {
+        }
+        if((bundle == null)||(railStationListGson == null)||(transportation == null)) {
             Toast.makeText(MainActivity.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
             finish();
+        }
+        if(!transportation.equals(API.TRA)) {
+            isDirectArrivalCheckBox.setVisibility(View.INVISIBLE);
         }
 
         railStationList = (new Gson()).fromJson(railStationListGson, new TypeToken<List<RailStation>>() {}.getType());
@@ -106,15 +115,23 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
+                        try {
 /*
-                        for(int i = 0; i < railStationList.size(); i++) {   //海瑞
-                            for(int j = i + 1; j < railStationList.size(); j++) {
-                                trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), "00:01", railStationList, railStationList.get(i), railStationList.get(j));
-                                Log.d("DEBUG", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                            for(int i = 0; i < railStationList.size(); i++) {   //海瑞-鎮安
+                                for(int j = i + 1; j < railStationList.size(); j++) {
+                                    trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                                    if((trainPathList != null ? trainPathList.size() : 0) == 0) {
+                                        Log.d("DEBUG1", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                                    } else {
+                                        Log.d("DEBUG2", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                                    }
+                                }
                             }
-                        }
 */
-                        trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
+                            trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                        } catch (Router.RouterException | ParseException e) {
+                            e.printStackTrace();
+                        }
                         return null;
                     }
 
