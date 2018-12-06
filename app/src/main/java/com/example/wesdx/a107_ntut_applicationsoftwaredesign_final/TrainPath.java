@@ -1,5 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 
@@ -37,10 +38,9 @@ public class TrainPath {
             for(TrainPath trainPath_temp1:trainPathList) {
                 boolean addToList = true;
                 for(int i = 0; i < trainPathList_new.size(); i++) {
-                    boolean remove = false;
                     if(trainPath_temp1.getLastItem().railDailyTimetable.DailyTrainInfo.TrainNo.equals(trainPathList_new.get(i).getLastItem().railDailyTimetable.DailyTrainInfo.TrainNo)) {
-                        Date time1 = new SimpleDateFormat("HH:mm").parse(trainPath_temp1.getOrigeinDepartureTime());
-                        Date time2 = new SimpleDateFormat("HH:mm").parse(trainPathList_new.get(i).getOrigeinDepartureTime());
+                        Date time1 = API.timeFormat.parse(trainPath_temp1.getOrigeinDepartureTime());
+                        Date time2 = API.timeFormat.parse(trainPathList_new.get(i).getOrigeinDepartureTime());
 
                         if(time1.before(time2)) {
                             if(trainPath_temp1.trainPathPartList.size() > 1) {

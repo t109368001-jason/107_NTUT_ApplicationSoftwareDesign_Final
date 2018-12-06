@@ -5,7 +5,6 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  *
  */
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,22 +19,46 @@ public class RailDailyTimetable {
   public String  UpdateTime;
   public String  VersionID;
 
+  public static List<RailDailyTimetable> filterByOD(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, boolean isDirectional) {
+    List<RailDailyTimetable> railDailyTimetableList_new = null;
+
+    for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+      boolean findBeg = false;
+      boolean findEnd = false;
+      for(int i = 0; i < railDailyTimetable.StopTimes.size(); i++) {
+        if(railDailyTimetable.StopTimes.get(i).StationID.equals(destinationStation.StationID)) {
+          if((!findBeg)&&isDirectional) {
+            break;
+          }
+          findEnd = true;
+        }
+        if(railDailyTimetable.StopTimes.get(i).StationID.equals(originStation.StationID)) {
+          findBeg = true;
+        }
+        if(findBeg&&findEnd) {
+          if(railDailyTimetableList_new == null) railDailyTimetableList_new = new ArrayList<>();
+          railDailyTimetableList_new.add(railDailyTimetable);
+          break;
+        }
+      }
+    }
+    return railDailyTimetableList_new;
+  }
+
   public static List<RailDailyTimetable> filterByPath(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes) {
     List<RailDailyTimetable> railDailyTimetableList_new = null;
     for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
-      int stopTimeStartIndex = 0;
       int railStationStartIndex = 0;
       boolean findStart = false;
       int totalStopTimes = 0;
       boolean next = false;
-      for(int i = stopTimeStartIndex; i < railDailyTimetable.StopTimes.size(); i++) {
+      for(int i = 0; i < railDailyTimetable.StopTimes.size(); i++) {
         for(int j = railStationStartIndex; j < railStationList.size(); j++) {
           if(railDailyTimetable.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
             totalStopTimes += 1;
             if(!findStart) {
               findStart = true;
               if(isDirectional) {
-                stopTimeStartIndex = i + 1;
                 railStationStartIndex = j + 1;
               }
             }
@@ -53,13 +76,13 @@ public class RailDailyTimetable {
     return railDailyTimetableList_new;
   }
 
-  public boolean beforeOverNightStation(String stationID) {
-    if(DailyTrainInfo.OverNightStationID == null) return true;
+  public boolean afterOverNightStation(String stationID) {
+    if(DailyTrainInfo.OverNightStationID == null) return false;
     for(StopTime stopTime:StopTimes) {
-      if(stopTime.StationID.equals(stationID)) return true;
-      if(stopTime.StationID.equals(DailyTrainInfo.OverNightStationID)) return false;
+      if(stopTime.StationID.equals(stationID)) return false;
+      if(stopTime.StationID.equals(DailyTrainInfo.OverNightStationID)) return true;
     }
-    return true;
+    return false;
   }
 
   public StopTime findStopTime(List<RailStation> railStationList) {
@@ -86,7 +109,6 @@ public class RailDailyTimetable {
 
   public StopTime getStopTimeOfStopTimes(RailStation railStation) {
     for(int i = 0; i < this.StopTimes.size(); i++) {
-      String s = StopTimes.get(i).StationID;
       if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
         return StopTimes.get(i);
       }
@@ -96,7 +118,6 @@ public class RailDailyTimetable {
 
   public StopTime getStopTimeOfStopTimes(String StationID) {
     for(int i = 0; i < this.StopTimes.size(); i++) {
-      String s = StopTimes.get(i).StationID;
       if(StopTimes.get(i).StationID.equals(StationID)) {
         return StopTimes.get(i);
       }
@@ -119,8 +140,8 @@ public class RailDailyTimetable {
 
   public Date getODTime(RailStation originStation, RailStation destinationStation) {
     try {
-      Date originTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(originStation).DepartureTime);
-      Date destinationTime = (new SimpleDateFormat("HH:mm")).parse(this.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+      Date originTime = API.timeFormat.parse(this.getStopTimeOfStopTimes(originStation).DepartureTime);
+      Date destinationTime = API.timeFormat.parse(this.getStopTimeOfStopTimes(destinationStation).ArrivalTime);
       Date total = new Date(destinationTime.getTime() - originTime.getTime());
       total.setHours(total.getHours() - TimeZone.getDefault().getRawOffset()/1000/60/60);
       return total;
@@ -128,25 +149,6 @@ public class RailDailyTimetable {
       e.printStackTrace();
     }
     return null;
-  }
-
-  public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, int num) {
-    List<RailDailyTimetable> railDailyTimetableList_new = new ArrayList<>();
-    for(int i = 0; i < railDailyTimetableList.size(); i++) {
-      int stopTimes = 0;
-      for(int j = 0; j < railDailyTimetableList.get(i).StopTimes.size(); j++) {
-        for(int k = 0; k < railStationList.size(); k++) {
-          if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(railStationList.get(k).StationID)) {
-            stopTimes++;
-          }
-        }
-        if(stopTimes >= num) {
-          railDailyTimetableList_new.add(railDailyTimetableList.get(i));
-          break;
-        }
-      }
-    }
-    return railDailyTimetableList_new;
   }
 
   public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation) {
@@ -158,7 +160,6 @@ public class RailDailyTimetable {
         if(!originFind) {
           if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(originStation.StationID)) {
             originFind = true;
-            //j = 0;
           }
         } else {
           if(railDailyTimetableList.get(i).StopTimes.get(j).StationID.equals(destinationStation.StationID)) {
@@ -174,20 +175,20 @@ public class RailDailyTimetable {
 
   public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
     List<RailDailyTimetable> railDailyTimetableList1_new = new ArrayList<>();
-    Date start = new Date(0);
-    Date endAdd = new Date(0);
-    Date end = new Date(0);
+    Date start;
+    Date endAdd;
+    Date end;
 
     try {
-      start = (new SimpleDateFormat("HH:mm")).parse(startTime);
-      endAdd = (new SimpleDateFormat("HH:mm")).parse(lessThanEndTimeOfHours);
-      if(endAdd.compareTo((new SimpleDateFormat("HH:mm")).parse("00:00")) == 0) {
-        endAdd = (new SimpleDateFormat("HH:mm")).parse("24:00");
+      start = API.timeFormat.parse(startTime);
+      endAdd = API.timeFormat.parse(lessThanEndTimeOfHours);
+      if(endAdd.compareTo(API.timeFormat.parse("00:00")) == 0) {
+        endAdd = API.timeFormat.parse("24:00");
       }
 
       for(int i = 0; i < railDailyTimetableList.size(); i++) {
-        Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList.get(i).getStopTimeOfStopTimes(originStation).DepartureTime);
+        Date temp;
+        temp = API.timeFormat.parse(railDailyTimetableList.get(i).getStopTimeOfStopTimes(originStation).DepartureTime);
 
         if(temp.after(start)) {
           railDailyTimetableList1_new.add(railDailyTimetableList.get(i));
@@ -196,11 +197,11 @@ public class RailDailyTimetable {
 
       if(railDailyTimetableList1_new.size() == 0) return null;
 
-      end = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(0).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+      end = API.timeFormat.parse(railDailyTimetableList1_new.get(0).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
       for(int i = 0; i < railDailyTimetableList1_new.size(); i++) {
-        Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+        Date temp;
+        temp = API.timeFormat.parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
         if(temp.before(end)&&temp.after(start)) {
           end = temp;
@@ -210,8 +211,8 @@ public class RailDailyTimetable {
       end = new Date(end.getTime() + endAdd.getTime());
 
       for(int i = 0; i < railDailyTimetableList1_new.size(); i++) {
-        Date temp = new Date(0);
-        temp = (new SimpleDateFormat("HH:mm")).parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
+        Date temp;
+        temp = API.timeFormat.parse(railDailyTimetableList1_new.get(i).getStopTimeOfStopTimes(destinationStation).ArrivalTime);
 
         if(temp.after(end)) {
           railDailyTimetableList1_new.remove(i);
@@ -229,10 +230,10 @@ public class RailDailyTimetable {
     Collections.sort(railDailyTimetableList, new Comparator<RailDailyTimetable>(){
       public int compare(RailDailyTimetable obj1, RailDailyTimetable obj2) {
         try {
-          if ((new SimpleDateFormat("HH:mm").parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).after((new SimpleDateFormat("HH:mm").parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime))))) {
+          if ((API.timeFormat.parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).after(API.timeFormat.parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime)))) {
             return 1;
           }
-          else if ((new SimpleDateFormat("HH:mm").parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).before((new SimpleDateFormat("HH:mm").parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime))))) {
+          else if ((API.timeFormat.parse(obj1.getStopTimeOfStopTimes(originStation).DepartureTime).before(API.timeFormat.parse(obj2.getStopTimeOfStopTimes(originStation).DepartureTime)))) {
             return -1;
           }
           else {

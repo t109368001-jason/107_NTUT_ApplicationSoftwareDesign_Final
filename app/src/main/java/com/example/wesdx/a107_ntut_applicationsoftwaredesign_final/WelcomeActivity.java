@@ -19,15 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private ImageButton TRAButton, THSRButton;
-    private Button TRA_AND_THSRButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-        TRAButton = findViewById(R.id.TRAButton);
-        THSRButton = findViewById(R.id.THSRButton);
-        TRA_AND_THSRButton = findViewById(R.id.TRA_AND_THSRButton);
+        Button TRA_AND_THSRButton = findViewById(R.id.TRA_AND_THSRButton);
+        ImageButton TRAButton = findViewById(R.id.TRAButton);
+        ImageButton THSRButton = findViewById(R.id.THSRButton);
 
         TRAButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,9 +57,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 if(transportation.equals(API.TRA_AND_THSR)) {
                     List<RailStation> temp = API.getStation(API.THSR);
                     railStationList = API.getStation(API.TRA);
-                    for( RailStation railStation:temp) {
-                        railStationList.add(railStation);
-                    }
+                    railStationList.addAll(temp);
                 } else {
                     railStationList = API.getStation(transportation);
                 }

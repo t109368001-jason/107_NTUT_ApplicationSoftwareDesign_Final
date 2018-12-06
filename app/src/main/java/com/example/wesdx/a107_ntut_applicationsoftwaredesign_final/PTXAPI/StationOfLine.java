@@ -10,10 +10,10 @@ public class StationOfLine {
    public String UpdateTime;
 
    public StationOfLine(StationOfLine obj) {
-        LineNo = new String(obj.LineNo);
-        LineID = new String(obj.LineID);
+        LineNo = obj.LineNo;
+        LineID = obj.LineID;
         Stations = new ArrayList<>(obj.Stations);
-        UpdateTime = new String(obj.UpdateTime);
+        UpdateTime = obj.UpdateTime;
    }
 
    public final static String E_EL = "E-EL";    //東部幹線  八堵-臺東
@@ -50,6 +50,125 @@ public class StationOfLine {
          if(Stations.get(i).StationID.equals(stationID)) return i;
       }
       return -1;
+   }
+
+   public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) {
+       StationOfLine B_NW_StationOfLine = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
+       if(B_NW_StationOfLine == null) throw new NullPointerException();
+
+      for(int i = 0; i < stationOfLineList.size(); i++) {
+         if(stationOfLineList.get(i).LineNo.equals(StationOfLine.B_LJ)) {
+            for(int j = 0; j < 3; j++) {
+               stationOfLineList.get(i).Stations.add(j, B_NW_StationOfLine.Stations.get(j));
+            }
+         }
+          if(stationOfLineList.get(i).LineNo.equals(StationOfLine.E_EL)) {
+              for(int j = 0; j < stationOfLineList.get(i).Stations.size(); j++) {
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("豐田")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "林榮新光";
+                      lineStation.StationID = "1608";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+              }
+          }
+          if(stationOfLineList.get(i).LineNo.equals(StationOfLine.W_TL_N)) {
+              for(int j = 0; j < stationOfLineList.get(i).Stations.size(); j++) {
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("樹林")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "南樹林";
+                      lineStation.StationID = "1034";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("富岡")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "新富";
+                      lineStation.StationID = "1036";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+              }
+          }
+          if(stationOfLineList.get(i).LineNo.equals(StationOfLine.W_TL_M)) {
+              for(int j = 0; j < stationOfLineList.get(i).Stations.size(); j++) {
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("豐原")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "栗林";
+                      lineStation.StationID = "1325";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("潭子")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "頭家厝";
+                      lineStation.StationID = "1326";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("頭家厝")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "松竹";
+                      lineStation.StationID = "1327";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("太原")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "精武";
+                      lineStation.StationID = "1328";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("臺中")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "五權";
+                      lineStation.StationID = "1329";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+              }
+          }
+          if(stationOfLineList.get(i).LineNo.equals(StationOfLine.W_TL_S)) {
+              for(int j = 0; j < stationOfLineList.get(i).Stations.size(); j++) {
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("左營")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "內惟";
+                      lineStation.StationID = "1245";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("內惟")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "美術館";
+                      lineStation.StationID = "1246";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("美術館")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "鼓山";
+                      lineStation.StationID = "1237";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("鼓山")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "三塊厝";
+                      lineStation.StationID = "1247";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("高雄")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "民族";
+                      lineStation.StationID = "1419";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("民族")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "科工館";
+                      lineStation.StationID = "1420";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+                  if(stationOfLineList.get(i).Stations.get(j).StationName.equals("科工館")) {
+                      LineStation lineStation = new LineStation();
+                      lineStation.StationName = "正義";
+                      lineStation.StationID = "1421";
+                      stationOfLineList.get(i).Stations.add(j+1, lineStation);
+                  }
+              }
+          }
+      }
    }
 
    public static StationOfLine getStationIndexOfStationsByLineNo(List<StationOfLine> stationOfLineList, String lineNo) {
@@ -109,21 +228,6 @@ public class StationOfLine {
       return getStationOfLineList(stationOfLineList, railStation.StationID);
    }
 
-   public static StationOfLine getMainLine(List<StationOfLine> stationOfLineList) {
-      for(StationOfLine stationOfLine:stationOfLineList) {
-         switch (stationOfLine.LineNo) {
-            case E_EL:
-            case W_TL_N:
-            case W_TL_M:
-            case W_TL_C:
-            case W_TL_S:
-            case W_PL:
-            case S_SL:
-               return stationOfLine;
-         }
-      }
-      return null;
-   }
 }
 
 
