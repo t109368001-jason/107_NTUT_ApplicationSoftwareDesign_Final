@@ -3,6 +3,7 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,14 @@ public class TrainPath {
             this.destinationStation = destinationStation;
             this.railDailyTimetable = railDailyTimetable;
         }
+
+        public StopTime getOriginStopTime() {
+            return this.railDailyTimetable.getStopTimeOfStopTimes(this.originStation);
+        }
+
+        public StopTime geDestinationStopTime() {
+            return this.railDailyTimetable.getStopTimeOfStopTimes(this.destinationStation);
+        }
     }
 
     List<TrainPathPart> trainPathPartList;
@@ -44,6 +53,14 @@ public class TrainPath {
         this.trainPathPartList.add(trainPathPart);
     }
 
+    public Date getOriginDepartureTimeDate() throws ParseException {
+        return this.trainPathPartList.get(0).getOriginStopTime().getDepartureTimeDate();
+    }
+
+    public Date getDestinationArrivalTimeDate() throws ParseException {
+        return this.getLastItem().geDestinationStopTime().getArrivalTimeDate();
+    }
+
     public String getOrigeinDepartureTime() {
         return this.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(this.trainPathPartList.get(0).originStation).DepartureTime;
     }
@@ -54,6 +71,25 @@ public class TrainPath {
 
     public TrainPathPart getLastItem() {
         return this.trainPathPartList.get(this.trainPathPartList.size()-1);
+    }
+
+    public static TrainPath getBest(List<TrainPath> trainPathList, boolean useOriginDeparetureTime, boolean useEarliest) throws ParseException {
+        TrainPath trainPath = null;
+        for(TrainPath trainPath_temp:trainPathList) {
+            if(trainPath == null) trainPath = trainPath_temp;
+            else {
+                if(useOriginDeparetureTime) {
+                    if(trainPath_temp.getOriginDepartureTimeDate().before(trainPath.getOriginDepartureTimeDate()) && useEarliest) {
+                        trainPath = trainPath_temp;
+                    }
+                } else {
+                    if(trainPath_temp.getDestinationArrivalTimeDate().before(trainPath.getDestinationArrivalTimeDate()) && useEarliest) {
+                        trainPath = trainPath_temp;
+                    }
+                }
+            }
+        }
+        return trainPath;
     }
 
     public static List<TrainPath> filter(List<TrainPath> trainPathList) {
