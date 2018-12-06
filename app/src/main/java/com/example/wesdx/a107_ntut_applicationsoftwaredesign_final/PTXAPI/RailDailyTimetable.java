@@ -142,7 +142,7 @@ public class RailDailyTimetable {
         return railDailyTimetableList_new;
     }
 
-  public static List<RailDailyTimetable> filterByPath(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes) {
+  public static List<RailDailyTimetable> filterByPath(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes) {//根據有方向性的路徑去設定列車要怎麼經過以及要經過幾站
     List<RailDailyTimetable> railDailyTimetableList_new = null;
     for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
       int railStationStartIndex = 0;
@@ -173,7 +173,7 @@ public class RailDailyTimetable {
     return railDailyTimetableList_new;
   }
 
-  public boolean afterOverNightStation(String stationID) {
+  public boolean afterOverNightStation(String stationID) {//判斷該站有沒有過夜，
     if(DailyTrainInfo.OverNightStationID == null) return false;
     for(StopTime stopTime:StopTimes) {
       if(stopTime.StationID.equals(stationID)) return false;
@@ -182,18 +182,18 @@ public class RailDailyTimetable {
     return false;
   }
 
-  public StopTime findStopTime(List<RailStation> railStationList) {
-    for(int j = 0; j < railStationList.size(); j++) {
-      for(int i = 0; i < this.StopTimes.size(); i++) {
-        if(this.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
-          return this.StopTimes.get(i);
-        }
-      }
+    public StopTime findStopTime(List<RailStation> railStationList) {//給路徑，判斷該火車經過該路徑的第一站，回傳停靠資訊
+        for(int j = 0; j < railStationList.size(); j++) {
+            for(int i = 0; i < this.StopTimes.size(); i++) {
+                if(this.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
+                    return this.StopTimes.get(i);
+                }
+            }
     }
     return null;
   }
 
-  public StopTime findLastStopTime(List<RailStation> railStationList) {
+    public StopTime findLastStopTime(List<RailStation> railStationList) {//給路徑，判斷該火車經過該路徑的最後一站，回傳停靠資訊
     for(int j = (railStationList.size()-1); j >= 0; j--) {
       for(int i = (this.StopTimes.size()-1); i >= 0; i--) {
         if(this.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
@@ -204,7 +204,7 @@ public class RailDailyTimetable {
     return null;
   }
 
-  public StopTime getStopTimeOfStopTimes(RailStation railStation) {
+  public StopTime getStopTimeOfStopTimes(RailStation railStation) {//給站，回傳停靠資訊
     for(int i = 0; i < this.StopTimes.size(); i++) {
       if(StopTimes.get(i).StationID.equals(railStation.StationID)) {
         return StopTimes.get(i);
@@ -213,7 +213,7 @@ public class RailDailyTimetable {
     return null;
   }
 
-  public StopTime getStopTimeOfStopTimes(String StationID) {
+  public StopTime getStopTimeOfStopTimes(String StationID) {//給StationID，回傳停靠資訊
     for(int i = 0; i < this.StopTimes.size(); i++) {
       if(StopTimes.get(i).StationID.equals(StationID)) {
         return StopTimes.get(i);
@@ -235,7 +235,7 @@ public class RailDailyTimetable {
     return "";
   }
 
-  public Date getODTime(RailStation originStation, RailStation destinationStation) {
+  public Date getODTime(RailStation originStation, RailStation destinationStation) {//給起站終站，取得起終站的行經時間
     try {
       Date originTime = API.timeFormat.parse(this.getStopTimeOfStopTimes(originStation).DepartureTime);
       Date destinationTime = API.timeFormat.parse(this.getStopTimeOfStopTimes(destinationStation).ArrivalTime);

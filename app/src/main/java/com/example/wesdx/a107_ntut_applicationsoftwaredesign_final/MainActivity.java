@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 new AsyncTask<Void, Void, Void>() {
                     private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
                     private List<TrainPath> trainPathList;
+                    private String errorMessage;
 
                     @Override
                     protected Void doInBackground(Void... voids) {
@@ -129,8 +130,13 @@ public class MainActivity extends AppCompatActivity {
                             }
 */
                             trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                            for(int i = 10; i < trainPathList.size(); i++) {
+                                trainPathList.remove(i);
+                                i--;
+                            }
                         } catch (Router.RouterException | ParseException e) {
                             e.printStackTrace();
+                            errorMessage = e.getMessage();
                         }
                         return null;
                     }
@@ -148,20 +154,24 @@ public class MainActivity extends AppCompatActivity {
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
                         dialog.dismiss();
-                        if(trainPathList != null) {
-                            if(trainPathList.size() == 0) {
-                                Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Intent intent = new Intent(MainActivity.this, ShowResult.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
-                                bundle.putString("originStationGson", (new Gson()).toJson(originStation));
-                                bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                            }
+                        if(errorMessage != null) {
+                            Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
+                            if (trainPathList != null) {
+                                if (trainPathList.size() == 0) {
+                                    Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Intent intent = new Intent(MainActivity.this, ShowResult.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
+                                    bundle.putString("originStationGson", (new Gson()).toJson(originStation));
+                                    bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }
+                            } else {
+                                Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 }.execute();
