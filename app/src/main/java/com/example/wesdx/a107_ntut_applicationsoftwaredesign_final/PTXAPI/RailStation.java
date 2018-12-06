@@ -102,6 +102,12 @@ public class RailStation implements Comparable<RailStation> {
             case "新左營":
                 name = "左營";
                 break;
+            case "桃園":
+            case "嘉義":
+            case "雲林":
+            case "彰化":
+                name = "123";
+                break;
         }
 
         for (RailStation railStation1_temp : railStationList) {

@@ -173,14 +173,14 @@ public class RailDailyTimetable {
     return railDailyTimetableList_new;
   }
 
-  public boolean afterOverNightStation(String stationID) {//判斷該站有沒有過夜，
-    if(DailyTrainInfo.OverNightStationID == null) return false;
-    for(StopTime stopTime:StopTimes) {
-      if(stopTime.StationID.equals(stationID)) return false;
-      if(stopTime.StationID.equals(DailyTrainInfo.OverNightStationID)) return true;
+    public boolean afterOverNightStation(String stationID) {//判斷該站有沒有過夜，
+        if(DailyTrainInfo.OverNightStationID == null) return false;
+        for(StopTime stopTime:StopTimes) {
+            if(stopTime.StationID.equals(DailyTrainInfo.OverNightStationID)) return true;
+            if(stopTime.StationID.equals(stationID)) return false;
+        }
+        return false;
     }
-    return false;
-  }
 
     public StopTime findStopTime(List<RailStation> railStationList) {//給路徑，判斷該火車經過該路徑的第一站，回傳停靠資訊
         for(int j = 0; j < railStationList.size(); j++) {

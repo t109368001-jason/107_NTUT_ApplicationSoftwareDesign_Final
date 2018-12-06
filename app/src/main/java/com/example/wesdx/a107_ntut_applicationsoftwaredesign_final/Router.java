@@ -146,6 +146,12 @@ public class Router {
                             List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
                             List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);//在該路徑下含有台鐵的高鐵最遠可以走的班次表
 
+                            for(int i = 0; i<railDailyTimetableList_THSR.size(); i++){
+                                if((railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR) == null)||(railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR).getDepartureTimeDate().before(takeTime))){
+                                    railDailyTimetableList_THSR.remove(i);
+                                    i--;
+                                }
+                            }
 
                             for(RailDailyTimetable railDailyTimetableList_THSR_temp:railDailyTimetableList_THSR){
                                 StopTime THSR_LastStopTime = railDailyTimetableList_THSR_temp.findLastStopTime(railStationList_THSR);
@@ -162,7 +168,16 @@ public class Router {
                                 for(TrainPath TRA_trainPath_temp:TRA_trainPath){
                                     if(best == null) best = TRA_trainPath_temp;
                                     else {
-                                        if(API.timeFormat.parse(TRA_trainPath_temp.getDestinationArrivalTime()).before(API.timeFormat.parse(best.getDestinationArrivalTime()))){
+                                        Date tempTime = API.timeFormat.parse(TRA_trainPath_temp.getDestinationArrivalTime());
+                                        Date bestTime = best.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(best.getLastItem().destinationStation).getDepartureTimeDate();
+
+                                        if (TRA_trainPath_temp.getLastItem().railDailyTimetable.afterOverNightStation(TRA_trainPath_temp.getLastItem().destinationStation.StationID)) {
+                                            tempTime.setDate(tempTime.getDate() + 1);
+                                        }
+                                        if (best.getLastItem().railDailyTimetable.afterOverNightStation(best.getLastItem().destinationStation.StationID)) {
+                                            bestTime.setDate(bestTime.getDate() + 1);
+                                        }
+                                        if(tempTime.before(bestTime)){
                                             best = TRA_trainPath_temp;
                                         }
                                     }

@@ -130,10 +130,6 @@ public class MainActivity extends AppCompatActivity {
                             }
 */
                             trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
-                            for(int i = 10; i < trainPathList.size(); i++) {
-                                trainPathList.remove(i);
-                                i--;
-                            }
                         } catch (Router.RouterException | ParseException e) {
                             e.printStackTrace();
                             errorMessage = e.getMessage();
@@ -161,6 +157,10 @@ public class MainActivity extends AppCompatActivity {
                                 if (trainPathList.size() == 0) {
                                     Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
                                 } else {
+                                    for(int i = 10; i < trainPathList.size(); i++) {
+                                        trainPathList.remove(i);
+                                        i--;
+                                    }
                                     Intent intent = new Intent(MainActivity.this, ShowResult.class);
                                     Bundle bundle = new Bundle();
                                     bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
