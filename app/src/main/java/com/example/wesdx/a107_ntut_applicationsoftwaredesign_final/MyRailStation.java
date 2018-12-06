@@ -559,6 +559,7 @@ public class MyRailStation {
         }
 
         for(List<RailStation> railStationList_temp:out) {
+            if(railStationList_temp.size() < 2) continue;
             for(int i = 0; i < railStationList_temp.size()-1; i++) {
                 if(railStationList_temp.get(i).StationID.equals(railStationList_temp.get(i+1).StationID)) {
                     railStationList_temp.remove(i);

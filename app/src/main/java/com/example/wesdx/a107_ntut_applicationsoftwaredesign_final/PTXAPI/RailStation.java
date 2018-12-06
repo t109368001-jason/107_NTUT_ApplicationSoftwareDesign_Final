@@ -74,11 +74,11 @@ public class RailStation implements Comparable<RailStation> {
             case "沙崙":
                 name = "台南";
                 break;
-            case "高雄":
+            case "左營":
                 name = "新左營";
                 break;
             case "新左營":
-                name = "高雄";
+                name = "左營";
                 break;
         }
 
@@ -101,7 +101,7 @@ public class RailStation implements Comparable<RailStation> {
         Log.d("DEBUG", sb.toString());
     }
 
-    public static List<RailStation> getStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
+    public static List<RailStation> getStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {//取得起站到站中間的所有站，依照起終站，有方向性
         List<RailStation> railStationList_new = null;
 
         int begIndex = -1;
@@ -119,7 +119,7 @@ public class RailStation implements Comparable<RailStation> {
         return railStationList_new;
     }
 
-    public static RailStation find(List<RailStation> railStationList, String StationID) {
+    public static RailStation find(List<RailStation> railStationList, String StationID) {//把StationID轉成RailStation型態
         for(int i = 0; i < railStationList.size(); i++) {
             if(railStationList.get(i).StationID.equals(StationID)) {
                 return railStationList.get(i);

@@ -115,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
                         }
 */
                         trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation);
+
+                        for(int i = 10; i < trainPathList.size(); i++) {
+                            trainPathList.remove(i);
+                            i--;
+                        }
+
                         return null;
                     }
 
