@@ -118,9 +118,9 @@ public class MainActivity extends AppCompatActivity {
                     protected Void doInBackground(Void... voids) {
                         try {
 /*
-                            for(int i = 0; i < railStationList.size(); i++) {   //海瑞-鎮安
+                            for(int i = 0; i < railStationList.size(); i++) {   //7
                                 for(int j = i + 1; j < railStationList.size(); j++) {
-                                    trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                                    trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), null, null, null, railStationList, railStationList.get(i), railStationList.get(j), isDirectArrivalCheckBox.isChecked());
                                     if((trainPathList != null ? trainPathList.size() : 0) == 0) {
                                         Log.d("DEBUG1", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
                                     } else {
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 */
-                            trainPathList = Router.getTranserPath(transportation, dateTextView.getText().toString(), timeTextView.getText().toString(), railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                            trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
                         } catch (Router.RouterException | ParseException e) {
                             e.printStackTrace();
                             errorMessage = e.getMessage();

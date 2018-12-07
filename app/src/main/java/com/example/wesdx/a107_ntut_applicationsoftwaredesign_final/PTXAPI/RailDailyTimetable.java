@@ -159,6 +159,47 @@ public class RailDailyTimetable {
         return railDailyTimetableList_new;
     }
 
+    public static List<RailDailyTimetable> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, Date firstDepartureTime, Date lastArrivalTime, boolean isDirectional, int stopTimes) throws ParseException {
+        List<RailDailyTimetable> railDailyTimetableList_new = new ArrayList<>();
+
+        for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+            StopTime firstStopTime;
+            StopTime lastStopTime;
+            boolean firstFind = false;
+            int stopTimes_temp = 0;
+            int firstIndexOfStopTimes = railDailyTimetable.StopTimes.size();
+            int lastIndexOfStopTimes = -1;
+            int firstIndexOfRailStationList = railStationList.size();
+            int lastIndexOfRailStationList = -1;
+            for(int i = 0 ; i < railDailyTimetable.StopTimes.size(); i++) {
+                for(int j = 0; j < railStationList.size(); j++) {
+                    if(railDailyTimetable.StopTimes.get(i).StationID.equals(railStationList.get(j).StationID)) {
+                        stopTimes_temp += 1;
+                        if(!firstFind) {
+                            firstIndexOfRailStationList = j;
+                            firstIndexOfStopTimes = i;
+                            firstFind = true;
+                        } else {
+                            lastIndexOfRailStationList = j;
+                            lastIndexOfStopTimes = i;
+                        }
+                    }
+                }
+            }
+            if(stopTimes_temp < stopTimes) continue;
+            if(firstIndexOfStopTimes > lastIndexOfStopTimes) continue;
+            if(firstDepartureTime != null) {
+                if (railDailyTimetable.getDepartureTimeDateByStationID(railStationList.get(firstIndexOfRailStationList).StationID).before(firstDepartureTime)) continue;
+            }
+            if(lastArrivalTime != null) {
+                if (railDailyTimetable.getArrivalTimeDateByStationID(railStationList.get(lastIndexOfRailStationList).StationID).before(lastArrivalTime)) continue;
+            }
+            railDailyTimetableList_new.add(railDailyTimetable);
+        }
+
+        return railDailyTimetableList_new;
+    }
+
     public static List<RailDailyTimetable> filterByPathAndFirstDepartureTime(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, boolean isDirectional, int stopTimes, Date time) throws ParseException {
         List<RailDailyTimetable> railDailyTimetableList_new = new ArrayList<>();
         for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {

@@ -8,6 +8,8 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTi
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -69,6 +71,14 @@ public class TrainPath {
         return this.getLastItem().getDestinationArrivalTimeDate();
     }
 
+    public RailStation getOriginRailStation() {
+        return this.trainPathPartList.get(0).originStation;
+    }
+
+    public RailStation getDestinationRailStation() {
+        return this.getLastItem().destinationStation;
+    }
+
     private String getOrigeinDepartureTime() {
         return this.trainPathPartList.get(0).railDailyTimetable.getStopTimeOfStopTimes(this.trainPathPartList.get(0).originStation).DepartureTime;
     }
@@ -100,37 +110,133 @@ public class TrainPath {
         return trainPath;
     }
 
-    public static List<TrainPath> filter(List<TrainPath> trainPathList) {
-        List<TrainPath> trainPathList_new = new ArrayList<>();
+    public static List<TrainPath> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, Date firstDepartureTime, Date lastArrivalTime, boolean isDirectional, int stopTimes) throws ParseException {
+        List<TrainPath> trainPathList = new ArrayList<>();
 
-        try {
-            for(TrainPath trainPath_temp1:trainPathList) {
-                boolean addToList = true;
-                for(int i = 0; i < trainPathList_new.size(); i++) {
-                    if(trainPath_temp1.getLastItem().railDailyTimetable.DailyTrainInfo.TrainNo.equals(trainPathList_new.get(i).getLastItem().railDailyTimetable.DailyTrainInfo.TrainNo)) {
-                        Date time1 = API.timeFormat.parse(trainPath_temp1.getOrigeinDepartureTime());
-                        Date time2 = API.timeFormat.parse(trainPathList_new.get(i).getOrigeinDepartureTime());
-
-                        if(time1.before(time2)) {
-                            if(trainPath_temp1.trainPathPartList.size() > 1) {
-                                addToList = false;
-                            }
-                        } else {
-                            if(trainPathList_new.get(i).trainPathPartList.size() > 1) {
-                                trainPathList_new.remove(i);
-                                i--;
-                            }
-                        }
+        for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+            int stopTimes_temp = 0;
+            RailStation firstStation = null;
+            RailStation lastStation = null;
+            for(int i = 0; i < railStationList.size(); i++) {
+                for(int j = 0 ; j < railDailyTimetable.StopTimes.size(); j++) {
+                    if(railDailyTimetable.StopTimes.get(j).StationID.equals(railStationList.get(i).StationID)) {
+                        stopTimes_temp++;
+                        if(firstStation == null) firstStation = railStationList.get(i);
+                        lastStation = railStationList.get(i);
                     }
                 }
-                if(addToList) {
-                    trainPathList_new.add(trainPath_temp1);
-                }
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
+            if(stopTimes_temp < stopTimes) continue;
+            if((firstStation == null)||(lastStation == null)) continue;
+            if(firstDepartureTime != null) {
+                if(railDailyTimetable.getDepartureTimeDateByStationID(firstStation.StationID).before(firstDepartureTime)) continue;
+            }
+            if(lastArrivalTime != null) {
+                if(railDailyTimetable.getArrivalTimeDateByStationID(lastStation.StationID).after(lastArrivalTime)) continue;
+            }
+            if(railDailyTimetable.getDepartureTimeDateByStationID(firstStation.StationID).after(railDailyTimetable.getArrivalTimeDateByStationID(lastStation.StationID))) continue;
+            trainPathList.add(new TrainPath(new TrainPathPart(firstStation, lastStation, railDailyTimetable)));
+        }
+
+        return trainPathList;
+    }
+
+    public static List<TrainPath> filter(List<TrainPath> trainPathList) throws ParseException {
+        List<TrainPath> trainPathList_new = new ArrayList<>(trainPathList);
+
+        for(int i = 0; i < trainPathList_new.size(); i++) {
+            boolean nextI = false;
+            TrainPath trainPath1 = trainPathList_new.get(i);
+            for(int j = i + 1; j < trainPathList_new.size(); j++) {
+                boolean nextJ = false;
+                TrainPath trainPath2 = trainPathList_new.get(j);
+                for(TrainPathPart trainPathPart1:trainPath1.trainPathPartList) {
+                    for(TrainPathPart trainPathPart2:trainPath2.trainPathPartList) {
+                        if(trainPathPart1.railDailyTimetable.DailyTrainInfo.TrainNo.equals(trainPathPart2.railDailyTimetable.DailyTrainInfo.TrainNo)) {
+                            switch (trainPath1.getDestinationArrivalTimeDate().compareTo(trainPath2.getDestinationArrivalTimeDate())) {
+                                case 1:     //trainPathPart1 > trainPathPart2
+                                    if(trainPath1.trainPathPartList.size() > 1) {
+                                        trainPathList_new.remove(i);
+                                        i--;
+                                        nextI = true;
+                                    }
+                                    break;
+                                case 0:     //trainPathPart1 = trainPathPart2
+                                    switch (trainPath1.getOriginDepartureTimeDate().compareTo(trainPath2.getOriginDepartureTimeDate())) {
+                                        case 1:     //trainPathPart1 > trainPathPart2
+                                            if(trainPath2.trainPathPartList.size() > 1) {
+                                                trainPathList_new.remove(j);
+                                                j--;
+                                            }
+                                            break;
+                                        case 0:     //trainPathPart1 = trainPathPart2
+                                            if(trainPath1.trainPathPartList.size() < trainPath2.trainPathPartList.size()) {
+                                                trainPathList_new.remove(j);
+                                                j--;
+                                            } else if(trainPath1.trainPathPartList.size() > trainPath2.trainPathPartList.size()){
+                                                trainPathList_new.remove(i);
+                                                i--;
+                                                nextI = true;
+                                            }
+                                            break;
+                                        case -1:    //trainPathPart1 < trainPathPart2
+                                            if(trainPath1.trainPathPartList.size() > 1) {
+                                                trainPathList_new.remove(i);
+                                                i--;
+                                                nextI = true;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case -1:    //trainPathPart1 < trainPathPart2
+                                    if(trainPath2.trainPathPartList.size() > 1) {
+                                        trainPathList_new.remove(j);
+                                        j--;
+                                    }
+                                    break;
+                            }
+                            nextJ = true;
+                        }
+                        if(nextJ) break;
+                    }
+                    if(nextJ) break;
+                }
+                if(nextI) break;
+            }
         }
 
         return trainPathList_new;
+    }
+
+    public static List<RailDailyTimetable> convert(List<TrainPath> trainPathList) {
+        List<RailDailyTimetable> railDailyTimetableList = new ArrayList<>();
+
+        for(TrainPath trainPath:trainPathList) {
+            if(trainPath.trainPathPartList.size() == 1) {
+                railDailyTimetableList.add(trainPath.trainPathPartList.get(0).railDailyTimetable);
+            }
+        }
+        return railDailyTimetableList;
+    }
+
+    public static void sort(List<TrainPath> trainPathList) {
+        Collections.sort(trainPathList, new Comparator<TrainPath>() {
+            public int compare(TrainPath obj1, TrainPath obj2) {
+                try {
+                    Date obj1ArrivalTime = API.timeFormat.parse(obj1.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(obj1.getLastItem().destinationStation).ArrivalTime);
+                    Date obj2ArrivalTime = API.timeFormat.parse(obj2.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(obj2.getLastItem().destinationStation).ArrivalTime);
+                    if(obj1.getLastItem().railDailyTimetable.afterOverNightStation(obj1.getLastItem().destinationStation.StationID)) {
+                        obj1ArrivalTime.setDate(obj1ArrivalTime.getDate() + 1);
+                    }
+                    if(obj2.getLastItem().railDailyTimetable.afterOverNightStation(obj2.getLastItem().destinationStation.StationID)) {
+                        obj2ArrivalTime.setDate(obj2ArrivalTime.getDate() + 1);
+                    }
+                    return obj1ArrivalTime.compareTo(obj2ArrivalTime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                return 0;
+            }
+        });
     }
 }
