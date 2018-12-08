@@ -140,7 +140,7 @@ public class RailStation implements Comparable<RailStation> {
     }
 
     public static void logD(List<RailStation> railStationList) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for(RailStation railStation:railStationList) {
             sb.append(railStation.StationName.Zh_tw);
@@ -149,28 +149,10 @@ public class RailStation implements Comparable<RailStation> {
         Log.d("DEBUG", sb.toString());
     }
 
-    public static List<RailStation> getStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {//取得起站到站中間的所有站，依照起終站，有方向性
-        List<RailStation> railStationList_new = null;
-
-        int begIndex = -1;
-        int endIndex = -1;
-
-        for(int i = 0; i < railStationList.size(); i++) {
-            if(railStationList.get(i).StationID.equals(originStation.StationID)) begIndex = i;
-            if(railStationList.get(i).StationID.equals(destinationStation.StationID)) endIndex = i;
-        }
-        for(int i = begIndex; (begIndex < endIndex ? i <= endIndex : i >= endIndex); i += (begIndex < endIndex ? 1 : -1)) {
-            if(railStationList_new == null) railStationList_new = new ArrayList<>();
-            railStationList_new.add(railStationList.get(i));
-        }
-
-        return railStationList_new;
-    }
-
     public static RailStation find(List<RailStation> railStationList, String StationID) {//把StationID轉成RailStation型態
-        for(int i = 0; i < railStationList.size(); i++) {
-            if(railStationList.get(i).StationID.equals(StationID)) {
-                return railStationList.get(i);
+        for(RailStation railStation:railStationList) {
+            if(railStation.StationID.equals(StationID)) {
+                return railStation;
             }
         }
         return null;
@@ -237,11 +219,11 @@ public class RailStation implements Comparable<RailStation> {
                 case "山里": case "臺東": case "康樂": case "知本": case "太麻里":
                 case "金崙": case "瀧溪": case "大武": case "古莊": case "富貴":
                 case "台北": case "台中": case "雲林":
-                    continue;
+                    break;
                 default:
                     list.remove(i);
                     i--;
-                    continue;
+                    break;
             }
         }
     }

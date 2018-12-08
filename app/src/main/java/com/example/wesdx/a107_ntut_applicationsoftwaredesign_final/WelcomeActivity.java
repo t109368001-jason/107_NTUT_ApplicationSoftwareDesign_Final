@@ -15,7 +15,8 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.security.SignatureException;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
@@ -51,17 +52,21 @@ public class WelcomeActivity extends AppCompatActivity {
     private void task(final String transportation) {
         new AsyncTask<Void, Void, Void>() {
             private ProgressDialog dialog = new ProgressDialog(WelcomeActivity.this);
-            private List<RailStation> railStationList = new ArrayList<>();
+            private List<RailStation> railStationList;
             @Override
             protected Void doInBackground(Void... voids) {
-                if(transportation.equals(API.TRA_AND_THSR)) {
-                    List<RailStation> temp = API.getStation(API.THSR);
-                    railStationList = API.getStation(API.TRA);
-                    railStationList.addAll(temp);
-                } else {
-                    railStationList = API.getStation(transportation);
+                try {
+                    if(transportation.equals(API.TRA_AND_THSR)) {
+                        List<RailStation> temp = API.getStation(API.THSR);
+                        railStationList = API.getStation(API.TRA);
+                        railStationList.addAll(temp);
+                    } else {
+                        railStationList = API.getStation(transportation);
+                    }
+                    RailStation.removeUnreservationStation(railStationList);
+                } catch (SignatureException | IOException e) {
+                    e.printStackTrace();
                 }
-                RailStation.removeUnreservationStation(railStationList);
                 return null;
             }
 

@@ -1,10 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 /**
  * 臺鐵定期時刻表資料
  *
@@ -19,57 +14,6 @@ public class RailODDailyTimetable {
     public RailStopTime DestinationStopTime;
     public String UpdateTime;
     public String VersionID;
-
-    public static List<RailODDailyTimetable> filter(List<RailODDailyTimetable> railODDailyTimetableList, String startTime /*HH:mm*/, String lessThanEndTimeOfHours) {
-        List<RailODDailyTimetable> railODDailyTimetableList_new = new ArrayList<>();
-        Date start;
-        Date endAdd;
-        Date end;
-
-        try {
-            start = API.timeFormat.parse(startTime);
-            endAdd = API.timeFormat.parse(lessThanEndTimeOfHours);
-            if(endAdd.compareTo(API.timeFormat.parse("00:00")) == 0) {
-                endAdd = API.timeFormat.parse("24:00");
-            }
-
-            for(int i = 0; i < railODDailyTimetableList.size(); i++) {
-                Date temp;
-                temp = API.timeFormat.parse(railODDailyTimetableList.get(i).OriginStopTime.DepartureTime);
-
-                if(temp.after(start)) {
-                    railODDailyTimetableList_new.add(railODDailyTimetableList.get(i));
-                }
-            }
-
-            end = API.timeFormat.parse(railODDailyTimetableList_new.get(0).DestinationStopTime.ArrivalTime);
-
-            for(int i = 0; i < railODDailyTimetableList_new.size(); i++) {
-                Date temp;
-                temp = API.timeFormat.parse(railODDailyTimetableList_new.get(i).DestinationStopTime.ArrivalTime);
-
-                if(temp.before(end)&&temp.after(start)) {
-                    end = temp;
-                }
-            }
-
-            end = new Date(end.getTime() + endAdd.getTime());
-
-            for(int i = 0; i < railODDailyTimetableList_new.size(); i++) {
-                Date temp;
-                temp = API.timeFormat.parse(railODDailyTimetableList_new.get(i).DestinationStopTime.ArrivalTime);
-
-                if(temp.after(end)) {
-                    railODDailyTimetableList_new.remove(i);
-                    i--;
-                }
-            }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return railODDailyTimetableList_new;
-    }
 }
 
 
