@@ -20,7 +20,6 @@
         </activity>
         <activity android:name=".ShowResult" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".ShowDetailActivity" />
         <activity android:name=".ShowResultDetailActivity"></activity>
     </application>
 

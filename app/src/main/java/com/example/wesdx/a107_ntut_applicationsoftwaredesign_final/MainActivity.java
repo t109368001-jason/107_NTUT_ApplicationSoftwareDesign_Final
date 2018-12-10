@@ -227,6 +227,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         String originStationID = settings.getString(transportation + "originStationID", "");
         String destinationStationID = settings.getString(transportation + "destinationStationID", "");
+        int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
+        int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
+        Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
+        Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime * 60 * 1000;
         for (RailStation railStation:railStationList) {
             if (railStation.StationID.equals(originStationID)) {
                 originStationTextView_buffer.setText(railStation.StationName.Zh_tw);

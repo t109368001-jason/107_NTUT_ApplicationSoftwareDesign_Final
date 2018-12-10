@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import android.widget.ListView;
+
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
@@ -90,7 +92,134 @@ public class MyRailStation {
             final StationOfLine begStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, beginOfMainLine.StationID);
             final StationOfLine endStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, endOfMainLine.StationID);
 
-            if(begStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||begStationOfLine.LineNo.equals(StationOfLine.W_TL_M)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_M)) {
+            if((begStationOfLine.LineNo.equals(StationOfLine.W_TL_C)&&endStationOfLine.LineNo.equals(StationOfLine.W_TL_M)) || (begStationOfLine.LineNo.equals(StationOfLine.W_TL_M)&&endStationOfLine.LineNo.equals(StationOfLine.W_TL_C))) {
+                List<RailStation> railStationList_C = new ArrayList<>();
+                List<RailStation> railStationList_CC = new ArrayList<>();
+
+                StationOfLine currentStationOfLine_C = new StationOfLine(begStationOfLine);
+                StationOfLine currentStationOfLine_CC = new StationOfLine(begStationOfLine);
+
+                boolean C_finish = false;
+                boolean CC_finish = false;
+                boolean C_ori_pass = false;
+                boolean CC_ori_pass = false;
+
+                while(!(C_finish&&CC_finish)) {
+                    if(!C_finish) {
+                        int begIndex_C;
+                        int endIndex_C;
+                        switch (currentStationOfLine_C.LineNo) {
+                            case StationOfLine.W_TL_C:
+                                Collections.reverse(currentStationOfLine_C.Stations);
+                                break;
+                        }
+
+                        if((currentStationOfLine_C.LineNo.equals(begStationOfLine.LineNo))&&(!C_ori_pass)) {
+                            begIndex_C = currentStationOfLine_C.getStationIndexOfStationsByID(beginOfMainLine.StationID);
+                            C_ori_pass = true;
+                        } else {
+                            begIndex_C = 0;
+                        }
+                        if(currentStationOfLine_C.LineNo.equals(endStationOfLine.LineNo)) {
+                            endIndex_C = currentStationOfLine_C.getStationIndexOfStationsByID(endOfMainLine.StationID);
+                        } else {
+                            endIndex_C = currentStationOfLine_C.Stations.size() - 1;
+                        }
+
+                        for(int i = begIndex_C; i <= endIndex_C; i++) {
+                            railStationList_C.add(RailStation.find(railStationList_TRA_all, currentStationOfLine_C.Stations.get(i).StationID));
+                            if(currentStationOfLine_C.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
+                                C_finish = true;
+                                break;
+                            }
+                        }
+
+                        switch (currentStationOfLine_C.LineNo) {
+                            case StationOfLine.W_TL_C:
+                                currentStationOfLine_C = new StationOfLine(W_TL_M);
+                            case StationOfLine.W_TL_M:
+                                currentStationOfLine_C = new StationOfLine(W_TL_C);
+                                break;
+                        }
+                    }
+                    if(!CC_finish) {
+                        int begIndex_CC;
+                        int endIndex_CC;
+                        switch (currentStationOfLine_CC.LineNo) {
+                            case StationOfLine.W_TL_M:
+                                Collections.reverse(currentStationOfLine_CC.Stations);
+                                break;
+                        }
+
+                        if((currentStationOfLine_CC.LineNo.equals(begStationOfLine.LineNo))&&(!CC_ori_pass)) {
+                            begIndex_CC = currentStationOfLine_CC.getStationIndexOfStationsByID(beginOfMainLine.StationID);
+                            CC_ori_pass = true;
+                        } else {
+                            begIndex_CC = 0;
+                        }
+                        if(currentStationOfLine_CC.LineNo.equals(endStationOfLine.LineNo)) {
+                            endIndex_CC = currentStationOfLine_CC.getStationIndexOfStationsByID(endOfMainLine.StationID);
+                        } else {
+                            endIndex_CC = currentStationOfLine_CC.Stations.size() - 1;
+                        }
+
+                        for(int i = begIndex_CC; i <= endIndex_CC; i++) {
+                            railStationList_CC.add(RailStation.find(railStationList_TRA_all, currentStationOfLine_CC.Stations.get(i).StationID));
+                            if(currentStationOfLine_CC.Stations.get(i).StationID.equals(endOfMainLine.StationID)) {
+                                CC_finish = true;
+                                break;
+                            }
+                        }
+
+                        switch (currentStationOfLine_CC.LineNo) {
+                            case StationOfLine.W_TL_C:
+                                currentStationOfLine_CC = new StationOfLine(W_TL_M);
+                            case StationOfLine.W_TL_M:
+                                currentStationOfLine_CC = new StationOfLine(W_TL_C);
+                                break;
+                        }
+                    }
+                }
+                out = new ArrayList<>();
+                List<RailStation> temp_C = new ArrayList<>(railStationList_front);
+                List<RailStation> temp_CC = new ArrayList<>(railStationList_front);
+
+                temp_C.addAll(railStationList_C);
+                temp_CC.addAll(railStationList_CC);
+                temp_C.addAll(railStationList_tail);
+                temp_CC.addAll(railStationList_tail);
+
+                out.add(temp_C);
+                out.add(temp_CC);
+
+                for(List<RailStation> railStationList:out) {
+                    for(int i = 0 ; i < railStationList.size(); i++) {
+                        if(railStationList.get(i).StationName.Zh_tw.equals("成功")) {
+                            for(int j = i + 1; j < railStationList.size(); j++) {
+                                if(railStationList.get(j).StationName.Zh_tw.equals("追分")) {
+                                    for(int k = i + 1; k < j; k++) {
+                                        railStationList.remove(i + 1);
+                                    }
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                        if(railStationList.get(i).StationName.Zh_tw.equals("追分")) {
+                            for(int j = i + 1; j < railStationList.size(); j++) {
+                                if(railStationList.get(j).StationName.Zh_tw.equals("成功")) {
+                                    for(int k = i + 1; k < j; k++) {
+                                        railStationList.remove(i + 1);
+                                    }
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(begStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||begStationOfLine.LineNo.equals(StationOfLine.W_TL_M)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_C)||endStationOfLine.LineNo.equals(StationOfLine.W_TL_M)) {
                 List<RailStation> railStationList_C = new ArrayList<>();
                 List<RailStation> railStationList_CC = new ArrayList<>();
 

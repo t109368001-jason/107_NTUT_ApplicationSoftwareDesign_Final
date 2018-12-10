@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import android.support.annotation.NonNull;
+
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
@@ -144,6 +146,7 @@ public class TrainPath implements Comparable<TrainPath> {
     }
 
     public static List<TrainPath> filter(List<TrainPath> trainPathList) throws ParseException {
+        if(trainPathList == null) return null;
         List<TrainPath> trainPathList_new = new ArrayList<>(trainPathList);
 
         for(int i = 0; i < trainPathList_new.size(); i++) {

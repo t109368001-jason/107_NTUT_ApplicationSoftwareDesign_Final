@@ -19,30 +19,50 @@ public class Router {
         }
     }
 
-    public static long TRANSFER_TIME = 10 * 60 * 1000;
+    public static long TRAToTRATransferTime = 5 * 60 * 1000;
+    public static long TRAToTHSRTransferTime = 10 * 60 * 1000;
     public static List<StationOfLine> stationOfLineList;
 
-    public static String TRARailDailyTimetableListCacheDate;
-    public static List<RailDailyTimetable> TRARailDailyTimetableListCache;
-    public static String THSRRailDailyTimetableListCacheDate;
-    public static List<RailDailyTimetable> THSRRailDailyTimetableListCache;
+    private static List<RailStation> railStationListCache_TRA;
+    private static List<RailStation> railStationListCache_THSR;
+    private static String railDailyTimetableListCacheDate_TRA;
+    private static List<RailDailyTimetable> railDailyTimetableListCache_TRA;
+    private static String railDailyTimetableListCacheDate_THSR;
+    private static List<RailDailyTimetable> railDailyTimetableListCache_THSR;
+
+    public static List<RailStation> getRailStationListFromCache(String transportation) {
+        if(transportation.equals(API.TRA)) {
+            return new ArrayList<>(railStationListCache_TRA);
+        } else if(transportation.equals(API.THSR)) {
+            return new ArrayList<>(railStationListCache_THSR);
+        }
+        return null;
+    }
+
+    public static void saveRailStationListToCache(String transportation, List<RailStation> railStationList) {
+        if(transportation.equals(API.TRA)) {
+            railStationListCache_TRA = new ArrayList<>(railStationList);
+        } else {
+            railStationListCache_THSR = new ArrayList<>(railStationList);
+        }
+    }
 
     public static List<RailDailyTimetable> getFromCache(String transportation, String date) {
-        if(transportation.equals(API.TRA) && date.equals(TRARailDailyTimetableListCacheDate)) {
-            return new ArrayList<>(TRARailDailyTimetableListCache);
-        } else if(transportation.equals(API.THSR) && date.equals(THSRRailDailyTimetableListCacheDate)) {
-            return new ArrayList<>(THSRRailDailyTimetableListCache);
+        if(transportation.equals(API.TRA) && date.equals(railDailyTimetableListCacheDate_TRA)) {
+            return new ArrayList<>(railDailyTimetableListCache_TRA);
+        } else if(transportation.equals(API.THSR) && date.equals(railDailyTimetableListCacheDate_THSR)) {
+            return new ArrayList<>(railDailyTimetableListCache_THSR);
         }
         return null;
     }
 
     public static void seveToCache(String transportation, String date, List<RailDailyTimetable> railDailyTimetableList) {
         if(transportation.equals(API.TRA)) {
-            TRARailDailyTimetableListCacheDate = date;
-            TRARailDailyTimetableListCache = railDailyTimetableList;
+            railDailyTimetableListCacheDate_TRA = date;
+            railDailyTimetableListCache_TRA = railDailyTimetableList;
         } else if(transportation.equals(API.THSR)) {
-            THSRRailDailyTimetableListCacheDate = date;
-            THSRRailDailyTimetableListCache = railDailyTimetableList;
+            railDailyTimetableListCacheDate_THSR = date;
+            railDailyTimetableListCache_THSR = railDailyTimetableList;
         }
     }
 
@@ -112,7 +132,7 @@ public class Router {
                         trainPath_temp.trainPathPartList = new ArrayList<>();
 
                         if (!trainPath_mid.getOriginRailStation().StationID.equals(originStation.StationID)) {
-                            Date firstTimeThreshold = new Date(firstTime.getTime() - TRANSFER_TIME);
+                            Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTRATransferTime);
                             List<TrainPath> trainPathList_first;
                             if((trainPathList_first = getTrainPath(API.TRA, date, originDepartureTime, firstTimeThreshold, railDailyTimetableList_mid_all, null, originStation, firstRailStation, true)) == null) continue;
 
@@ -120,7 +140,7 @@ public class Router {
                         }
 
                         if (!lastRailStation.StationID.equals(destinationStation.StationID)) {
-                            Date lastTimeThreshold = new Date(lastTime.getTime() + TRANSFER_TIME);
+                            Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTRATransferTime);
                             List<TrainPath> trainPathList_last;
                             if((trainPathList_last = getTrainPath(API.TRA, date, lastTimeThreshold, destinationArrivalTime, railDailyTimetableList_mid_all, null, lastRailStation, destinationStation, true)) == null) continue;
 
