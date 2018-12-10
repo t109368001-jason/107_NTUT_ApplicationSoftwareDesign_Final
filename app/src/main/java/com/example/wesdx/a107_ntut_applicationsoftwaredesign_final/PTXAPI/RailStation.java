@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -21,28 +23,136 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
-    public static List<RailStation> getStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
-        List<RailStation> railStationList_new = null;
+    public static List<List<RailStation>> filter(List<List<RailStation>> railStationList_List, int upToMinMultipleNum) {
+        if(railStationList_List.size() < 2) return railStationList_List;
+        List<List<RailStation>> railStationList_List_new = new ArrayList<>(railStationList_List);
 
-        int begIndex = -1;
-        int endIndex = -1;
-
-        for(int i = 0; i < railStationList.size(); i++) {
-            if(railStationList.get(i).StationID.equals(originStation.StationID)) begIndex = i;
-            if(railStationList.get(i).StationID.equals(destinationStation.StationID)) endIndex = i;
+        for(int i = 0 ; i < railStationList_List_new.size(); i++) {
+            for(int j = i + 1; j < railStationList_List_new.size(); j++) {
+                if(railStationList_List_new.get(i).size() < railStationList_List_new.get(j).size() * upToMinMultipleNum) {
+                    railStationList_List_new.remove(j);
+                    j--;
+                } else if(railStationList_List_new.get(i).size() > railStationList_List_new.get(j).size() * upToMinMultipleNum) {
+                    railStationList_List_new.remove(i);
+                    i--;
+                    break;
+                }
+            }
         }
-        for(int i = begIndex; (begIndex < endIndex ? i <= endIndex : i >= endIndex); i += (begIndex < endIndex ? 1 : -1)) {
-            if(railStationList_new == null) railStationList_new = new ArrayList<>();
-            railStationList_new.add(railStationList.get(i));
-        }
 
-        return railStationList_new;
+        return railStationList_List_new;
     }
 
-    public static RailStation find(List<RailStation> railStationList, String StationID) {
-        for(int i = 0; i < railStationList.size(); i++) {
-            if(railStationList.get(i).StationID.equals(StationID)) {
-                return railStationList.get(i);
+    public static List<List<RailStation>> removeRepeatedRailStationList(final List<List<RailStation>> railStationList_List) {
+        List<List<RailStation>> railStationList_List_new = new ArrayList<>(railStationList_List);
+        for (int i = 0; i < railStationList_List_new.size(); i++) {
+            for (int j = i + 1; j < railStationList_List_new.size(); j++) {
+                boolean same = true;
+                if (railStationList_List_new.get(i).size() == railStationList_List_new.get(j).size()) {
+                    for (int k = 0; k < railStationList_List_new.get(i).size(); k++) {
+                        if (!railStationList_List_new.get(i).get(k).StationID.equals(railStationList_List_new.get(j).get(k).StationID)) {
+                            same = false;
+                            break;
+                        }
+                    }
+                    if (same) {
+                        railStationList_List_new.remove(j);
+                    }
+                }
+            }
+        }
+        if(railStationList_List_new.size() == 0) return null;
+        return railStationList_List_new;
+    }
+
+    public static List<RailStation> filterTHSR(List<RailStation> railStationList, List<RailStation> mix) {
+        List<RailStation> railStationList_new = null;
+        for(RailStation railStation:railStationList) {
+            if(transferStation(mix, railStation) != null) {
+                if(railStationList_new == null) railStationList_new = new ArrayList<>();
+                railStationList_new.add(transferStation(mix, railStation));
+            }
+        }
+        return  railStationList_new;
+    }
+
+    public static  RailStation transferStation(List<RailStation> railStationList, RailStation railStation) {
+        String name = railStation.StationName.Zh_tw;
+
+        switch (name) {
+            case "南港":
+                name = "南港";
+                break;
+            case "臺北":
+                name = "台北";
+                break;
+            case "台北":
+                name = "臺北";
+                break;
+            case "板橋":
+                name = "板橋";
+                break;
+            case "新竹":
+                name = "六家";
+                break;
+            case "六家":
+                name = "新竹";
+                break;
+            case "苗栗":
+                name = "豐富";
+                break;
+            case "豐富":
+                name = "苗栗";
+                break;
+            case "新烏日":
+                name = "台中";
+                break;
+            case "台中":
+                name = "新烏日";
+                break;
+            case "台南":
+                name = "沙崙";
+                break;
+            case "沙崙":
+                name = "台南";
+                break;
+            case "左營":
+                name = "新左營";
+                break;
+            case "新左營":
+                name = "左營";
+                break;
+            case "桃園":
+            case "嘉義":
+            case "雲林":
+            case "彰化":
+                name = "123";
+                break;
+        }
+
+        for (RailStation railStation1_temp : railStationList) {
+            //if((!(railStation1_temp.OperatorID == null ? "TRA" : railStation1_temp.OperatorID).equals((railStation.OperatorID == null ? "TRA" : railStation.OperatorID)))&&(railStation1_temp.StationName.Zh_tw.equals(name))){
+            if ((!railStation1_temp.OperatorID.equals(railStation.OperatorID)) && (railStation1_temp.StationName.Zh_tw.equals(name))) {
+                return railStation1_temp;
+            }
+        }
+        return null;
+    }
+
+    public static void logD(List<RailStation> railStationList) {
+        StringBuilder sb = new StringBuilder();
+
+        for(RailStation railStation:railStationList) {
+            sb.append(railStation.StationName.Zh_tw);
+            sb.append("→");
+        }
+        Log.d("DEBUG", sb.toString());
+    }
+
+    public static RailStation find(List<RailStation> railStationList, String StationID) {//把StationID轉成RailStation型態
+        for(RailStation railStation:railStationList) {
+            if(railStation.StationID.equals(StationID)) {
+                return railStation;
             }
         }
         return null;
@@ -109,26 +219,18 @@ public class RailStation implements Comparable<RailStation> {
                 case "山里": case "臺東": case "康樂": case "知本": case "太麻里":
                 case "金崙": case "瀧溪": case "大武": case "古莊": case "富貴":
                 case "台北": case "台中": case "雲林":
-                    continue;
+                    break;
                 default:
                     list.remove(i);
                     i--;
-                    continue;
+                    break;
             }
         }
     }
 
     @Override
     public int compareTo(RailStation f) {
-        if (Integer.parseInt(ReservationCode) > Integer.parseInt(f.ReservationCode)) {
-            return 1;
-        }
-        else if (Integer.parseInt(ReservationCode) < Integer.parseInt(f.ReservationCode)) {
-            return -1;
-        }
-        else {
-            return 0;
-        }
+        return Integer.compare(Integer.parseInt(ReservationCode), Integer.parseInt(f.ReservationCode));
     }
 }
 

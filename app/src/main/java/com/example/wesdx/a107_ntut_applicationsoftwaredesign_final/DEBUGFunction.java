@@ -31,10 +31,10 @@ public class DEBUGFunction {
             }
         }
 
-        for(int i = 0; i < x.length; i++) {
-            System.out.print(x[i].StationName);
+        for (Temp aX : x) {
+            System.out.print(aX.StationName);
             System.out.print('\t');
-            System.out.println(x[i].num);
+            System.out.println(aX.num);
         }
         return x;
     }

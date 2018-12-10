@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".WelcomeActivity">
+
+    <item
+        android:id="@+id/action_settings" app:showAsAction="never" android:title="settings">
+    </item>
+    <item
+        android:id="@+id/action_exit"  app:showAsAction="never" android:title="exit">
+    </item>
+</menu>
