@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.Router;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,9 +102,9 @@ public class StationOfLine {
         return stationOfLine_new;
     }
 
-    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws Exception {
+    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws Router.RouterException {
         StationOfLine B_NW_StationOfLine = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
-        if(B_NW_StationOfLine == null) throw new Exception("stationOfLineList illegal");
+        if(B_NW_StationOfLine == null) throw new Router.RouterException("stationOfLineList illegal");
 
         for(StationOfLine stationOfLine:stationOfLineList) {
             switch (stationOfLine.LineNo) {

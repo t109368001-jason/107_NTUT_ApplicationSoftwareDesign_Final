@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -163,7 +164,7 @@ public class ShowResultDetailActivity extends AppCompatActivity {
             ((TextView)convertView.findViewById(R.id.arrivalTimeTextView)).setText(trainPathPart.railDailyTimetable.getStopTimeOfStopTimes(trainPathPart.originStation).DepartureTime);
             ((TextView)convertView.findViewById(R.id.departureTimeTextView)).setText(trainPathPart.railDailyTimetable.getStopTimeOfStopTimes(trainPathPart.destinationStation).ArrivalTime);
             ((TextView)convertView.findViewById(R.id.trainNoTextView)).setText(trainPathPart.railDailyTimetable.DailyTrainInfo.TrainNo);
-            ((TextView)convertView.findViewById(R.id.trainTypeTextView)).setText(trainPathPart.railDailyTimetable.DailyTrainInfo.TrainTypeName.Zh_tw);
+            ((TextView)convertView.findViewById(R.id.trainTypeTextView)).setText((trainPathPart.originStation.OperatorID.equals(API.THSR)) ? "高鐵" : trainPathPart.railDailyTimetable.DailyTrainInfo.TrainTypeName.Zh_tw);
             ((ImageView)convertView.findViewById(R.id.trainIconImageView)).setImageResource((trainPathPart.originStation.OperatorID.equals("THSR") ? R.drawable.thsr : R.drawable.tra));
             return convertView;
         }

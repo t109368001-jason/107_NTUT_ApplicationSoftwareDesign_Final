@@ -35,6 +35,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.security.SignatureException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -206,6 +207,11 @@ public class MainActivity extends AppCompatActivity {
                                         SharedPreferences.Editor editor = settings.edit();
                                         editor.putInt((which == 0 ? "TRAToTRATransferTime" : "TRAToTHSRTransferTime"), time);
                                         editor.apply();
+                                        if(which == 0) {
+                                            Router.TRAToTRATransferTime = time * 60 * 1000;
+                                        } else {
+                                            Router.TRAToTHSRTransferTime = time * 60 * 1000;
+                                        }
                                         Toast.makeText(MainActivity.this, "已將" + (which == 0 ? "台鐵-台鐵轉乘時間" : "台鐵-高鐵轉乘時間") + "設為：" + Integer.toString(time), Toast.LENGTH_SHORT).show();
                                     }
                                 }
@@ -233,18 +239,13 @@ public class MainActivity extends AppCompatActivity {
                     List<RailStation> railStationList_TRA = API.getStation(API.TRA);
                     List<RailStation> railStationList_THSR = API.getStation(API.THSR);
                     RailStation.removeUnreservationStation(railStationList_TRA);
-                    Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
-                    Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
+
+                    Router.initCache(railStationList_TRA, railStationList_THSR);
+
                     railStationList = new ArrayList<>();
                     railStationList.addAll(railStationList_TRA);
                     railStationList.addAll(railStationList_THSR);
                     regionalRailStationList = RegionalRailStation.convert(railStationList);
-
-                    for(int i = 0 ; i < railStationList.size(); i++) {
-                        if(railStationList.get(i).OperatorID == null) {
-                            continue;
-                        }
-                    }
 
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                     String originStationID = settings.getString("originStationID", "");
@@ -263,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
                             destinationStation = railStation;
                         }
                     }
-                } catch (SignatureException | IOException e) {
+                } catch (SignatureException | IOException | ParseException | Router.RouterException e) {
                     e.printStackTrace();
                 }
                 return null;
@@ -331,9 +332,10 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 */
+
                     trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
 
-                } catch (Exception e) {
+                } catch (ParseException | Router.RouterException | SignatureException | IOException e) {
                     e.printStackTrace();
                     errorMessage = e.getMessage();
                 }
@@ -391,10 +393,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, final int which) {
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
 
-                final String[] stationList = new String[regionalRailStationList.get(which).railStationList.size()];
+                List<String> buffer = new ArrayList<>();
 
                 for(int i = 0; i < regionalRailStationList.get(which).railStationList.size(); i++) {
-                    stationList[i] = regionalRailStationList.get(which).railStationList.get(i).StationName.Zh_tw;
+                    if(regionalRailStationList.get(which).railStationList.get(i).StationName.Zh_tw.equals("古莊")) continue;
+                    buffer.add(regionalRailStationList.get(which).railStationList.get(i).StationName.Zh_tw);
+                }
+
+                final String[] stationList = new String[buffer.size()];
+                for(int i = 0; i < buffer.size(); i++) {
+                    stationList[i] = buffer.get(i);
                 }
 
                 alertDialog.setTitle("選擇區域");

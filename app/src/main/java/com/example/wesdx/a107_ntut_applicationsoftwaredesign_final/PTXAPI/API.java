@@ -148,7 +148,7 @@ public class API {
     }
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) throws SignatureException, IOException {
-        if(transportation == THSR) return null;
+        if(transportation.equals(THSR)) return null;
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 

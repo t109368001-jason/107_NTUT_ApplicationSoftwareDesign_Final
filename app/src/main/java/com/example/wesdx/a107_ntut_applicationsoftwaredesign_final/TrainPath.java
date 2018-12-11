@@ -1,7 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.support.annotation.NonNull;
-
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
@@ -182,6 +180,11 @@ public class TrainPath implements Comparable<TrainPath> {
                                                 trainPathList_new.remove(i);
                                                 i--;
                                                 nextI = true;
+                                            } else {
+                                                if(trainPath1.trainPathPartList.size() > 1) {
+                                                    trainPathList_new.remove(j);
+                                                    j--;
+                                                }
                                             }
                                             break;
                                         case -1:    //trainPathPart1 < trainPathPart2
