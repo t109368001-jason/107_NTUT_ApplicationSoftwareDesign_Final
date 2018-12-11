@@ -1,5 +1,6 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
@@ -9,9 +10,46 @@ import java.util.Collections;
 import java.util.List;
 
 public class MyRailStation {
+    public static List<RailStation> getTHSRRailStationList(final List<RailStation> railStationList_input, RailStation originStation, RailStation destinationStation) {
+        List<RailStation> railStationList_new = new ArrayList<>();
+        List<String> stationNameList = new ArrayList<>();
+        stationNameList.add("南港");
+        stationNameList.add("台北");
+        stationNameList.add("板橋");
+        stationNameList.add("桃園");
+        stationNameList.add("新竹");
+        stationNameList.add("苗栗");
+        stationNameList.add("台中");
+        stationNameList.add("彰化");
+        stationNameList.add("雲林");
+        stationNameList.add("嘉義");
+        stationNameList.add("台南");
+        stationNameList.add("左營");
 
-    public static List<List<RailStation>> getRailStationList(List<RailStation> railStationList, RailStation originStation, RailStation destinationStation) {
+        int begIndex = 0;
+        int endIndex = 0;
+        for(int i = 0; i < stationNameList.size(); i++) {
+            if(stationNameList.get(i).equals(originStation.StationName.Zh_tw)) {
+                begIndex = i;
+            }
+            if(stationNameList.get(i).equals(destinationStation.StationName.Zh_tw)) {
+                endIndex = i;
+            }
+        }
+
+        for(int i = begIndex; i <= endIndex; i++) {
+            for(RailStation railStation:railStationList_input) {
+                if(railStation.OperatorID.equals(API.THSR)&&railStation.StationName.Zh_tw.equals(stationNameList.get(i))) {
+                    railStationList_new.add(railStation);
+                    break;
+                }
+            }
+        }
+        return railStationList_new;
+    }
+    public static List<List<RailStation>> getRailStationList(final List<RailStation> railStationList_input, RailStation originStation, RailStation destinationStation) {
         List<List<RailStation>> out = null;
+        List<RailStation> railStationList = new ArrayList<>(railStationList_input);
 
         final StationOfLine originStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, originStation.StationID);
         final StationOfLine destinationStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, destinationStation.StationID);
@@ -561,6 +599,13 @@ public class MyRailStation {
         for(List<RailStation> railStationList_temp:out) {
             if(railStationList_temp.size() < 2) continue;
             for(int i = 0; i < railStationList_temp.size()-1; i++) {
+                if(railStationList_temp.get(i) == null) {
+                    continue;
+                }
+                if(railStationList_temp.get(i + 1) == null) {
+                    continue;
+                }
+
                 if(railStationList_temp.get(i).StationID.equals(railStationList_temp.get(i+1).StationID)) {
                     railStationList_temp.remove(i);
                     i--;

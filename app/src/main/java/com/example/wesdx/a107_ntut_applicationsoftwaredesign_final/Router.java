@@ -10,6 +10,7 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailSt
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 
+import java.security.interfaces.RSAKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Router {
         }
     }
 
-    public static long TRANSFER_TIME = 10 * 60 * 1000;
+    public static long TRANSFER_TIME = 1 * 60 * 1000;
     public static List<StationOfLine> stationOfLineList;
 
     public static String TRARailDailyTimetableListCacheDate;
@@ -56,7 +57,7 @@ public class Router {
         }
     }
 
-    public static List<TrainPath> getTrainPath(String transportation, String date, Date originDepartureTime, Date destinationArrivalTime, List<RailDailyTimetable> railDailyTimetableList_input, List<RailStation> railStationList, RailStation originStation, RailStation destinationStation, boolean isDirectArrival) throws ParseException, RouterException {
+    public static List<TrainPath> getTrainPath(String transportation, String date, Date originDepartureTime, Date destinationArrivalTime, List<RailDailyTimetable> railDailyTimetableList_input, final List<RailStation> railStationList, RailStation originStation, RailStation destinationStation, boolean isDirectArrival) throws ParseException, RouterException {
         List<TrainPath> trainPathList = new ArrayList<>();
 
         if(stationOfLineList == null) {
@@ -91,6 +92,8 @@ public class Router {
         } else {
             if (transportation.equals(API.TRA_AND_THSR)) {
                 List<RailStation> railStationList_THSR_ALL = API.getStation(API.THSR);//匯入高鐵所有站
+                final List<RailStation> railStations_TRA_ALL = API.getStation(API.TRA);
+                RailStation.removeUnreservationStation(railStations_TRA_ALL);
                 List<RailStation> THSR_have_TRA = new ArrayList<>();
                 List<RailStation> TRA_have_THSR = new ArrayList<>();
 
@@ -129,96 +132,243 @@ public class Router {
                     THSRRailDailyTimetableListCache = railDailyTimetableList_THSR_ALL;
                 }
 
-                RailStation originStation_THSR = (originStation.OperatorID.equals("TRA"))?RailStation.transferStation(railStationList, originStation):originStation;//把輸入車站一律轉換成高鐵，若無法轉換則為null
-                RailStation destinationStation_THSR = (destinationStation.OperatorID.equals("TRA"))?RailStation.transferStation(railStationList, destinationStation):destinationStation;
-                RailStation originStation_TRA = (originStation.OperatorID.equals("THSR"))?RailStation.transferStation(railStationList, originStation):originStation;//把輸入車站一律轉換為台鐵，若輸入為沒有台鐵的高鐵站則為null
-                RailStation destinationStation_TRA = (destinationStation.OperatorID.equals("THSR"))?RailStation.transferStation(railStationList, destinationStation):destinationStation;
+                if((originStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, originStation) != null)) && (destinationStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, destinationStation) != null))) {//如果起站跟終站都是高鐵的話不轉乘
+                    trainPathList = getTrainPath(API.THSR, date, originDepartureTime, destinationArrivalTime, null, null, originStation.OperatorID.equals(API.THSR) ? originStation : RailStation.transferStation(railStationList, originStation), destinationStation.OperatorID.equals(API.THSR) ? destinationStation : RailStation.transferStation(railStationList, destinationStation), true);
+                } else {
+                    boolean boolorininStationisTHSR  = originStation.OperatorID.equals("THSR");//把輸入車站一律轉換成高鐵，若無法轉換則為null
+                    boolean booldestinationStationisTHSR = destinationStation.OperatorID.equals("THSR");
+                    List<RailStation> originStation_THSR_twoSide = new ArrayList<>();
+                    List<RailStation> destinationStation_THSR_twoSide = new ArrayList<>();
+                    RailStation firstRailStation = new RailStation();
+                    RailStation lastRailStation = new RailStation();
+                    RailStation originStation_TRA = new RailStation();
+                    RailStation destinationStation_TRA = new RailStation();
+                    RailStation originStation_THSR = new RailStation();
+                    RailStation destinationStation_THSR = new RailStation();
 
-                if(( (originStation_TRA.OperatorID.equals("THSR")) && ((destinationStation_TRA.OperatorID.equals("THSR")) || (destinationStation_THSR != null ))) ||
-                        ((originStation_THSR != null ) && ((destinationStation_THSR != null) || (destinationStation_TRA.OperatorID.equals("THSR"))) )) {//如果起站跟終站都是高鐵的話不轉乘
-                    trainPathList = getTrainPath(API.THSR, date, originDepartureTime, null, null, railStationList_THSR_ALL, originStation_THSR, destinationStation_THSR, true);
-                } else if((originStation_TRA.OperatorID.equals("THSR"))||(originStation_THSR != null)){//如果起站是高鐵終站是臺鐵的話一段轉乘
-                    if(originStation_THSR != null){//如果起站是高鐵而且同時有臺鐵的話
-                        List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation_TRA, destinationStation_TRA);//台鐵的起站到終站的所有班次裡的所有站
 
-                        for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天每個班次裡會經過2站以上的班次篩選出來
-                            List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
-                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
-                            List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);//在該路徑下含有台鐵的高鐵最遠可以走的班次表
+                    if (boolorininStationisTHSR && booldestinationStationisTHSR) return null;
 
-                            for(int i = 0; i<railDailyTimetableList_THSR.size(); i++){
-                                if((railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR) == null)||(railDailyTimetableList_THSR.get(i).getStopTimeOfStopTimes(originStation_THSR).getDepartureTimeDate().before(originDepartureTime))){
-                                    railDailyTimetableList_THSR.remove(i);
-                                    i--;
+                    if (boolorininStationisTHSR) {
+                        originStation_THSR_twoSide.add(originStation);
+                        if (RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(0)) == null) {
+                            originStation_THSR_twoSide = RailStation.getTwoSide(railStationList, originStation);
+                        }
+                        firstRailStation = originStation;
+                    } else {
+                        originStation_TRA = originStation;
+                    }
+
+                    if (booldestinationStationisTHSR) {
+                        destinationStation_THSR_twoSide.add(destinationStation);
+                        if (RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(0)) == null) {
+                            destinationStation_THSR_twoSide = RailStation.getTwoSide(railStationList, destinationStation);
+                        }
+                        lastRailStation = destinationStation;
+                    } else {
+                        destinationStation_TRA = destinationStation;
+                    }
+
+                    if ((originStation_THSR_twoSide == null) || (destinationStation_THSR_twoSide == null))
+                        return null;
+
+                    if (originStation_THSR_twoSide.size() > 1) {
+                        int min_THSR = 239;
+                        int min_THSR_Index = 0;
+                        for (int i = 0; i < originStation_THSR_twoSide.size(); i++) {
+                            RailStation railStation_TRA_temp = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(i));
+                            if (railStation_TRA_temp == null) throw new RouterException("170");
+
+                            List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, railStation_TRA_temp, destinationStation);
+
+                            int min = 239;
+                            int minIndex = 0;
+
+                            for (int j = 0; j < railStation_list_list.size(); j++) {
+                                if (railStation_list_list.get(j).size() < min) {
+                                    min = railStation_list_list.get(j).size();
+                                    minIndex = j;
                                 }
                             }
 
-                            for(RailDailyTimetable railDailyTimetableList_THSR_temp:railDailyTimetableList_THSR){
-                                StopTime THSR_LastStopTime = railDailyTimetableList_THSR_temp.findLastStopTime(railStationList_THSR);
-                                RailStation lastStation_THSR = RailStation.find(railStationList_THSR, THSR_LastStopTime.StationID);
-                                Date THSR_ArrivalTime = API.timeFormat.parse(THSR_LastStopTime.ArrivalTime);
-                                Date TRA_DepartureTime = new Date(THSR_ArrivalTime.getTime() + TRANSFER_TIME);
+                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
 
-                                List<TrainPath> TRA_trainPath;
-
-                                if((TRA_trainPath = getTrainPath(API.TRA, date, TRA_DepartureTime, null, null, railStationList_current, RailStation.transferStation(railStationList, lastStation_THSR), destinationStation, false)) == null) continue;
-
-                                TrainPath best = null;
-
-                                for(TrainPath TRA_trainPath_temp:TRA_trainPath){
-                                    if(best == null) best = TRA_trainPath_temp;
-                                    else {
-                                        Date tempTime = TRA_trainPath_temp.getDestinationArrivalTimeDate();
-                                        Date bestTime = best.getLastItem().railDailyTimetable.getStopTimeOfStopTimes(best.getLastItem().destinationStation).getDepartureTimeDate();
-
-                                        if (TRA_trainPath_temp.getLastItem().railDailyTimetable.afterOverNightStation(TRA_trainPath_temp.getLastItem().destinationStation.StationID)) {
-                                            tempTime.setDate(tempTime.getDate() + 1);
-                                        }
-                                        if (best.getLastItem().railDailyTimetable.afterOverNightStation(best.getLastItem().destinationStation.StationID)) {
-                                            bestTime.setDate(bestTime.getDate() + 1);
-                                        }
-                                        if(tempTime.before(bestTime)){
-                                            best = TRA_trainPath_temp;
-                                        }
-                                    }
+                            if (railStationList_THSR.size() < min_THSR) {
+                                min_THSR = railStationList_THSR.size();
+                                min_THSR_Index = i;
+                                if (railStationList_THSR.size() > 0) {
+                                    lastRailStation = railStationList_THSR.get(railStationList_THSR.size() - 1);
+                                } else {
+                                    lastRailStation = null;
                                 }
-
-                                if(best == null) continue;
-
-                                TrainPath trainPath = new TrainPath();
-                                trainPath.trainPathPartList = new ArrayList<>();
-                                TrainPath.TrainPathPart trainPathPart = new TrainPath.TrainPathPart();
-                                trainPathPart.originStation = originStation_THSR;
-                                trainPathPart.destinationStation = lastStation_THSR;
-                                trainPathPart.railDailyTimetable = railDailyTimetableList_THSR_temp;
-                                trainPath.trainPathPartList.add(trainPathPart);
-                                trainPath.trainPathPartList.addAll(best.trainPathPartList);
-                                trainPathList.add(trainPath);
                             }
                         }
-                    } else {//如果起站是高鐵但沒有臺鐵的話
+                        originStation_TRA = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(min_THSR_Index));
+                    } else if (originStation_THSR_twoSide.size() == 1) {
+                        RailStation firstRailStation_temp = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(0));
+                        firstRailStation = originStation_THSR_twoSide.get(0);
 
-                    }
-                } else if(destinationStation_TRA.OperatorID.equals("THSR")||(destinationStation_THSR != null)){//如果起站是臺鐵終站是高鐵的話一段轉乘
-                    if(destinationStation_THSR != null){//如果終站是高鐵而且同時有臺鐵的話
-                        List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation_TRA, destinationStation_TRA);//有方向性的所有路徑
+                        List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, firstRailStation_temp, destinationStation);
 
-                        for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天班次裡會經過2站以上的班次篩選出來
-                            List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
-                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
-                            List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);
+                        int min = 239;
+                        int minIndex = 0;
+
+                        for (int j = 0; j < railStation_list_list.size(); j++) {
+                            if (railStation_list_list.get(j).size() < min) {
+                                min = railStation_list_list.get(j).size();
+                                minIndex = j;
+                            }
                         }
-                    } else {//如果終站是高鐵但沒有臺鐵的話
 
+                        List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                        if (railStationList_THSR.size() > 0) {
+                            lastRailStation = railStationList_THSR.get(railStationList_THSR.size() - 1);
+                        } else {
+                            lastRailStation = null;
+                        }
+                        originStation_TRA = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(0));
                     }
-                } else {//如果起站跟終站都是臺鐵的話二段轉乘
-                    //遞迴賢杰功能
-                    List<List<RailStation>> railStationList_List = MyRailStation.getRailStationList(railStationList, originStation_TRA, destinationStation_TRA);//台鐵的起站到終站的所有班次裡的所有站
 
-                    for (List<RailStation> railStationList_current : railStationList_List) {//把台鐵高鐵當天班次裡會經過2站以上的班次篩選出來
-                        List<RailDailyTimetable> railDailyTimetableList_TRA = RailDailyTimetable.filterByPath(railDailyTimetableList_TRA_ALL, railStationList_current, true, 2);
-                        List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStationList_current, railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
-                        List<RailDailyTimetable> railDailyTimetableList_THSR = RailDailyTimetable.filterByPath(railDailyTimetableList_THSR_ALL, railStationList_THSR, true, 2);
+                    if (destinationStation_THSR_twoSide.size() > 1) {
+                        int min_THSR = 239;
+                        int min_THSR_Index = 0;
+                        for (int i = 0; i < destinationStation_THSR_twoSide.size(); i++) {
+                            RailStation railStation_TRA_temp = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(i));
+                            if (railStation_TRA_temp == null) throw new RouterException("239");
+
+                            List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation, railStation_TRA_temp);
+
+                            int min = 239;
+                            int minIndex = 0;
+
+                            for (int j = 0; j < railStation_list_list.size(); j++) {
+                                if (railStation_list_list.get(j).size() < min) {
+                                    min = railStation_list_list.get(j).size();
+                                    minIndex = j;
+                                }
+                            }
+
+                            List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                            if (railStationList_THSR.size() < min_THSR) {
+                                min_THSR = railStationList_THSR.size();
+                                min_THSR_Index = i;
+                                if (railStationList_THSR.size() > 0) {
+                                    firstRailStation = railStationList_THSR.get(0);
+                                } else {
+                                    firstRailStation = null;
+                                }
+                            }
+                        }
+                        destinationStation_TRA = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(min_THSR_Index));
+
+                    } else if (destinationStation_THSR_twoSide.size() == 1) {
+                        RailStation lastRailStation_temp = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(0));
+                        lastRailStation = destinationStation_THSR_twoSide.get(0);
+
+                        List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation, lastRailStation_temp);
+
+                        int min = 239;
+                        int minIndex = 0;
+
+                        for (int j = 0; j < railStation_list_list.size(); j++) {
+                            if (railStation_list_list.get(j).size() < min) {
+                                min = railStation_list_list.get(j).size();
+                                minIndex = j;
+                            }
+                        }
+
+                        List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                        if (railStationList_THSR.size() > 0) {
+                            firstRailStation = railStationList_THSR.get(0);
+                        } else {
+                            firstRailStation = null;
+                        }
+
+                        destinationStation_TRA = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(0));
+                    }
+
+                    if(!(boolorininStationisTHSR&&booldestinationStationisTHSR)) {
+
+                        List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation_TRA, destinationStation_TRA);
+
+                        int min = 239;
+                        int minIndex = 0;
+
+                        for (int j = 0; j < railStation_list_list.size(); j++) {
+                            if (railStation_list_list.get(j).size() < min) {
+                                min = railStation_list_list.get(j).size();
+                                minIndex = j;
+                            }
+                        }
+
+                        List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                        if((railStationList_THSR != null ? railStationList_THSR.size() : 0) == 0) {
+                            return getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                        }
+                        firstRailStation = railStationList_THSR.get(0);
+                        lastRailStation = railStationList_THSR.get(railStationList_THSR.size()-1);
+                    }
+
+                    if((originStation.OperatorID.equals(API.THSR) ? originStation : firstRailStation).StationID.equals((destinationStation.OperatorID.equals(API.THSR) ? destinationStation : lastRailStation).StationID)&&(!(boolorininStationisTHSR&&booldestinationStationisTHSR))){
+                        trainPathList = getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                    } else {
+
+                        List<TrainPath> trainPathList_mid_all = getTrainPath(API.THSR, date, originDepartureTime, destinationArrivalTime, null, null, (originStation.OperatorID.equals(API.THSR) ? originStation : firstRailStation), (destinationStation.OperatorID.equals(API.THSR) ? destinationStation : lastRailStation), true);
+
+
+                        for (TrainPath trainPath_mid : trainPathList_mid_all) {
+                            TrainPath trainPath_first = null;
+                            TrainPath trainPath_last = null;
+                            RailStation firstRailStation_TRA = RailStation.transferStation(railStationList, trainPath_mid.getOriginRailStation());
+                            RailStation lastRailStation_TRA = RailStation.transferStation(railStationList, trainPath_mid.getDestinationRailStation());
+                            Date firstTime = trainPath_mid.getOriginDepartureTimeDate();
+                            Date lastTime = trainPath_mid.getDestinationArrivalTimeDate();
+
+                            TrainPath trainPath_temp = new TrainPath();
+                            trainPath_temp.trainPathPartList = new ArrayList<>();
+
+                            if ((originStation_TRA != null) && (firstRailStation_TRA != null)) {
+                                if (!(originStation_TRA.StationID.equals(firstRailStation_TRA.StationID))) {
+                                    Date firstTimeThreshold = new Date(firstTime.getTime() - TRANSFER_TIME);
+                                    List<TrainPath> trainPathList_first;
+                                    if ((trainPathList_first = getTrainPath(API.TRA, date, originDepartureTime, firstTimeThreshold, null, null, originStation_TRA, firstRailStation_TRA, true)) == null)
+                                        continue;
+
+                                    if ((trainPath_first = TrainPath.getBest(trainPathList_first, true, false)) == null)
+                                        continue;
+                                }
+                            }
+
+                            if ((destinationStation_TRA != null) && (lastRailStation_TRA != null)) {
+                                if (!(destinationStation_TRA.StationID.equals(lastRailStation_TRA.StationID))) {
+                                    Date lastTimeThreshold = new Date(lastTime.getTime() + TRANSFER_TIME);
+                                    List<TrainPath> trainPathList_last;
+                                    if ((trainPathList_last = getTrainPath(API.TRA, date, lastTimeThreshold, destinationArrivalTime, null, null, lastRailStation_TRA, destinationStation_TRA, true)) == null)
+                                        continue;
+
+                                    if ((trainPath_last = TrainPath.getBest(trainPathList_last, false, true)) == null)
+                                        continue;
+                                }
+                            }
+
+                            if (trainPath_first != null)
+                                trainPath_temp.trainPathPartList.addAll(trainPath_first.trainPathPartList);
+
+                            trainPath_temp.trainPathPartList.addAll(trainPath_mid.trainPathPartList);
+
+                            if (trainPath_last != null)
+                                trainPath_temp.trainPathPartList.addAll(trainPath_last.trainPathPartList);
+
+                            trainPathList.add(trainPath_temp);
+                        }
+                        if(!(boolorininStationisTHSR&&booldestinationStationisTHSR)) {
+                            List<TrainPath> trainPathList_temp = getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                            trainPathList.addAll(trainPathList_temp);
+                        }
                     }
                 }
             } else if (transportation.equals(API.TRA)) {

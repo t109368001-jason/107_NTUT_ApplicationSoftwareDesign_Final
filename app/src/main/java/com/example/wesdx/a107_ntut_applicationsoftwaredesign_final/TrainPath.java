@@ -97,11 +97,11 @@ public class TrainPath {
             if(trainPath == null) trainPath = trainPath_temp;
             else {
                 if(useOriginDeparetureTime) {
-                    if(trainPath_temp.getOriginDepartureTimeDate().before(trainPath.getOriginDepartureTimeDate()) && useEarliest) {
+                    if(trainPath_temp.getOriginDepartureTimeDate().before(trainPath.getOriginDepartureTimeDate()) ^ (!useEarliest)) {
                         trainPath = trainPath_temp;
                     }
                 } else {
-                    if(trainPath_temp.getDestinationArrivalTimeDate().before(trainPath.getDestinationArrivalTimeDate()) && useEarliest) {
+                    if(trainPath_temp.getDestinationArrivalTimeDate().before(trainPath.getDestinationArrivalTimeDate()) ^ (!useEarliest)) {
                         trainPath = trainPath_temp;
                     }
                 }
