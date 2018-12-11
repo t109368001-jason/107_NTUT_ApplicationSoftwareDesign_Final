@@ -1,7 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.support.annotation.NonNull;
-
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
@@ -99,11 +97,11 @@ public class TrainPath implements Comparable<TrainPath> {
             if(trainPath == null) trainPath = trainPath_temp;
             else {
                 if(useOriginDeparetureTime) {
-                    if(trainPath_temp.getOriginDepartureTimeDate().before(trainPath.getOriginDepartureTimeDate()) && useEarliest) {
+                    if(trainPath_temp.getOriginDepartureTimeDate().before(trainPath.getOriginDepartureTimeDate()) ^ (!useEarliest)) {
                         trainPath = trainPath_temp;
                     }
                 } else {
-                    if(trainPath_temp.getDestinationArrivalTimeDate().before(trainPath.getDestinationArrivalTimeDate()) && useEarliest) {
+                    if(trainPath_temp.getDestinationArrivalTimeDate().before(trainPath.getDestinationArrivalTimeDate()) ^ (!useEarliest)) {
                         trainPath = trainPath_temp;
                     }
                 }
@@ -182,6 +180,11 @@ public class TrainPath implements Comparable<TrainPath> {
                                                 trainPathList_new.remove(i);
                                                 i--;
                                                 nextI = true;
+                                            } else {
+                                                if(trainPath1.trainPathPartList.size() > 1) {
+                                                    trainPathList_new.remove(j);
+                                                    j--;
+                                                }
                                             }
                                             break;
                                         case -1:    //trainPathPart1 < trainPathPart2

@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.Router;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,14 +77,22 @@ public class StationOfLine {
                 if(lineStation.StationID.equals(stationID)) {
                     if(stationOfLine_new == null) stationOfLine_new = new StationOfLine(stationOfLine);
                     else {
-                        switch (stationOfLine.LineNo) {
+                        switch (stationOfLine_new.LineNo) {
                             case E_EL:
                             case W_TL_N:
-                            case W_TL_M:
-                            case W_TL_C:
                             case W_TL_S:
                             case W_PL:
                             case S_SL:
+                                continue;
+                        }
+                        switch (stationOfLine.LineNo) {
+                            case E_EL:
+                            case W_TL_N:
+                            case W_TL_S:
+                            case W_PL:
+                            case S_SL:
+                            case W_TL_C:
+                            case W_TL_M:
                                 stationOfLine_new = new StationOfLine(stationOfLine);
                         }
                     }
@@ -92,9 +102,9 @@ public class StationOfLine {
         return stationOfLine_new;
     }
 
-    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws Exception {
+    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws Router.RouterException {
         StationOfLine B_NW_StationOfLine = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
-        if(B_NW_StationOfLine == null) throw new Exception("stationOfLineList illegal");
+        if(B_NW_StationOfLine == null) throw new Router.RouterException("stationOfLineList illegal");
 
         for(StationOfLine stationOfLine:stationOfLineList) {
             switch (stationOfLine.LineNo) {

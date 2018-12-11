@@ -35,9 +35,9 @@
         android:layout_marginStart="8dp"
         android:text="出發站："
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@+id/originStationTextView"
+        app:layout_constraintBottom_toBottomOf="@+id/stationNameTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/originStationTextView" />
+        app:layout_constraintTop_toTopOf="@+id/stationNameTextView" />
 
     <TextView
         android:id="@+id/textView7"
@@ -72,12 +72,12 @@
         android:text="互換"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/originStationTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/stationNameTextView" />
 
     <CheckBox
-        android:id="@+id/directArrivalCheckBox"
+        android:id="@+id/isDirectArrivalCheckBox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="34dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="直達"
@@ -85,7 +85,7 @@
         app:layout_constraintTop_toBottomOf="@+id/searchButton" />
 
     <TextView
-        android:id="@+id/originStationTextView"
+        android:id="@+id/stationNameTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -112,5 +112,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView7"
         app:layout_constraintTop_toBottomOf="@+id/changeStationButton" />
+
+    <CheckBox
+        android:id="@+id/useTHSR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="高鐵"
+        app:layout_constraintStart_toEndOf="@+id/isDirectArrivalCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/searchButton" />
 
 </android.support.constraint.ConstraintLayout>

@@ -16,6 +16,52 @@ public class RailDailyTimetable {
     public String  UpdateTime;
     public String  VersionID;
 
+    public RailDailyTimetable(RailGeneralTimetable railGeneralTimetable, String date) throws ParseException {
+        this.TrainDate = date;
+        this.DailyTrainInfo = new RailDailyTrainInfo();
+        this.DailyTrainInfo.TrainNo = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainNo;
+        this.DailyTrainInfo.Direction = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.Direction;
+        this.DailyTrainInfo.StartingStationID = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.StartingStationID;
+        this.DailyTrainInfo.StartingStationName = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.StartingStationName;
+        this.DailyTrainInfo.EndingStationID = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.EndingStationID;
+        this.DailyTrainInfo.EndingStationName = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.EndingStationName;
+        //this.DailyTrainInfo.TripHeadsign = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TripHeadsign;
+        this.DailyTrainInfo.TrainTypeID = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainTypeID;
+        this.DailyTrainInfo.TrainTypeCode = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainTypeCode;
+        this.DailyTrainInfo.TrainTypeName = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainTypeName;
+        this.DailyTrainInfo.TripLine = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TripLine;
+        if(railGeneralTimetable.GeneralTimetable.StopTimes.get(0).ArrivalTime != null) {
+            int size = railGeneralTimetable.GeneralTimetable.StopTimes.size();
+            for(int i = 0; i < (size - 1); i++) {
+                if(railGeneralTimetable.GeneralTimetable.StopTimes.get(i).getArrivalTimeDate().after(railGeneralTimetable.GeneralTimetable.StopTimes.get(i).getDepartureTimeDate())) {
+                    this.DailyTrainInfo.OverNightStationID = railGeneralTimetable.GeneralTimetable.StopTimes.get(i).StationID;
+                    break;
+                }
+                if(railGeneralTimetable.GeneralTimetable.StopTimes.get(i).getArrivalTimeDate().after(railGeneralTimetable.GeneralTimetable.StopTimes.get(i+1).getArrivalTimeDate())) {
+                    this.DailyTrainInfo.OverNightStationID = railGeneralTimetable.GeneralTimetable.StopTimes.get(i+1).StationID;
+                    break;
+                }
+                if(i == (size - 2)) {
+                    if(railGeneralTimetable.GeneralTimetable.StopTimes.get(i+1).getArrivalTimeDate().after(railGeneralTimetable.GeneralTimetable.StopTimes.get(i+1).getDepartureTimeDate())) {
+                        this.DailyTrainInfo.OverNightStationID = railGeneralTimetable.GeneralTimetable.StopTimes.get(i+1).StationID;
+                        break;
+                    }
+                }
+            }
+        }
+        this.DailyTrainInfo.WheelchairFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.WheelchairFlag;
+        this.DailyTrainInfo.PackageServiceFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.PackageServiceFlag;
+        this.DailyTrainInfo.DiningFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.DiningFlag;
+        this.DailyTrainInfo.BikeFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.BikeFlag;
+        this.DailyTrainInfo.BreastFeedingFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.BreastFeedingFlag;
+        this.DailyTrainInfo.DailyFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.DailyFlag;
+        //this.DailyTrainInfo.ServiceAddedFlag = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.ServiceAddedFlag;
+        this.DailyTrainInfo.Note = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.Note;
+        this.StopTimes = new ArrayList<>(railGeneralTimetable.GeneralTimetable.StopTimes);
+        this.UpdateTime = railGeneralTimetable.UpdateTime;
+        this.VersionID = railGeneralTimetable.VersionID;
+    }
+
     public boolean afterOverNightStation(String stationID) {//判斷該站有沒有過夜，
         if(DailyTrainInfo.OverNightStationID == null) return false;
         for(StopTime stopTime:StopTimes) {

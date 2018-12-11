@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <TextView
-        android:id="@+id/originDepartureTimeTextView"
+        android:id="@+id/arrivalTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -27,7 +27,7 @@
         app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <TextView
-        android:id="@+id/originStationTextView"
+        android:id="@+id/stationNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="起站起站"
@@ -43,7 +43,7 @@
         android:gravity="center"
         android:text=" → "
         app:layout_constraintBottom_toBottomOf="@+id/textView4"
-        app:layout_constraintStart_toEndOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintStart_toEndOf="@+id/arrivalTimeTextView"
         app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <TextView

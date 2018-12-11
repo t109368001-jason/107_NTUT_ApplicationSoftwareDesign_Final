@@ -12,12 +12,12 @@
         android:layout_marginStart="8dp"
         android:gravity="center"
         android:text=" → "
-        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
-        app:layout_constraintStart_toEndOf="@+id/originDepartureTimeTextView"
-        app:layout_constraintTop_toTopOf="@+id/originDepartureTimeTextView" />
+        app:layout_constraintBottom_toBottomOf="@+id/arrivalTimeTextView"
+        app:layout_constraintStart_toEndOf="@+id/arrivalTimeTextView"
+        app:layout_constraintTop_toTopOf="@+id/arrivalTimeTextView" />
 
     <TextView
-        android:id="@+id/originDepartureTimeTextView"
+        android:id="@+id/arrivalTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -32,9 +32,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="99:99"
-        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintBottom_toBottomOf="@+id/arrivalTimeTextView"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toTopOf="@+id/originDepartureTimeTextView" />
+        app:layout_constraintTop_toTopOf="@+id/arrivalTimeTextView" />
 
     <TextView
         android:id="@+id/totalTimeTextView"
@@ -43,10 +43,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:text="99小時99分"
-        app:layout_constraintBottom_toBottomOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintBottom_toBottomOf="@+id/arrivalTimeTextView"
         app:layout_constraintEnd_toStartOf="@+id/showDetailButton"
         app:layout_constraintStart_toEndOf="@+id/destinationArrivalTImeTextView"
-        app:layout_constraintTop_toTopOf="@+id/originDepartureTimeTextView" />
+        app:layout_constraintTop_toTopOf="@+id/arrivalTimeTextView" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"

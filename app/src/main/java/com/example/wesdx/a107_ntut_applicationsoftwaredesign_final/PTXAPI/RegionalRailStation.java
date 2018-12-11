@@ -38,7 +38,7 @@ public class RegionalRailStation implements Comparable<RegionalRailStation> {
                     case "北湖": case "湖口": case "新豐": case "竹北": case "北新竹":
                     case "新竹": case "三姓橋": case "香山": case "千甲": case "新莊":
                     case "竹中": case "六家": case "上員": case "榮華": case "竹東":
-                    case "橫山": case "九讚頭": case "合興": case "富貴(南河)": case "內灣":
+                    case "橫山": case "九讚頭": case "合興": case "富貴": case "內灣":
                         regionName = "新竹地區";
                         break;
                     case "石城": case "大里": case "大溪": case "龜山": case "外澳":
@@ -103,8 +103,11 @@ public class RegionalRailStation implements Comparable<RegionalRailStation> {
                         break;
                     case "池上": case "海端": case "關山": case "瑞和": case "瑞源":
                     case "鹿野": case "山里": case "臺東": case "康樂": case "知本":
-                    case "太麻里": case "金崙": case "瀧溪": case "大武":
+                    case "太麻里": case "金崙": case "瀧溪": case "大武": case "古莊":
                         regionName = "臺東地區";
+                        break;
+                    default:
+                        regionName = "其他";
                         break;
                 }
             } else if(railStation.OperatorID.equals(API.THSR)) {
