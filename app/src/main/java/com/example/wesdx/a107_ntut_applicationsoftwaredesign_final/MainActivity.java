@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private RailStation destinationStation;
     private List<RailStation> railStationList;
     private List<RegionalRailStation> regionalRailStationList;
-    private CheckBox isDirectArrivalCheckBox;
+    private CheckBox isDirectArrivalCheckBox, useTHSR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         Button searchButton = findViewById(R.id.searchButton);
         Button changeStationButton = findViewById(R.id.changeStationButton);
         isDirectArrivalCheckBox = findViewById(R.id.isDirectArrivalCheckBox);
+        useTHSR = findViewById(R.id.useTHSR);
 
         dateTextView.setText(API.dateFormat.format(Calendar.getInstance().getTime()));
         dateTextView.setOnClickListener(new View.OnClickListener() {
@@ -132,6 +133,16 @@ public class MainActivity extends AppCompatActivity {
                 destinationStation = railStation;
                 originStationTextView_buffer.setText(originStation.StationName.Zh_tw);
                 destinationStationTextView_buffer.setText(destinationStation.StationName.Zh_tw);
+            }
+        });
+
+        isDirectArrivalCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                useTHSR.setEnabled(!isDirectArrivalCheckBox.isChecked());
+                if(isDirectArrivalCheckBox.isChecked()) {
+                    useTHSR.setChecked(false);
+                }
             }
         });
 
@@ -289,7 +300,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    String transportation = (originStation.OperatorID.equals(destinationStation.OperatorID) ? originStation.OperatorID : API.TRA_AND_THSR);
+                    String transportation;
+                    if(useTHSR.isChecked()) {
+                        transportation = API.TRA_AND_THSR;
+                    } else {
+                        transportation = (originStation.OperatorID.equals(destinationStation.OperatorID) ? originStation.OperatorID : API.TRA_AND_THSR);
+                    }
                     /*
                     FileWriter fw = new FileWriter(getFilesDir() +"/text.txt");
                     PrintWriter pw = new PrintWriter(fw);
@@ -395,12 +411,18 @@ public class MainActivity extends AppCompatActivity {
                             if (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA)) {
                                 isDirectArrivalCheckBox.setEnabled(true);
                                 isDirectArrivalCheckBox.setChecked(false);
+                                useTHSR.setVisibility(View.VISIBLE);
+
                             } else if (originStation.OperatorID.equals(API.THSR) && destinationStation.OperatorID.equals(API.THSR)) {
                                 isDirectArrivalCheckBox.setEnabled(false);
                                 isDirectArrivalCheckBox.setChecked(true);
+                                useTHSR.setVisibility(View.INVISIBLE);
+                                useTHSR.setChecked(false);
                             } else {
                                 isDirectArrivalCheckBox.setEnabled(false);
                                 isDirectArrivalCheckBox.setChecked(false);
+                                useTHSR.setVisibility(View.INVISIBLE);
+                                useTHSR.setChecked(false);
                             }
                         }
                     }

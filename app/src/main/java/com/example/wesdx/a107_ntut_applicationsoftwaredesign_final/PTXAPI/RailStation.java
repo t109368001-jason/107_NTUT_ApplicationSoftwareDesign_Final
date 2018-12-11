@@ -138,6 +138,44 @@ public class RailStation implements Comparable<RailStation> {
         }
         return null;
     }
+    public static  List<RailStation> transferStation(List<RailStation> railStationList, List<RailStation> railStationList_input) {
+        List<RailStation> railStationList_new = new ArrayList<>();
+        for(RailStation railStation_temp:railStationList_input){
+            railStationList_new.add(RailStation.transferStation(railStationList, railStation_temp));
+        }
+        return railStationList_new;
+    }
+
+        public static List<RailStation> getTwoSide (List<RailStation> railStationList, RailStation railStation){
+        List<RailStation> railStationList_new = new ArrayList<>();
+        String name1;
+        String name2;
+        switch (railStation.StationName.Zh_tw){
+            case "桃園":
+                name1 = "板橋";
+                name2 = "新竹";
+                break;
+            case "嘉義":
+            case "雲林":
+            case "彰化":
+                name1 = "台中";
+                name2 = "台南";
+                break;
+            default:
+                return null;
+        }
+        for(RailStation railStationList_temp:railStationList){
+            if (railStationList_temp.OperatorID.equals(railStation.OperatorID)){
+                if(railStationList_temp.StationName.Zh_tw.equals(name1)){
+                    railStationList_new.add(railStationList_temp);
+                }
+                if(railStationList_temp.StationName.Zh_tw.equals(name2)){
+                    railStationList_new.add(railStationList_temp);
+                }
+            }
+        }
+        return railStationList_new;
+    }
 
     public static void logD(List<RailStation> railStationList) {
         StringBuilder sb = new StringBuilder();

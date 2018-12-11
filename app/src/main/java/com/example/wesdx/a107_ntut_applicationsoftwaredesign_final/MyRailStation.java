@@ -1,7 +1,5 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
 
-import android.widget.ListView;
-
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;

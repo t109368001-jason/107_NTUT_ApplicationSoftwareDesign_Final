@@ -113,4 +113,14 @@
         app:layout_constraintStart_toEndOf="@+id/textView7"
         app:layout_constraintTop_toBottomOf="@+id/changeStationButton" />
 
+    <CheckBox
+        android:id="@+id/useTHSR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="高鐵"
+        app:layout_constraintStart_toEndOf="@+id/isDirectArrivalCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/searchButton" />
+
 </android.support.constraint.ConstraintLayout>
