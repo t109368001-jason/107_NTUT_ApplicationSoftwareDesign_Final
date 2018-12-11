@@ -6,13 +6,13 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/originStationTextView"
+        android:id="@+id/stationNameTextView"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="起站起站"
-        app:layout_constraintBottom_toTopOf="@+id/originDepartureTimeTextView"
+        app:layout_constraintBottom_toTopOf="@+id/arrivalTimeTextView"
         app:layout_constraintEnd_toStartOf="@+id/textView"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,7 +24,7 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="訖站訖站"
-        app:layout_constraintBottom_toTopOf="@+id/destinationArrivalTimeTextView"
+        app:layout_constraintBottom_toTopOf="@+id/departureTimeTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -41,17 +41,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/originDepartureTimeTextView"
+        android:id="@+id/arrivalTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="99:99"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/originStationTextView"
-        app:layout_constraintStart_toStartOf="@+id/originStationTextView" />
+        app:layout_constraintEnd_toEndOf="@+id/stationNameTextView"
+        app:layout_constraintStart_toStartOf="@+id/stationNameTextView" />
 
     <TextView
-        android:id="@+id/destinationArrivalTimeTextView"
+        android:id="@+id/departureTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -126,7 +126,7 @@
         android:layout_marginBottom="8dp"
         android:text="自強"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/originStationTextView"
+        app:layout_constraintEnd_toStartOf="@+id/stationNameTextView"
         app:layout_constraintStart_toEndOf="@+id/trainNoTextView"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -75,14 +75,22 @@ public class StationOfLine {
                 if(lineStation.StationID.equals(stationID)) {
                     if(stationOfLine_new == null) stationOfLine_new = new StationOfLine(stationOfLine);
                     else {
-                        switch (stationOfLine.LineNo) {
+                        switch (stationOfLine_new.LineNo) {
                             case E_EL:
                             case W_TL_N:
-                            case W_TL_M:
-                            case W_TL_C:
                             case W_TL_S:
                             case W_PL:
                             case S_SL:
+                                continue;
+                        }
+                        switch (stationOfLine.LineNo) {
+                            case E_EL:
+                            case W_TL_N:
+                            case W_TL_S:
+                            case W_PL:
+                            case S_SL:
+                            case W_TL_C:
+                            case W_TL_M:
                                 stationOfLine_new = new StationOfLine(stationOfLine);
                         }
                     }

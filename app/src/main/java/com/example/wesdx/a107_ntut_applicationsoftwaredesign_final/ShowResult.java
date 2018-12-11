@@ -41,7 +41,7 @@ public class ShowResult extends AppCompatActivity {
         TrainPathAdapter trainPathAdapter;
 
         ListView listView = findViewById(R.id.listView);
-        TextView originStationTextView = findViewById(R.id.originStationTextView);
+        TextView originStationTextView = findViewById(R.id.stationNameTextView);
         TextView destinationStationTextView = findViewById(R.id.destinationStationTextView);
         TextView dataOver50TextView = findViewById(R.id.dataOver50TextView);
 
@@ -96,7 +96,7 @@ public class ShowResult extends AppCompatActivity {
         public View getView(final int position, View convertView, ViewGroup parent) {
             TrainPath trainPath = trainPathList.get(position);
             convertView = getLayoutInflater().inflate(R.layout.trainpath_listview_item, parent, false);
-            ((TextView)convertView.findViewById(R.id.originDepartureTimeTextView)).setText(trainPath.getOrigeinDepartureTime());
+            ((TextView)convertView.findViewById(R.id.arrivalTimeTextView)).setText(trainPath.getOrigeinDepartureTime());
             ((TextView)convertView.findViewById(R.id.destinationArrivalTImeTextView)).setText(trainPath.getDestinationArrivalTime());
 
             try {
@@ -109,7 +109,7 @@ public class ShowResult extends AppCompatActivity {
             ((RecyclerView)convertView.findViewById(R.id.recyclerView)).setAdapter(new TrainPathPartAdapter(trainPath.trainPathPartList));
             ((RecyclerView)convertView.findViewById(R.id.recyclerView)).setLayoutManager(linearLayoutManager);
 
-            convertView.findViewById(R.id.showDetailButton).setVisibility((trainPath.trainPathPartList.size() <= 1 ? View.INVISIBLE : View.VISIBLE));
+            //convertView.findViewById(R.id.showDetailButton).setVisibility((trainPath.trainPathPartList.size() <= 1 ? View.INVISIBLE : View.VISIBLE));
             convertView.findViewById(R.id.showDetailButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -156,10 +156,10 @@ public class ShowResult extends AppCompatActivity {
                 holder.mView.findViewById(R.id.upCircleImageView).setVisibility(View.GONE);
                 holder.mView.findViewById(R.id.dowmCircleImageView).setVisibility(View.GONE);
                 holder.mView.findViewById(R.id.upBigCircleImageView).setVisibility(View.GONE);
-                holder.mView.findViewById(R.id.originStationTextView).setVisibility(View.GONE);
+                holder.mView.findViewById(R.id.stationNameTextView).setVisibility(View.GONE);
                 holder.mView.findViewById(R.id.destinationStationTextView).setVisibility(View.GONE);
-                holder.mView.findViewById(R.id.originDepartureTimeTextView).setVisibility(View.GONE);
-                holder.mView.findViewById(R.id.destinationArrivalTimeTextView).setVisibility(View.GONE);
+                holder.mView.findViewById(R.id.arrivalTimeTextView).setVisibility(View.GONE);
+                holder.mView.findViewById(R.id.departureTimeTextView).setVisibility(View.GONE);
                 holder.mView.findViewById(R.id.textView).setVisibility(View.GONE);
 
                 ((TextView)holder.mView.findViewById(R.id.trainNoTextView)).setText(trainPathPart.railDailyTimetable.DailyTrainInfo.TrainNo);

@@ -14,10 +14,16 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -26,8 +32,10 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
+import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -36,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView dateTextView, timeTextView;
     private TextView originStationTextView_buffer, destinationStationTextView_buffer;
-    private String transportation;
     private RailStation originStation;
     private RailStation destinationStation;
     private List<RailStation> railStationList;
     private List<RegionalRailStation> regionalRailStationList;
+    private CheckBox isDirectArrivalCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,42 +57,13 @@ public class MainActivity extends AppCompatActivity {
 
         dateTextView = findViewById(R.id.dateTextView);
         timeTextView = findViewById(R.id.timeTextView);
-        final TextView originStationTextView = findViewById(R.id.originStationTextView);
+        final TextView originStationTextView = findViewById(R.id.stationNameTextView);
         final TextView destinationStationTextView = findViewById(R.id.destinationStationTextView);
         originStationTextView_buffer = originStationTextView;
         destinationStationTextView_buffer = destinationStationTextView;
         Button searchButton = findViewById(R.id.searchButton);
         Button changeStationButton = findViewById(R.id.changeStationButton);
-        final CheckBox isDirectArrivalCheckBox = findViewById(R.id.directArrivalCheckBox);
-
-        Bundle bundle;
-        if((bundle= getIntent().getExtras()) == null) {
-            Toast.makeText(MainActivity.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        String railStationListGson = null;
-        if(((railStationListGson = bundle.getString("railStationListGson")) == null)
-                || ((transportation = bundle.getString("transportation")) == null)) {
-            Toast.makeText(MainActivity.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-
-
-        if((railStationList = (new Gson()).fromJson(railStationListGson, new TypeToken<List<RailStation>>() {}.getType())) == null) {
-            Toast.makeText(MainActivity.this, "Bundle data losed", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        if(!transportation.equals(API.TRA)) {
-            isDirectArrivalCheckBox.setVisibility(View.INVISIBLE);
-        }
-
-        regionalRailStationList = RegionalRailStation.convert(railStationList);
+        isDirectArrivalCheckBox = findViewById(R.id.isDirectArrivalCheckBox);
 
         dateTextView.setText(API.dateFormat.format(Calendar.getInstance().getTime()));
         dateTextView.setOnClickListener(new View.OnClickListener() {
@@ -139,77 +118,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         searchButton.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View v) {
-                if((originStation == null) || (destinationStation == null)) {
-                    Toast.makeText(MainActivity.this, "請選擇車站", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                new AsyncTask<Void, Void, Void>() {
-                    private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
-                    private List<TrainPath> trainPathList;
-                    private String errorMessage;
-
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        try {
-/*
-                            trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
-                            for(int i = 0; i < railStationList.size(); i++) {   //7
-                                for(int j = i + 1; j < railStationList.size(); j++) {
-                                    trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), null, null, null, railStationList, railStationList.get(i), railStationList.get(j), isDirectArrivalCheckBox.isChecked());
-                                    if((trainPathList != null ? trainPathList.size() : 0) == 0) {
-                                        Log.d("DEBUG1", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
-                                    } else {
-                                        Log.d("DEBUG2", railStationList.get(i).StationName.Zh_tw + "→" + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
-                                    }
-                                }
-                            }
-*/
-                            trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            errorMessage = e.getMessage();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-                        dialog.setMessage("取得班次");
-                        dialog.setCancelable(false);
-                        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                        dialog.show();
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        super.onPostExecute(aVoid);
-                        dialog.dismiss();
-                        if(errorMessage != null) {
-                            Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                        } else {
-                            if ((trainPathList != null ? trainPathList.size() : 0) == 0) {
-                                Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
-                            } else {
-                                int limitSize = 10;
-                                if(trainPathList.size() > limitSize) trainPathList = trainPathList.subList(0, limitSize);
-
-                                Intent intent = new Intent(MainActivity.this, ShowResult.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
-                                bundle.putString("originStationGson", (new Gson()).toJson(originStation));
-                                bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
-                                bundle.putInt("limitSize", limitSize);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                            }
-                        }
-                    }
-                }.execute();
+                searchTask();
             }
         });
 
@@ -224,23 +135,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String originStationID = settings.getString(transportation + "originStationID", "");
-        String destinationStationID = settings.getString(transportation + "destinationStationID", "");
-        int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
-        int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
-        Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
-        Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime * 60 * 1000;
-        for (RailStation railStation:railStationList) {
-            if (railStation.StationID.equals(originStationID)) {
-                originStationTextView_buffer.setText(railStation.StationName.Zh_tw);
-                originStation = railStation;
-            }
-            if (railStation.StationID.equals(destinationStationID)) {
-                destinationStationTextView_buffer.setText(railStation.StationName.Zh_tw);
-                destinationStation = railStation;
-            }
-        }
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,R.layout.custom_title_bar);
+
+        setInitialData();
     }
 
     @Override
@@ -248,67 +145,269 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(transportation + "originStationID", originStation.StationID);
-        editor.putString(transportation + "destinationStationID", destinationStation.StationID);
+        editor.putString("originStationID", originStation.StationID);
+        editor.putString("destinationStationID", destinationStation.StationID);
         editor.apply();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_settings:
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+                final String[] settingList = {"台鐵-台鐵轉乘時間", "台鐵-高鐵轉乘時間"};
+
+                alertDialog.setTitle("選擇設定");
+                alertDialog.setItems(settingList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, final int which) {
+
+                        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+                        final EditText input = new EditText(MainActivity.this);
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.MATCH_PARENT);
+                        input.setLayoutParams(lp);
+                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+                        alertDialog.setTitle("輸入時間(分鐘)");
+                        alertDialog.setView(input);
+                        alertDialog.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which2) {
+                                String number = input.getText().toString();
+                                if(number.equals("")) {
+                                    Toast.makeText(MainActivity.this, "請輸入數字", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    int time = Integer.parseInt(input.getText().toString());
+                                    if(time < 0) {
+                                        Toast.makeText(MainActivity.this, "請輸入大於等於0的數字", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                                        SharedPreferences.Editor editor = settings.edit();
+                                        editor.putInt((which == 0 ? "TRAToTRATransferTime" : "TRAToTHSRTransferTime"), time);
+                                        editor.apply();
+                                        Toast.makeText(MainActivity.this, "已將" + (which == 0 ? "台鐵-台鐵轉乘時間" : "台鐵-高鐵轉乘時間") + "設為：" + Integer.toString(time), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+                        });
+                        alertDialog.show();
+                    }
+                });
+                alertDialog.show();
+                return(true);
+            case R.id.action_exit:
+                finish();
+                return(true);
+        }
+        return(super.onOptionsItemSelected(item));
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void setInitialData() {
+        new AsyncTask<Void, Void, Void>() {
+            private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    List<RailStation> railStationList_TRA = API.getStation(API.TRA);
+                    List<RailStation> railStationList_THSR = API.getStation(API.THSR);
+                    RailStation.removeUnreservationStation(railStationList_TRA);
+                    Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
+                    Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
+                    railStationList = new ArrayList<>();
+                    railStationList.addAll(railStationList_TRA);
+                    railStationList.addAll(railStationList_THSR);
+                    regionalRailStationList = RegionalRailStation.convert(railStationList);
+
+                    for(int i = 0 ; i < railStationList.size(); i++) {
+                        if(railStationList.get(i).OperatorID == null) {
+                            continue;
+                        }
+                    }
+
+                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                    String originStationID = settings.getString("originStationID", "");
+                    String destinationStationID = settings.getString("destinationStationID", "");
+                    int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
+                    int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
+                    Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
+                    Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime * 60 * 1000;
+                    for (RailStation railStation:railStationList) {
+                        if (railStation.StationID.equals(originStationID)) {
+                            originStationTextView_buffer.setText(railStation.StationName.Zh_tw);
+                            originStation = railStation;
+                        }
+                        if (railStation.StationID.equals(destinationStationID)) {
+                            destinationStationTextView_buffer.setText(railStation.StationName.Zh_tw);
+                            destinationStation = railStation;
+                        }
+                    }
+                } catch (SignatureException | IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog.setMessage("更新資料");
+                dialog.setCancelable(false);
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                dialog.show();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                dialog.dismiss();
+            }
+        }.execute();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void searchTask() {
+        if((originStation == null) || (destinationStation == null)) {
+            Toast.makeText(MainActivity.this, "請選擇車站", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new AsyncTask<Void, Void, Void>() {
+            private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+            private List<TrainPath> trainPathList;
+            private String errorMessage;
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    String transportation = (originStation.OperatorID.equals(destinationStation.OperatorID) ? originStation.OperatorID : API.TRA_AND_THSR);
+                    /*
+                    FileWriter fw = new FileWriter(getFilesDir() +"/text.txt");
+                    PrintWriter pw = new PrintWriter(fw);
+                    try {
+                        trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                        for(int i = 0; i < railStationList.size(); i++) {  //46
+                            for(int j = 0; j < railStationList.size(); j++) {
+                                if(i == j) continue;
+                                trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), null, null, null, railStationList, railStationList.get(i), railStationList.get(j), false);
+
+
+                                pw.print(Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0) + '\n');
+
+                                if((trainPathList != null ? trainPathList.size() : 0) == 0) {
+                                    Log.d("DEBUG1", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                                } else {
+                                    Log.d("DEBUG2", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+*/
+                    trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    errorMessage = e.getMessage();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog.setMessage("取得班次");
+                dialog.setCancelable(false);
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                dialog.show();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                dialog.dismiss();
+                if(errorMessage != null) {
+                    Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                } else {
+                    if ((trainPathList != null ? trainPathList.size() : 0) == 0) {
+                        Toast.makeText(MainActivity.this, "查無班次", Toast.LENGTH_SHORT).show();
+                    } else {
+                        int limitSize = 10;
+                        if(trainPathList.size() > limitSize) trainPathList = trainPathList.subList(0, limitSize);
+
+                        Intent intent = new Intent(MainActivity.this, ShowResult.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("trainPathListGson", (new Gson()).toJson(trainPathList));
+                        bundle.putString("originStationGson", (new Gson()).toJson(originStation));
+                        bundle.putString("destinationStationGson", (new Gson()).toJson(destinationStation));
+                        bundle.putInt("limitSize", limitSize);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    }
+                }
+            }
+        }.execute();
     }
 
     private void selectStation(final TextView textView) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        if(regionalRailStationList.size() == 1) {
-            final String[] stationList = new String[regionalRailStationList.get(0).railStationList.size()];
 
-            for(int i = 0; i < regionalRailStationList.get(0).railStationList.size(); i++) {
-                stationList[i] = regionalRailStationList.get(0).railStationList.get(i).StationName.Zh_tw;
-            }
+        String[] regionList = new String[regionalRailStationList.size()];
 
-            alertDialog.setTitle("選擇區域");
-            alertDialog.setItems(stationList, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    textView.setText(stationList[which]);
-                    if(textView == originStationTextView_buffer) {
-                        originStation = regionalRailStationList.get(0).railStationList.get(which);
-                    } else if(textView == destinationStationTextView_buffer){
-                        destinationStation = regionalRailStationList.get(0).railStationList.get(which);
-                    }
+        for(int i = 0; i < regionalRailStationList.size(); i++) {
+            regionList[i] = regionalRailStationList.get(i).regionName;
+        }
+
+        alertDialog.setTitle("選擇區域");
+        alertDialog.setItems(regionList, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, final int which) {
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+                final String[] stationList = new String[regionalRailStationList.get(which).railStationList.size()];
+
+                for(int i = 0; i < regionalRailStationList.get(which).railStationList.size(); i++) {
+                    stationList[i] = regionalRailStationList.get(which).railStationList.get(i).StationName.Zh_tw;
                 }
-            });
-        } else {
-            String[] regionList = new String[regionalRailStationList.size()];
 
-            for(int i = 0; i < regionalRailStationList.size(); i++) {
-                regionList[i] = regionalRailStationList.get(i).regionName;
-            }
-
-            alertDialog.setTitle("選擇區域");
-            alertDialog.setItems(regionList, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, final int which) {
-                    final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-
-                    final String[] stationList = new String[regionalRailStationList.get(which).railStationList.size()];
-
-                    for(int i = 0; i < regionalRailStationList.get(which).railStationList.size(); i++) {
-                        stationList[i] = regionalRailStationList.get(which).railStationList.get(i).StationName.Zh_tw;
-                    }
-
-                    alertDialog.setTitle("選擇區域");
-                    alertDialog.setItems(stationList, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which2) {
-                            textView.setText(stationList[which2]);
-                            if(textView == originStationTextView_buffer) {
-                                originStation = regionalRailStationList.get(which).railStationList.get(which2);
-                            } else if(textView == destinationStationTextView_buffer){
-                                destinationStation = regionalRailStationList.get(which).railStationList.get(which2);
+                alertDialog.setTitle("選擇區域");
+                alertDialog.setItems(stationList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which2) {
+                        textView.setText(stationList[which2]);
+                        if(textView == originStationTextView_buffer) {
+                            originStation = regionalRailStationList.get(which).railStationList.get(which2);
+                        } else if(textView == destinationStationTextView_buffer){
+                            destinationStation = regionalRailStationList.get(which).railStationList.get(which2);
+                        }
+                        if((originStation != null)&&(destinationStation != null)){
+                            if (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA)) {
+                                isDirectArrivalCheckBox.setEnabled(true);
+                                isDirectArrivalCheckBox.setChecked(false);
+                            } else if (originStation.OperatorID.equals(API.THSR) && destinationStation.OperatorID.equals(API.THSR)) {
+                                isDirectArrivalCheckBox.setEnabled(false);
+                                isDirectArrivalCheckBox.setChecked(true);
+                            } else {
+                                isDirectArrivalCheckBox.setEnabled(false);
+                                isDirectArrivalCheckBox.setChecked(false);
                             }
                         }
-                    });
-                    alertDialog.show();
-                }
-            });
-        }
+                    }
+                });
+                alertDialog.show();
+            }
+        });
         alertDialog.show();
     }
 }
