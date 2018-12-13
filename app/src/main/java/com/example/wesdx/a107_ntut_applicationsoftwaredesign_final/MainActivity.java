@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -240,7 +241,19 @@ public class MainActivity extends AppCompatActivity {
                     List<RailStation> railStationList_THSR = API.getStation(API.THSR);
                     RailStation.removeUnreservationStation(railStationList_TRA);
 
-                    Router.initCache(railStationList_TRA, railStationList_THSR);
+                    Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
+                    Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Router.upDateRailDailyTimetableList(API.TRA_AND_THSR, API.dateFormat.format(Calendar.getInstance().getTime()));
+                            } catch (ParseException | IOException | Router.RouterException | SignatureException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
 
                     railStationList = new ArrayList<>();
                     railStationList.addAll(railStationList_TRA);
@@ -264,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                             destinationStation = railStation;
                         }
                     }
-                } catch (SignatureException | IOException | ParseException | Router.RouterException e) {
+                } catch (IOException | SignatureException e) {
                     e.printStackTrace();
                 }
                 return null;
@@ -307,32 +320,21 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         transportation = (originStation.OperatorID.equals(destinationStation.OperatorID) ? originStation.OperatorID : API.TRA_AND_THSR);
                     }
-                    /*
-                    FileWriter fw = new FileWriter(getFilesDir() +"/text.txt");
-                    PrintWriter pw = new PrintWriter(fw);
-                    try {
-                        trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
-                        for(int i = 0; i < railStationList.size(); i++) {  //46
-                            for(int j = 0; j < railStationList.size(); j++) {
-                                if(i == j) continue;
-                                trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), null, null, null, railStationList, railStationList.get(i), railStationList.get(j), false);
+/*
+                    for(int i = 0; i < railStationList.size(); i++) {  //46
+                        for(int j = 230; j < railStationList.size(); j++) {
+                            if(i == j) continue;
+                            trainPathList = Router.getTrainPath(API.TRA_AND_THSR, dateTextView.getText().toString(), null, null, null, railStationList, railStationList.get(i), railStationList.get(j), false);
 
+                            if((trainPathList != null ? trainPathList.size() : 0) == 0) {
+                                Log.d("DEBUG1", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
+                            } else {
+                                Log.d("DEBUG2", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
 
-                                pw.print(Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0) + '\n');
-
-                                if((trainPathList != null ? trainPathList.size() : 0) == 0) {
-                                    Log.d("DEBUG1", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
-                                } else {
-                                    Log.d("DEBUG2", Integer.toString(i) + " " + railStationList.get(i).StationName.Zh_tw + "→" + Integer.toString(j) + " " + railStationList.get(j).StationName.Zh_tw + " : " + Integer.toString(trainPathList != null ? trainPathList.size() : 0));
-
-                                }
                             }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
 */
-
                     trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
 
                 } catch (ParseException | Router.RouterException | SignatureException | IOException e) {

@@ -40,19 +40,6 @@ public class Router {
     private static List<RailGeneralTimetable> railGeneralTimetableListCache_TRA;
     private static List<RailGeneralTimetable> railGeneralTimetableListCache_THSR;
 
-    public static void initCache(List<RailStation> railStationList_TRA, List<RailStation> railStationList_THSR) throws IOException, SignatureException, RouterException, ParseException {
-        if(Router.stationOfLineList == null) {
-            stationOfLineList = API.getStationOfLine(API.TRA);
-            StationOfLine.fixMissing15StationProblem(stationOfLineList);
-            if(stationOfLineList == null) throw new RouterException("Failed to get stationOfLineList API");
-        }
-
-        Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
-        Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
-        Router.upDateRailDailyTimetableList(API.TRA, API.dateFormat.format(Calendar.getInstance().getTime()));
-        Router.upDateRailDailyTimetableList(API.THSR, API.dateFormat.format(Calendar.getInstance().getTime()));
-    }
-
     public static List<RailStation> getRailStationListFromCache(String transportation) {
         if(transportation.equals(API.TRA)) {
             return new ArrayList<>(railStationListCache_TRA);
@@ -71,69 +58,82 @@ public class Router {
     }
 
     @SuppressLint("SimpleDateFormat")
-    public static void upDateRailDailyTimetableList(String transportation, String date) throws ParseException, IOException, SignatureException {
-        if(transportation.equals(API.TRA)) {
-            if (!date.equals((railDailyTimetableListCacheDate_TRA != null ? railDailyTimetableListCacheDate_TRA : ""))) {
-                if(railGeneralTimetableListCache_TRA == null) {
-                    railGeneralTimetableListCache_TRA = API.getGeneralTimetable(API.TRA);
-                }
-                List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
-                railDailyTimetableListCache_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);
+    public static synchronized void upDateRailDailyTimetableList(String transportation, String date) throws ParseException, IOException, SignatureException, RouterException {
+        if(Router.stationOfLineList == null) {
+            stationOfLineList = API.getStationOfLine(API.TRA);
+            StationOfLine.fixMissing15StationProblem(stationOfLineList);
+            if(stationOfLineList == null) throw new RouterException("Failed to get stationOfLineList API");
+        }
 
-                int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
-
-                for(RailGeneralTimetable railGeneralTimetable:railGeneralTimetableListCache_TRA) {
-                    if(railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
-                        railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
+        switch (transportation) {
+            case API.TRA:
+                if (!date.equals((railDailyTimetableListCacheDate_TRA != null ? railDailyTimetableListCacheDate_TRA : ""))) {
+                    if (railGeneralTimetableListCache_TRA == null) {
+                        railGeneralTimetableListCache_TRA = API.getGeneralTimetable(API.TRA);
                     }
-                }
-                for(RailDailyTimetable railDailyTimetable_temp:railDailyTimetableList_temp) {
-                    boolean addToList = true;
-                    for(RailDailyTimetable railDailyTimetable_temp2:railDailyTimetableListCache_TRA) {
-                        if(railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
-                            addToList = false;
-                            break;
+                    List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
+                    railDailyTimetableListCache_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);
+
+                    int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
+
+                    for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableListCache_TRA) {
+                        if (railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
+                            railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
                         }
                     }
-                    if(addToList) {
-                        railDailyTimetableListCache_TRA.add(railDailyTimetable_temp);
-                    }
-                }
-                railDailyTimetableListCacheDate_TRA = date;
-            }
-        } else if(transportation.equals(API.THSR)) {
-            if (!date.equals((railDailyTimetableListCacheDate_THSR != null ? railDailyTimetableListCacheDate_THSR : ""))) {
-                if(railGeneralTimetableListCache_THSR == null) {
-                    railGeneralTimetableListCache_THSR = API.getGeneralTimetable(API.THSR);
-                }
-                List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
-                railDailyTimetableListCache_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, date);
-
-                int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
-
-                for(RailGeneralTimetable railGeneralTimetable:railGeneralTimetableListCache_THSR) {
-                    if(railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
-                        railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
-                    }
-                }
-                for(RailDailyTimetable railDailyTimetable_temp:railDailyTimetableList_temp) {
-                    boolean addToList = true;
-                    for(RailDailyTimetable railDailyTimetable_temp2:railDailyTimetableListCache_THSR) {
-                        if(railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
-                            addToList = false;
-                            break;
+                    for (RailDailyTimetable railDailyTimetable_temp : railDailyTimetableList_temp) {
+                        boolean addToList = true;
+                        for (RailDailyTimetable railDailyTimetable_temp2 : railDailyTimetableListCache_TRA) {
+                            if (railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
+                                addToList = false;
+                                break;
+                            }
+                        }
+                        if (addToList) {
+                            railDailyTimetableListCache_TRA.add(railDailyTimetable_temp);
                         }
                     }
-                    if(addToList) {
-                        railDailyTimetableListCache_THSR.add(railDailyTimetable_temp);
-                    }
+                    railDailyTimetableListCacheDate_TRA = date;
                 }
-                railDailyTimetableListCacheDate_THSR = date;
-            }
+                break;
+            case API.THSR:
+                if (!date.equals((railDailyTimetableListCacheDate_THSR != null ? railDailyTimetableListCacheDate_THSR : ""))) {
+                    if (railGeneralTimetableListCache_THSR == null) {
+                        railGeneralTimetableListCache_THSR = API.getGeneralTimetable(API.THSR);
+                    }
+                    List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
+                    railDailyTimetableListCache_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, date);
+
+                    int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
+
+                    for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableListCache_THSR) {
+                        if (railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
+                            railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
+                        }
+                    }
+                    for (RailDailyTimetable railDailyTimetable_temp : railDailyTimetableList_temp) {
+                        boolean addToList = true;
+                        for (RailDailyTimetable railDailyTimetable_temp2 : railDailyTimetableListCache_THSR) {
+                            if (railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
+                                addToList = false;
+                                break;
+                            }
+                        }
+                        if (addToList) {
+                            railDailyTimetableListCache_THSR.add(railDailyTimetable_temp);
+                        }
+                    }
+                    railDailyTimetableListCacheDate_THSR = date;
+                }
+                break;
+            case API.TRA_AND_THSR:
+                Router.upDateRailDailyTimetableList(API.TRA, API.dateFormat.format(Calendar.getInstance().getTime()));
+                Router.upDateRailDailyTimetableList(API.THSR, API.dateFormat.format(Calendar.getInstance().getTime()));
+                break;
         }
     }
 
-    public static List<RailDailyTimetable> getRailDailyTimetableList(String transportation, String date) throws ParseException, SignatureException, IOException {
+    public static List<RailDailyTimetable> getRailDailyTimetableList(String transportation, String date) throws ParseException, SignatureException, IOException, RouterException {
         upDateRailDailyTimetableList(transportation, date);
         if(transportation.equals(API.TRA)) {
             return new ArrayList<>(railDailyTimetableListCache_TRA);
@@ -150,6 +150,7 @@ public class Router {
         if((transportation == null) || (date == null) || (originStation == null) || (destinationStation == null)) throw new RouterException(RouterException.INPUT_OBJECT_IS_NULL);
         if(originStation.StationID.equals(destinationStation.StationID)) throw new RouterException(RouterException.ORIGINSTATION_EQUALS_DESTINATIONSTATION);
 
+        upDateRailDailyTimetableList(transportation, date);
         if(isDirectArrival) {
             List<RailDailyTimetable> railDailyTimetableList_temp;
 
