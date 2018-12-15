@@ -16,6 +16,7 @@ import java.net.URL;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -35,31 +36,46 @@ public class API {
         private String preFix;
         public String transportation;
         public String function;
+        public String filter;
         private String postFix;
 
         public APIURL() {
             preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
             transportation = "TRA / THSR";
             function = "Station / GeneralTimetable / ODFare/OS/to/DS / GeneralTrainInfo / DailyTimetable/OS/to/DS";
-            postFix = "?format=JSON";
+            filter = "";
+            postFix = "format=JSON";
         }
 
         public APIURL(String transportation, String function) {
             this.preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
             this.transportation =transportation;
             this.function = function;
-            this.postFix = "?format=JSON";
+            this.filter = "";
+            this.postFix = "format=JSON";
+        }
+
+        public APIURL(String transportation, String function, String filter) {
+            this.preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
+            this.transportation =transportation;
+            this.function = function;
+            this.filter = filter;
+            this.postFix = "format=JSON";
         }
 
         public String get() {
-            return preFix + transportation + '/' + function + postFix;
+            return preFix + transportation + '/' + function + "?" + filter + postFix;
         }
     }
 
     @SuppressLint("SimpleDateFormat")
     public static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
     @SuppressLint("SimpleDateFormat")
+    public static SimpleDateFormat timeFormat2 = new SimpleDateFormat("HH:mm:ss");
+    @SuppressLint("SimpleDateFormat")
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    @SuppressLint("SimpleDateFormat")
+    public static SimpleDateFormat updateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
     private static String getAPIResponse(String APIUrl) throws SignatureException, IOException {
         HttpURLConnection connection;
@@ -108,10 +124,29 @@ public class API {
     }
 
     //Network
-
+    //$filter=date(UpdateTime)%20gt%202018-10-21%20and%20time(UpdateTime)%20gt%2008%3A07%3A47&$format=JSON
     public static List<RailStation> getStation(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "Station");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
+        if(transportation.equals(TRA_AND_THSR)) {
+            List<RailStation> railStationList_TRA = getStation(TRA);
+            List<RailStation> railStationList_THSR = getStation(THSR);
+            railStationList_TRA.addAll(railStationList_THSR);
+            return railStationList_TRA;
+        } else {
+            APIURL apiurl = new APIURL(transportation, "Station");
+            return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
+        }
+    }
+
+    public static List<RailStation> getStation(String transportation, Date date) throws SignatureException, IOException {
+        if(transportation.equals(TRA_AND_THSR)) {
+            List<RailStation> railStationList_TRA = getStation(TRA, date);
+            List<RailStation> railStationList_THSR = getStation(THSR, date);
+            railStationList_TRA.addAll(railStationList_THSR);
+            return railStationList_TRA;
+        } else {
+            APIURL apiurl = new APIURL(transportation, "Station", "$filter=date(UpdateTime) ge " + API.dateFormat.format(date) + " and time(UpdateTime) gt " + API.timeFormat2.format(date) + "&$");
+            return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
+        }
     }
 
     //Line
@@ -123,6 +158,12 @@ public class API {
     //StationOfLine
     public static List<StationOfLine> getStationOfLine(String transportation) throws SignatureException, IOException {
         APIURL apiurl = new APIURL(transportation, "StationOfLine");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<StationOfLine>>() {}.getType());
+    }
+
+    //StationOfLine
+    public static List<StationOfLine> getStationOfLine(String transportation, Date date) throws SignatureException, IOException {
+        APIURL apiurl = new APIURL(transportation, "StationOfLine", "$filter=date(UpdateTime) ge " + API.dateFormat.format(date) + " and time(UpdateTime) gt " + API.timeFormat2.format(date) + "&$");
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<StationOfLine>>() {}.getType());
     }
 
@@ -167,6 +208,11 @@ public class API {
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
+    public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, Date date) throws SignatureException, IOException {
+        APIURL apiurl = new APIURL(transportation, "GeneralTimetable", "$filter=date(UpdateTime) ge " + API.dateFormat.format(date) + " and time(UpdateTime) gt " + API.timeFormat2.format(date) + "&$");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+    }
+
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) throws SignatureException, IOException {
         APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
@@ -182,6 +228,11 @@ public class API {
         return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
+    private static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter, Date date) throws SignatureException, IOException {
+        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter, "$filter=date(UpdateTime) ge " + API.dateFormat.format(date) + " and time(UpdateTime) gt " + API.timeFormat2.format(date) + "&$");
+        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+    }
+
     public static List<RailDailyTimetable> getDailyTimetable(String transportation) throws SignatureException, IOException {
         String functionParameter = "Today";
         return getDailyTimetable(transportation, functionParameter);
@@ -189,12 +240,22 @@ public class API {
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key) throws SignatureException, IOException {
         String functionParameter = "";
-        if(serachBy == TRAIN_NO) {
+        if (serachBy == TRAIN_NO) {
             functionParameter = "Today/TrainNo/" + key;
-        } else if(serachBy == TRAIN_DATE){
+        } else if (serachBy == TRAIN_DATE) {
             functionParameter = "TrainDate/" + key;
         }
         return getDailyTimetable(transportation, functionParameter);
+    }
+
+    public static List<RailDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key, Date date) throws SignatureException, IOException {
+        String functionParameter = "";
+        if (serachBy == TRAIN_NO) {
+            functionParameter = "Today/TrainNo/" + key;
+        } else if (serachBy == TRAIN_DATE) {
+            functionParameter = "TrainDate/" + key;
+        }
+        return getDailyTimetable(transportation, functionParameter, date);
     }
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, String trainNo, String trainDate) throws SignatureException, IOException {

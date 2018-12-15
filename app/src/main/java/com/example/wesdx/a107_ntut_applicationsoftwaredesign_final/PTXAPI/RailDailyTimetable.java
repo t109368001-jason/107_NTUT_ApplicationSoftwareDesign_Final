@@ -4,7 +4,10 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/DailyTimetable/Today
  *
  */
+import android.annotation.SuppressLint;
+
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,6 +116,42 @@ public class RailDailyTimetable {
             time.setDate(time.getDate() + 1);
         }
         return time;
+    }
+
+    public static Date getNewestUpdateTime(List<RailDailyTimetable> railDailyTimetableList) throws ParseException {
+        Date newest = null;
+        for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+            if(railDailyTimetable.UpdateTime.length() < 11) continue;
+            Date temp = API.updateTimeFormat.parse(railDailyTimetable.UpdateTime);
+            if(newest == null) newest = temp;
+            if (temp.after(newest)) newest = temp;
+        }
+        return newest;
+    }
+
+    public static void add(List<RailDailyTimetable> railDailyTimetableList, List<RailGeneralTimetable> railGeneralTimetableList, String date) throws ParseException {
+
+        List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
+
+        @SuppressLint("SimpleDateFormat") int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
+
+        for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList) {
+            if (railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
+                railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
+            }
+        }
+        for (RailDailyTimetable railDailyTimetable_temp : railDailyTimetableList_temp) {
+            boolean addToList = true;
+            for (RailDailyTimetable railDailyTimetable_temp2 : railDailyTimetableList) {
+                if (railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
+                    addToList = false;
+                    break;
+                }
+            }
+            if (addToList) {
+                railDailyTimetableList.add(railDailyTimetable_temp);
+            }
+        }
     }
 
     public static List<RailDailyTimetable> filterByOD(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, Date originDepartureTime, Date destinationArrivalTime, boolean isDirectional) throws ParseException {

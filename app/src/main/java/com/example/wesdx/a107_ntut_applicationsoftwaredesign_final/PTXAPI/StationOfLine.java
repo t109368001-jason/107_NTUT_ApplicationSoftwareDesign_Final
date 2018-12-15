@@ -2,7 +2,9 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.Router;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class StationOfLine {
@@ -222,6 +224,18 @@ public class StationOfLine {
             }
         }
     }
+
+    public static Date getNewestUpdateTime(List<StationOfLine> stationOfLineList) throws ParseException {
+        Date newest = null;
+        for(StationOfLine stationOfLine:stationOfLineList) {
+            if(stationOfLine.UpdateTime.length() < 11) continue;
+            Date temp = API.updateTimeFormat.parse(stationOfLine.UpdateTime);
+            if(newest == null) newest = temp;
+            if (temp.after(newest)) newest = temp;
+        }
+        return newest;
+    }
+
 }
 
 

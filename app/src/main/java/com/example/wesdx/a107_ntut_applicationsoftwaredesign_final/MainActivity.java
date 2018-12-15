@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,8 +29,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RegionalRailStation;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private List<RailStation> railStationList;
     private List<RegionalRailStation> regionalRailStationList;
     private CheckBox isDirectArrivalCheckBox, useTHSR;
+    private MySQLiteOpenHelper mySQLiteOpenHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
         Button changeStationButton = findViewById(R.id.changeStationButton);
         isDirectArrivalCheckBox = findViewById(R.id.isDirectArrivalCheckBox);
         useTHSR = findViewById(R.id.useTHSR);
+
+        mySQLiteOpenHelper = new MySQLiteOpenHelper(MainActivity.this);
 
         dateTextView.setText(API.dateFormat.format(Calendar.getInstance().getTime()));
         dateTextView.setOnClickListener(new View.OnClickListener() {
@@ -158,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("originStationID", originStation.StationID);
-        editor.putString("destinationStationID", destinationStation.StationID);
+        if(originStation != null) editor.putString("originStationID", originStation.StationID);
+        if(destinationStation != null) editor.putString("destinationStationID", destinationStation.StationID);
         editor.apply();
     }
 
@@ -232,32 +237,38 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void setInitialData() {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, String, Void>() {
             private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+            private Exception exception;
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    List<RailStation> railStationList_TRA = API.getStation(API.TRA);
-                    List<RailStation> railStationList_THSR = API.getStation(API.THSR);
-                    RailStation.removeUnreservationStation(railStationList_TRA);
+                    List<RailStation> railStationList_newest;
 
-                    Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
-                    Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
+                    publishProgress("從本地資料庫取得車站資訊");
+                    railStationList = mySQLiteOpenHelper.getAllRailStations(API.TRA_AND_THSR);
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Router.upDateRailDailyTimetableList(API.TRA_AND_THSR, API.dateFormat.format(Calendar.getInstance().getTime()));
-                            } catch (ParseException | IOException | Router.RouterException | SignatureException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
+                    if(railStationList == null) {
+                        publishProgress("從MOTC取得車站資訊");
+                        if((railStationList_newest = API.getStation(API.TRA_AND_THSR)) == null) throw new MyException("無法從MOTC取得車站資訊");
+                        RailStation.removeUnreservationStation(railStationList_newest);
+                    } else {
+                        publishProgress("檢查車站資訊更新");
+                        railStationList_newest = API.getStation(API.TRA_AND_THSR, RailStation.getNewestUpdateTime(API.TRA_AND_THSR, railStationList));
+                    }
 
-                    railStationList = new ArrayList<>();
-                    railStationList.addAll(railStationList_TRA);
-                    railStationList.addAll(railStationList_THSR);
+                    publishProgress("更新本地資料庫車站資訊");
+                    for(RailStation railStation:railStationList_newest) {
+                        if(railStationList == null) railStationList = new ArrayList<>();
+                        railStationList.add(railStation);
+                        mySQLiteOpenHelper.addOrUpdateRailStation(railStation);
+                    }
+
+                    if(railStationList == null) throw new MyException("無法取得車站資訊");
+
+
+                    Router.saveRailStationListToCache(API.TRA_AND_THSR, railStationList);
+
                     regionalRailStationList = RegionalRailStation.convert(railStationList);
 
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -277,8 +288,9 @@ public class MainActivity extends AppCompatActivity {
                             destinationStation = railStation;
                         }
                     }
-                } catch (IOException | SignatureException e) {
+                } catch (MyException | ParseException | IOException | SignatureException e) {
                     e.printStackTrace();
+                    exception = e;
                 }
                 return null;
             }
@@ -296,6 +308,23 @@ public class MainActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 dialog.dismiss();
+                if(exception != null) {
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                    alertDialog.setMessage("嚴重錯誤");
+                    alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            finish();
+                        }
+                    });
+                    alertDialog.show();
+                }
+            }
+
+            @Override
+            protected void onProgressUpdate(String... titles) {
+                super.onProgressUpdate(titles);
+                dialog.setMessage(titles[0]);
             }
         }.execute();
     }
@@ -306,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "請選擇車站", Toast.LENGTH_SHORT).show();
             return;
         }
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, String, Void>() {
             private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
             private List<TrainPath> trainPathList;
             private String errorMessage;
@@ -335,9 +364,111 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 */
-                    trainPathList = Router.getTrainPath(transportation, dateTextView.getText().toString(), API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+                    if(Router.stationOfLineList == null) {
+                        publishProgress("從本地資料庫取得台鐵路線資訊");
+                        List<StationOfLine> stationOfLineList = mySQLiteOpenHelper.getAllStationOfLine();
+                        List<StationOfLine> stationOfLineList_newest;
+                        if(stationOfLineList == null) {
+                            publishProgress("從MOTC取得台鐵路線資訊");
+                            if((stationOfLineList_newest = API.getStationOfLine(API.TRA)) == null) throw new MyException("無法從MOTC取得台鐵路線資訊");
+                            StationOfLine.fixMissing15StationProblem(stationOfLineList_newest);
+                        } else {
+                            publishProgress("檢查台鐵路線資訊更新");
+                            if((stationOfLineList_newest = API.getStationOfLine(API.TRA, StationOfLine.getNewestUpdateTime(stationOfLineList))) == null) throw new MyException("無法從MOTC取得台鐵路線資訊");
+                            if(stationOfLineList_newest.size() > 0) {
+                                if ((stationOfLineList_newest = API.getStationOfLine(API.TRA)) == null)
+                                    throw new MyException("無法從MOTC取得台鐵路線資訊");
+                                StationOfLine.fixMissing15StationProblem(stationOfLineList_newest);
+                            }
+                        }
+                        publishProgress("更新本地資料庫台鐵路線資訊");
+                        for(StationOfLine stationOfLine:stationOfLineList_newest) {
+                            if(stationOfLineList == null) stationOfLineList = new ArrayList<>();
+                            stationOfLineList.add(stationOfLine);
+                            mySQLiteOpenHelper.addOrUpdateStationOfLine(stationOfLine);
+                        }
 
-                } catch (ParseException | Router.RouterException | SignatureException | IOException e) {
+                        if(stationOfLineList == null) throw new MyException("無法取得台鐵路線資訊");
+                        Router.stationOfLineList = stationOfLineList;
+                    }
+
+                    if(Router.railDailyTimetableListCacheDate_TRA == null || !Router.railDailyTimetableListCacheDate_TRA.equals(dateTextView.getText().toString())) {
+                        if (transportation.equals(API.TRA) || transportation.equals(API.TRA_AND_THSR)) {
+                            publishProgress("從本地資料庫取得台鐵班次資訊");
+                            List<RailDailyTimetable> railDailyTimetableList_TRA = mySQLiteOpenHelper.getAllRailDailyTimetable(API.TRA, dateTextView.getText().toString());
+                            List<RailGeneralTimetable> railGeneralTimetableList_TRA = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.TRA);
+                            List<RailDailyTimetable> railDailyTimetableList_newest_TRA;
+                            List<RailGeneralTimetable> railGeneralTimetableList_newest_TRA;
+                            if (railDailyTimetableList_TRA == null) {
+                                publishProgress("從MOTC取得台鐵班次資訊");
+                                if ((railDailyTimetableList_newest_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, dateTextView.getText().toString())) == null)
+                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA)) == null)
+                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
+                            } else {
+                                publishProgress("檢查台鐵班次資訊更新");
+                                if ((railDailyTimetableList_newest_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_TRA))) == null)
+                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_TRA))) == null)
+                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
+                            }
+                            publishProgress("更新本地資料庫台鐵班次資訊");
+                            RailDailyTimetable.add(railDailyTimetableList_newest_TRA, railGeneralTimetableList_newest_TRA, dateTextView.getText().toString());
+                            for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_TRA) {
+                                if (railDailyTimetableList_TRA == null)
+                                    railDailyTimetableList_TRA = new ArrayList<>();
+                                railDailyTimetableList_TRA.add(railDailyTimetable);
+                                mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.TRA, railDailyTimetable);
+                            }
+                            for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_TRA) {
+                                mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.TRA, railGeneralTimetable);
+                            }
+                            if (railDailyTimetableList_TRA == null)
+                                throw new MyException("無法取得台鐵班次資訊");
+                            Router.saveRailDailyTimetableListToCache(API.TRA, railDailyTimetableList_TRA, dateTextView.getText().toString());
+                        }
+                    }
+
+                    if(Router.railDailyTimetableListCacheDate_THSR == null || !Router.railDailyTimetableListCacheDate_THSR.equals(dateTextView.getText().toString())) {
+                        if (transportation.equals(API.THSR) || transportation.equals(API.TRA_AND_THSR)) {
+                            publishProgress("從本地資料庫取得高鐵班次資訊");
+                            List<RailDailyTimetable> railDailyTimetableList_THSR = mySQLiteOpenHelper.getAllRailDailyTimetable(API.THSR, dateTextView.getText().toString());
+                            List<RailGeneralTimetable> railGeneralTimetableList_THSR = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.THSR);
+                            List<RailDailyTimetable> railDailyTimetableList_newest_THSR;
+                            List<RailGeneralTimetable> railGeneralTimetableList_newest_THSR;
+                            if (railDailyTimetableList_THSR == null) {
+                                publishProgress("從MOTC取得高鐵班次資訊");
+                                if ((railDailyTimetableList_newest_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, dateTextView.getText().toString())) == null)
+                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR)) == null)
+                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
+                            } else {
+                                publishProgress("檢查高鐵班次資訊更新");
+                                if ((railDailyTimetableList_newest_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_THSR))) == null)
+                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_THSR))) == null)
+                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
+                            }
+                            publishProgress("更新本地資料庫高鐵班次資訊");
+                            RailDailyTimetable.add(railDailyTimetableList_newest_THSR, railGeneralTimetableList_newest_THSR, dateTextView.getText().toString());
+                            for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_THSR) {
+                                if (railDailyTimetableList_THSR == null)
+                                    railDailyTimetableList_THSR = new ArrayList<>();
+                                railDailyTimetableList_THSR.add(railDailyTimetable);
+                                mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.THSR, railDailyTimetable);
+                            }
+                            for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_THSR) {
+                                mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.THSR, railGeneralTimetable);
+                            }
+                            if (railDailyTimetableList_THSR == null)
+                                throw new MyException("無法取得高鐵班次資訊");
+                            Router.saveRailDailyTimetableListToCache(API.THSR, railDailyTimetableList_THSR, dateTextView.getText().toString());
+                        }
+                    }
+                    dialog.setMessage("取得班次");
+                    trainPathList = Router.getTrainPath(transportation, API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
+
+                } catch (ParseException | Router.RouterException | SignatureException | IOException | MyException e) {
                     e.printStackTrace();
                     errorMessage = e.getMessage();
                 }
@@ -347,7 +478,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                dialog.setMessage("取得班次");
                 dialog.setCancelable(false);
                 dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 dialog.show();
@@ -376,6 +506,12 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 }
+            }
+
+            @Override
+            protected void onProgressUpdate(String... values) {
+                super.onProgressUpdate(values);
+                dialog.setMessage(values[0]);
             }
         }.execute();
     }
