@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;

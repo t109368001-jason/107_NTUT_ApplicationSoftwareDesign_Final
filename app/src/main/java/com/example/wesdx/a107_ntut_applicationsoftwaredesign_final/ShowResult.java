@@ -16,6 +16,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.TrainPath;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.TrainPathPart;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.google.gson.Gson;
@@ -72,7 +74,7 @@ public class ShowResult extends AppCompatActivity {
     public class TrainPathAdapter extends BaseAdapter {
         private List<TrainPath> trainPathList;
 
-        public TrainPathAdapter(List<TrainPath> trainPathList) {
+        TrainPathAdapter(List<TrainPath> trainPathList) {
             this.trainPathList = trainPathList;
         }
 
@@ -125,17 +127,17 @@ public class ShowResult extends AppCompatActivity {
     }
 
     public class TrainPathPartAdapter extends RecyclerView.Adapter<TrainPathPartAdapter.MyViewHolder> {
-        private List<TrainPath.TrainPathPart> trainPathPartList;
+        private List<TrainPathPart> trainPathPartList;
 
-        public class MyViewHolder extends RecyclerView.ViewHolder {
-            public View mView;
-            public MyViewHolder(View v) {
+        class MyViewHolder extends RecyclerView.ViewHolder {
+            View mView;
+            MyViewHolder(View v) {
                 super(v);
                 mView = v;
             }
         }
 
-        public TrainPathPartAdapter(List<TrainPath.TrainPathPart> trainPathPartList) {
+        TrainPathPartAdapter(List<TrainPathPart> trainPathPartList) {
             this.trainPathPartList = trainPathPartList;
         }
 
@@ -150,7 +152,7 @@ public class ShowResult extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            TrainPath.TrainPathPart trainPathPart = trainPathPartList.get(position);
+            TrainPathPart trainPathPart = trainPathPartList.get(position);
             if(trainPathPartList.size() <= 1)
             {
                 holder.mView.findViewById(R.id.upCircleImageView).setVisibility(View.GONE);

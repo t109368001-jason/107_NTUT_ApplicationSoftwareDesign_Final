@@ -1,97 +1,36 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 public class TrainPath implements Comparable<TrainPath> {
-    public static class TrainPathPart {
-        RailStation originStation;
-        RailStation destinationStation;
-        RailDailyTimetable railDailyTimetable;
+    public List<TrainPathPart> trainPathPartList;
 
-        public TrainPathPart() {
-            this.originStation = null;
-            this.destinationStation = null;
-            this.railDailyTimetable = null;
-        }
-
-        public TrainPathPart(RailStation originStation, RailStation destinationStation, RailDailyTimetable railDailyTimetable) {
-            this.originStation = originStation;
-            this.destinationStation = destinationStation;
-            this.railDailyTimetable = railDailyTimetable;
-        }
-
-        public Date getOriginDepartureTimeDate() throws ParseException {
-            return railDailyTimetable.getDepartureTimeDateByStationID(originStation.StationID);
-        }
-
-        public Date getDestinationArrivalTimeDate() throws ParseException {
-            return railDailyTimetable.getArrivalTimeDateByStationID(destinationStation.StationID);
-        }
-
-        public StopTime getOriginStopTime() {
-            return this.railDailyTimetable.getStopTimeOfStopTimes(this.originStation);
-        }
-
-        public StopTime getDestinationStopTime() {
-            return this.railDailyTimetable.getStopTimeOfStopTimes(this.destinationStation);
-        }
-    }
-
-    List<TrainPathPart> trainPathPartList;
-
-    public TrainPath() {
+    TrainPath() {
         this.trainPathPartList = null;
     }
 
-    public TrainPath(TrainPathPart trainPathPart) {
+    TrainPath(TrainPathPart trainPathPart) {
         this.trainPathPartList = new ArrayList<>();
         this.trainPathPartList.add(trainPathPart);
     }
 
-    public Date getODTime() throws ParseException {
-        Date total = new Date(this.getDestinationArrivalTimeDate().getTime() - this.getOriginDepartureTimeDate().getTime());
-        total.setHours(total.getHours() - TimeZone.getDefault().getRawOffset()/1000/60/60);
-        return total;
-    }
-
-    public Date getOriginDepartureTimeDate() throws ParseException {
+    Date getOriginDepartureTimeDate() throws ParseException {
         return this.trainPathPartList.get(0).getOriginDepartureTimeDate();
     }
 
-    public Date getDestinationArrivalTimeDate() throws ParseException {
+    Date getDestinationArrivalTimeDate() throws ParseException {
         return this.getLastItem().getDestinationArrivalTimeDate();
     }
 
-    public RailStation getOriginRailStation() {
-        return this.trainPathPartList.get(0).originStation;
-    }
-
-    public RailStation getDestinationRailStation() {
-        return this.getLastItem().destinationStation;
-    }
-
-    public String getOrigeinDepartureTime() {
-        return this.trainPathPartList.get(0).getOriginStopTime().DepartureTime;
-    }
-
-    public String getDestinationArrivalTime() {
-        return this.getLastItem().getDestinationStopTime().ArrivalTime;
-    }
-
-    private TrainPathPart getLastItem() {
-        return this.trainPathPartList.get(this.trainPathPartList.size()-1);
-    }
-
-    public static TrainPath getBest(List<TrainPath> trainPathList, boolean useOriginDeparetureTime, boolean useEarliest) throws ParseException {
+    static TrainPath getBest(List<TrainPath> trainPathList, boolean useOriginDeparetureTime, boolean useEarliest) throws ParseException {
         TrainPath trainPath = null;
         for(TrainPath trainPath_temp:trainPathList) {
             if(trainPath == null) trainPath = trainPath_temp;
@@ -110,7 +49,7 @@ public class TrainPath implements Comparable<TrainPath> {
         return trainPath;
     }
 
-    public static List<TrainPath> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, Date firstDepartureTime, Date lastArrivalTime, boolean isDirectional, int stopTimes) throws ParseException {
+    static List<TrainPath> filter(List<RailDailyTimetable> railDailyTimetableList, List<RailStation> railStationList, Date firstDepartureTime, Date lastArrivalTime, boolean isDirectional, int stopTimes) throws ParseException {
         List<TrainPath> trainPathList = new ArrayList<>();
 
         for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
@@ -143,7 +82,7 @@ public class TrainPath implements Comparable<TrainPath> {
         return trainPathList;
     }
 
-    public static List<TrainPath> filter(List<TrainPath> trainPathList) throws ParseException {
+    static List<TrainPath> filter(List<TrainPath> trainPathList) throws ParseException {
         if(trainPathList == null) return null;
         List<TrainPath> trainPathList_new = new ArrayList<>(trainPathList);
 
@@ -216,7 +155,7 @@ public class TrainPath implements Comparable<TrainPath> {
         return trainPathList_new;
     }
 
-    public static List<RailDailyTimetable> convert(List<TrainPath> trainPathList) {
+    static List<RailDailyTimetable> convert(List<TrainPath> trainPathList) {
         List<RailDailyTimetable> railDailyTimetableList = new ArrayList<>();
 
         for(TrainPath trainPath:trainPathList) {
@@ -227,22 +166,55 @@ public class TrainPath implements Comparable<TrainPath> {
         return railDailyTimetableList;
     }
 
-    public static void sort(List<TrainPath> trainPathList) {
+    static void sort(List<TrainPath> trainPathList) {
         Collections.sort(trainPathList);
+    }
+
+    private TrainPathPart getLastItem() {
+        return this.trainPathPartList.get(this.trainPathPartList.size()-1);
+    }
+
+    public Date getODTime() throws ParseException {
+        Calendar calendar1 = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        calendar1.setTime(getDestinationArrivalTimeDate());
+        calendar2.setTime(getOriginDepartureTimeDate());
+        calendar1.add(Calendar.HOUR_OF_DAY, -calendar2.get(Calendar.HOUR_OF_DAY));
+        calendar1.add(Calendar.MINUTE, -calendar2.get(Calendar.MINUTE));
+        return calendar1.getTime();
+    }
+
+    public RailStation getOriginRailStation() {
+        return this.trainPathPartList.get(0).originStation;
+    }
+
+    public RailStation getDestinationRailStation() {
+        return this.getLastItem().destinationStation;
+    }
+
+    public String getOrigeinDepartureTime() {
+        return this.trainPathPartList.get(0).getOriginStopTime().DepartureTime;
+    }
+
+    public String getDestinationArrivalTime() {
+        return this.getLastItem().getDestinationStopTime().ArrivalTime;
     }
 
     @Override
     public int compareTo(TrainPath obj2) {
         try {
-            Date obj1ArrivalTime = this.getDestinationArrivalTimeDate();
-            Date obj2ArrivalTime = obj2.getDestinationArrivalTimeDate();
+            Calendar calendarObj1 = Calendar.getInstance();
+            Calendar calendarObj2 = Calendar.getInstance();
+            calendarObj1.setTime(this.getDestinationArrivalTimeDate());
+            calendarObj2.setTime(obj2.getDestinationArrivalTimeDate());
             if(this.getLastItem().railDailyTimetable.afterOverNightStation(this.getLastItem().destinationStation.StationID)) {
-                obj1ArrivalTime.setDate(obj1ArrivalTime.getDate() + 1);
+                calendarObj1.add(Calendar.HOUR_OF_DAY, 24);
             }
             if(obj2.getLastItem().railDailyTimetable.afterOverNightStation(obj2.getLastItem().destinationStation.StationID)) {
-                obj2ArrivalTime.setDate(obj2ArrivalTime.getDate() + 1);
+                calendarObj2.add(Calendar.HOUR_OF_DAY, 24);
             }
-            return obj1ArrivalTime.compareTo(obj2ArrivalTime);
+
+            return calendarObj1.compareTo(calendarObj2);
         } catch (ParseException e) {
             e.printStackTrace();
         }

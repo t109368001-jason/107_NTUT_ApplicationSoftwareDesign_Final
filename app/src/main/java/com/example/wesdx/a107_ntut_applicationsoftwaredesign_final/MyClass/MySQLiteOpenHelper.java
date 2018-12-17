@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -37,10 +37,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
     private static final String STATIONOFLINE_TABLE = "stationOfLineTable";
     private static final String KEY_LINENO = "lineNo";
 
-    private static final String TAG = "DEBUG_MyRailStationSQL";
-
-
-    MySQLiteOpenHelper(Context context) {
+    public MySQLiteOpenHelper(Context context) {
         super(context, DATABASE_NAME , null, DATABASE_VERSION );
     }
     @Override
@@ -64,10 +61,9 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
-    public long addOrUpdateStationOfLine(@NonNull StationOfLine stationOfLine) {
-        SQLiteDatabase db = getWritableDatabase();
-        long userId = -1;
 
+    public void addOrUpdateStationOfLine(@NonNull StationOfLine stationOfLine) {
+        SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         ContentValues values = new ContentValues();
         values.put(KEY_LINENO, stationOfLine.LineNo);
@@ -76,11 +72,10 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         int rows = db.update(STATIONOFLINE_TABLE, values, KEY_LINENO + "= ?", new String[]{stationOfLine.LineNo});
 
         if (rows != 1) {
-            userId = db.insertOrThrow(STATIONOFLINE_TABLE, null, values);
+            db.insertOrThrow(STATIONOFLINE_TABLE, null, values);
             db.setTransactionSuccessful();
         }
         db.endTransaction();
-        return userId;
     }
 
     public List<StationOfLine> getAllStationOfLine() {
@@ -97,16 +92,14 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 stationOfLineList.add(stationOfLine);
             } while(cursor.moveToNext());
         }
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
         return stationOfLineList;
     }
 
-    public long addOrUpdateRailStation(@NonNull RailStation railStation) {
+    public void addOrUpdateRailStation(@NonNull RailStation railStation) {
         SQLiteDatabase db = getWritableDatabase();
-        long userId = -1;
-
         db.beginTransaction();
         ContentValues values = new ContentValues();
         values.put(KEY_TYPE_AND_ID, railStation.OperatorID + railStation.StationID);
@@ -116,11 +109,10 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         int rows = db.update(RAILSTATION_TABLE, values, KEY_TYPE_AND_ID + "= ?", new String[]{railStation.OperatorID + railStation.StationID});
 
         if (rows != 1) {
-            userId = db.insertOrThrow(RAILSTATION_TABLE, null, values);
+            db.insertOrThrow(RAILSTATION_TABLE, null, values);
             db.setTransactionSuccessful();
         }
         db.endTransaction();
-        return userId;
     }
 
     public List<RailStation> getAllRailStations(String transportation) {
@@ -137,16 +129,14 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 railStationList.add(railStation);
             } while(cursor.moveToNext());
         }
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
         return railStationList;
     }
 
-    public long addOrUpdateRailDailyTimetable(String transportation, @NonNull RailDailyTimetable railDailyTimetable) {
+    public void addOrUpdateRailDailyTimetable(String transportation, @NonNull RailDailyTimetable railDailyTimetable) {
         SQLiteDatabase db = getWritableDatabase();
-        long userId = -1;
-
         db.beginTransaction();
         ContentValues values = new ContentValues();
         values.put(KEY_TRAINDATE_AND_TRAINNO, railDailyTimetable.TrainDate + railDailyTimetable.DailyTrainInfo.TrainNo);
@@ -157,11 +147,10 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         int rows = db.update(RAILDAILYTIMETABLE_TABLE, values, KEY_TRAINDATE_AND_TRAINNO + "= ?", new String[]{railDailyTimetable.TrainDate + railDailyTimetable.DailyTrainInfo.TrainNo});
 
         if (rows != 1) {
-            userId = db.insertOrThrow(RAILDAILYTIMETABLE_TABLE, null, values);
+            db.insertOrThrow(RAILDAILYTIMETABLE_TABLE, null, values);
             db.setTransactionSuccessful();
         }
         db.endTransaction();
-        return userId;
     }
 
     public List<RailDailyTimetable> getAllRailDailyTimetable(String transportation, String trainDate) {
@@ -180,16 +169,14 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 railDailyTimetableList.add(railDailyTimetable);
             } while(cursor.moveToNext());
         }
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
         return railDailyTimetableList;
     }
 
-    public long addOrUpdateRailGeneralTimetable(String transportation, @NonNull RailGeneralTimetable railGeneralTimetable) {
+    public void addOrUpdateRailGeneralTimetable(String transportation, @NonNull RailGeneralTimetable railGeneralTimetable) {
         SQLiteDatabase db = getWritableDatabase();
-        long userId = -1;
-
         db.beginTransaction();
         ContentValues values = new ContentValues();
         values.put(KEY_OPERATOR_ID_AND_TRAINNO, transportation + railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainNo);
@@ -199,11 +186,10 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         int rows = db.update(RAILGENERALTIMETABLE_TABLE, values, KEY_OPERATOR_ID_AND_TRAINNO + "= ?", new String[]{transportation + railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainNo});
 
         if (rows != 1) {
-            userId = db.insertOrThrow(RAILGENERALTIMETABLE_TABLE, null, values);
+            db.insertOrThrow(RAILGENERALTIMETABLE_TABLE, null, values);
             db.setTransactionSuccessful();
         }
         db.endTransaction();
-        return userId;
     }
 
     public List<RailGeneralTimetable> getAllRailGeneralTimetables(String transportation) {
@@ -221,7 +207,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 railGeneralTimetableList.add(railGeneralTimetable);
             } while(cursor.moveToNext());
         }
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
         return railGeneralTimetableList;

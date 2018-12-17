@@ -28,6 +28,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.MyException;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.MySQLiteOpenHelper;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.Router;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.TrainPath;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
@@ -54,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private List<RegionalRailStation> regionalRailStationList;
     private CheckBox isDirectArrivalCheckBox, useTHSR;
     private MySQLiteOpenHelper mySQLiteOpenHelper;
+    private boolean useDataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("useDataBase", useDataBase);
         if(originStation != null) editor.putString("originStationID", originStation.StationID);
         if(destinationStation != null) editor.putString("destinationStationID", destinationStation.StationID);
         editor.apply();
@@ -178,61 +184,81 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_settings:
-                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-
-                final String[] settingList = {"台鐵-台鐵轉乘時間", "台鐵-高鐵轉乘時間"};
-
-                alertDialog.setTitle("選擇設定");
-                alertDialog.setItems(settingList, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, final int which) {
-
-                        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-
-                        final EditText input = new EditText(MainActivity.this);
-                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.MATCH_PARENT);
-                        input.setLayoutParams(lp);
-                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-                        alertDialog.setTitle("輸入時間(分鐘)");
-                        alertDialog.setView(input);
-                        alertDialog.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which2) {
-                                String number = input.getText().toString();
-                                if(number.equals("")) {
-                                    Toast.makeText(MainActivity.this, "請輸入數字", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    int time = Integer.parseInt(input.getText().toString());
-                                    if(time < 0) {
-                                        Toast.makeText(MainActivity.this, "請輸入大於等於0的數字", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
-                                        SharedPreferences.Editor editor = settings.edit();
-                                        editor.putInt((which == 0 ? "TRAToTRATransferTime" : "TRAToTHSRTransferTime"), time);
-                                        editor.apply();
-                                        if(which == 0) {
-                                            Router.TRAToTRATransferTime = time * 60 * 1000;
-                                        } else {
-                                            Router.TRAToTHSRTransferTime = time * 60 * 1000;
-                                        }
-                                        Toast.makeText(MainActivity.this, "已將" + (which == 0 ? "台鐵-台鐵轉乘時間" : "台鐵-高鐵轉乘時間") + "設為：" + Integer.toString(time), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }
-                        });
-                        alertDialog.show();
-                    }
-                });
-                alertDialog.show();
+                changeSettings();
                 return(true);
             case R.id.action_exit:
                 finish();
                 return(true);
         }
         return(super.onOptionsItemSelected(item));
+    }
+
+    private void changeSettings() {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+        final String[] settingList = {"變更台鐵-台鐵轉乘時間：" + Long.toString(Router.TRAToTRATransferTime/60/1000), "變更台鐵-高鐵轉乘時間：" + Long.toString(Router.TRAToTHSRTransferTime/60/1000), "其他"};
+
+        alertDialog.setTitle("選擇設定");
+        alertDialog.setItems(settingList, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, final int which) {
+
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+                if(which == 2) {
+                    final String[] settingList2 = {"效能優先", "節省流量"};
+                    alertDialog.setTitle("請選擇");
+                    alertDialog.setItems(settingList2, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which2) {
+                            useDataBase = (which2 == 1);
+                            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean("useDataBase", useDataBase);
+                            editor.apply();
+                            Toast.makeText(MainActivity.this, "已設為" + (settingList2[which2]), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    final EditText input = new EditText(MainActivity.this);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT);
+                    input.setLayoutParams(lp);
+                    input.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+                    alertDialog.setTitle("輸入時間(分鐘)");
+                    alertDialog.setView(input);
+                    alertDialog.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which2) {
+                            String number = input.getText().toString();
+                            if (number.equals("")) {
+                                Toast.makeText(MainActivity.this, "請輸入數字", Toast.LENGTH_SHORT).show();
+                            } else {
+                                int time = Integer.parseInt(input.getText().toString());
+                                if (time < 0) {
+                                    Toast.makeText(MainActivity.this, "請輸入大於等於0的數字", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    if (which == 0) {
+                                        Router.TRAToTRATransferTime = time * 60 * 1000;
+                                    } else {
+                                        Router.TRAToTHSRTransferTime = time * 60 * 1000;
+                                    }
+                                    SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                                    SharedPreferences.Editor editor = settings.edit();
+                                    editor.putInt((which == 0 ? "TRAToTRATransferTime" : "TRAToTHSRTransferTime"), time);
+                                    editor.apply();
+                                    Toast.makeText(MainActivity.this, "已將" + (which == 0 ? "台鐵-台鐵轉乘時間" : "台鐵-高鐵轉乘時間") + "設為：" + Integer.toString(time), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    });
+                }
+                alertDialog.show();
+            }
+        });
+        alertDialog.show();
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -274,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                     String originStationID = settings.getString("originStationID", "");
                     String destinationStationID = settings.getString("destinationStationID", "");
+                    useDataBase = settings.getBoolean("useDataBase", false);
                     int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
                     int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
                     Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
@@ -365,110 +392,149 @@ public class MainActivity extends AppCompatActivity {
                     }
 */
                     if(Router.stationOfLineList == null) {
-                        publishProgress("從本地資料庫取得台鐵路線資訊");
-                        List<StationOfLine> stationOfLineList = mySQLiteOpenHelper.getAllStationOfLine();
-                        List<StationOfLine> stationOfLineList_newest;
-                        if(stationOfLineList == null) {
-                            publishProgress("從MOTC取得台鐵路線資訊");
-                            if((stationOfLineList_newest = API.getStationOfLine(API.TRA)) == null) throw new MyException("無法從MOTC取得台鐵路線資訊");
-                            StationOfLine.fixMissing15StationProblem(stationOfLineList_newest);
-                        } else {
-                            publishProgress("檢查台鐵路線資訊更新");
-                            if((stationOfLineList_newest = API.getStationOfLine(API.TRA, StationOfLine.getNewestUpdateTime(stationOfLineList))) == null) throw new MyException("無法從MOTC取得台鐵路線資訊");
-                            if(stationOfLineList_newest.size() > 0) {
-                                if ((stationOfLineList_newest = API.getStationOfLine(API.TRA)) == null)
+                        List<StationOfLine> stationOfLineList;
+                        if(useDataBase) {
+                            publishProgress("從本地資料庫取得台鐵路線資訊");
+                            stationOfLineList = mySQLiteOpenHelper.getAllStationOfLine();
+                            List<StationOfLine> stationOfLineList_newest;
+                            if (stationOfLineList == null) {
+                                publishProgress("從MOTC取得台鐵路線資訊");
+                                if ((stationOfLineList_newest = API.getStationOfLine()) == null)
                                     throw new MyException("無法從MOTC取得台鐵路線資訊");
                                 StationOfLine.fixMissing15StationProblem(stationOfLineList_newest);
+                            } else {
+                                publishProgress("檢查台鐵路線資訊更新");
+                                if ((stationOfLineList_newest = API.getStationOfLine(StationOfLine.getNewestUpdateTime(stationOfLineList))) == null)
+                                    throw new MyException("無法從MOTC取得台鐵路線資訊");
+                                if (stationOfLineList_newest.size() > 0) {
+                                    if ((stationOfLineList_newest = API.getStationOfLine()) == null)
+                                        throw new MyException("無法從MOTC取得台鐵路線資訊");
+                                    StationOfLine.fixMissing15StationProblem(stationOfLineList_newest);
+                                }
                             }
-                        }
-                        publishProgress("更新本地資料庫台鐵路線資訊");
-                        for(StationOfLine stationOfLine:stationOfLineList_newest) {
-                            if(stationOfLineList == null) stationOfLineList = new ArrayList<>();
-                            stationOfLineList.add(stationOfLine);
-                            mySQLiteOpenHelper.addOrUpdateStationOfLine(stationOfLine);
-                        }
+                            publishProgress("更新本地資料庫台鐵路線資訊");
+                            for (StationOfLine stationOfLine : stationOfLineList_newest) {
+                                if (stationOfLineList == null)
+                                    stationOfLineList = new ArrayList<>();
+                                stationOfLineList.add(stationOfLine);
+                                mySQLiteOpenHelper.addOrUpdateStationOfLine(stationOfLine);
+                            }
 
-                        if(stationOfLineList == null) throw new MyException("無法取得台鐵路線資訊");
+                            if (stationOfLineList == null) throw new MyException("無法取得台鐵路線資訊");
+                        } else {
+                            publishProgress("從MOTC取得台鐵路線資訊");
+                            if ((stationOfLineList = API.getStationOfLine()) == null)
+                                throw new MyException("無法從MOTC取得台鐵路線資訊");
+                            StationOfLine.fixMissing15StationProblem(stationOfLineList);
+                        }
                         Router.stationOfLineList = stationOfLineList;
                     }
 
                     if(Router.railDailyTimetableListCacheDate_TRA == null || !Router.railDailyTimetableListCacheDate_TRA.equals(dateTextView.getText().toString())) {
-                        if (transportation.equals(API.TRA) || transportation.equals(API.TRA_AND_THSR)) {
-                            publishProgress("從本地資料庫取得台鐵班次資訊");
-                            List<RailDailyTimetable> railDailyTimetableList_TRA = mySQLiteOpenHelper.getAllRailDailyTimetable(API.TRA, dateTextView.getText().toString());
-                            List<RailGeneralTimetable> railGeneralTimetableList_TRA = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.TRA);
-                            List<RailDailyTimetable> railDailyTimetableList_newest_TRA;
-                            List<RailGeneralTimetable> railGeneralTimetableList_newest_TRA;
-                            if (railDailyTimetableList_TRA == null) {
-                                publishProgress("從MOTC取得台鐵班次資訊");
-                                if ((railDailyTimetableList_newest_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, dateTextView.getText().toString())) == null)
-                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
-                                if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA)) == null)
-                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
-                            } else {
-                                publishProgress("檢查台鐵班次資訊更新");
-                                if ((railDailyTimetableList_newest_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_TRA))) == null)
-                                    throw new MyException("無法從MOTC取得台鐵班次資訊");
-                                if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_TRA))) == null)
+                        List<RailDailyTimetable> railDailyTimetableList_TRA = null;
+                        List<RailGeneralTimetable> railGeneralTimetableList_TRA = null;
+                        if(useDataBase) {
+                            if (transportation.equals(API.TRA) || transportation.equals(API.TRA_AND_THSR)) {
+                                publishProgress("從本地資料庫取得台鐵班次資訊");
+                                railDailyTimetableList_TRA = mySQLiteOpenHelper.getAllRailDailyTimetable(API.TRA, dateTextView.getText().toString());
+                                railGeneralTimetableList_TRA = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.TRA);
+                                List<RailDailyTimetable> railDailyTimetableList_newest_TRA;
+                                List<RailGeneralTimetable> railGeneralTimetableList_newest_TRA;
+                                if (railDailyTimetableList_TRA == null) {
+                                    publishProgress("從MOTC取得台鐵班次資訊");
+                                    if ((railDailyTimetableList_newest_TRA = API.getDailyTimetableByTrainDate(API.TRA, dateTextView.getText().toString())) == null)
+                                        throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                    if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA)) == null)
+                                        throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                } else {
+                                    publishProgress("檢查台鐵班次資訊更新");
+                                    if ((railDailyTimetableList_newest_TRA = API.getDailyTimetableByTrainDate(API.TRA, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_TRA))) == null)
+                                        throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                    if ((railGeneralTimetableList_newest_TRA = API.getGeneralTimetable(API.TRA, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_TRA))) == null)
+                                        throw new MyException("無法從MOTC取得台鐵班次資訊");
+                                }
+                                publishProgress("更新本地資料庫台鐵班次資訊");
+                                RailDailyTimetable.add(railDailyTimetableList_newest_TRA, railGeneralTimetableList_newest_TRA, dateTextView.getText().toString());
+                                for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_TRA) {
+                                    if (railDailyTimetableList_TRA == null)
+                                        railDailyTimetableList_TRA = new ArrayList<>();
+                                    railDailyTimetableList_TRA.add(railDailyTimetable);
+                                    mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.TRA, railDailyTimetable);
+                                }
+                                for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_TRA) {
+                                    if (railGeneralTimetableList_TRA == null)
+                                        railGeneralTimetableList_TRA = new ArrayList<>();
+                                    railGeneralTimetableList_TRA.add(railGeneralTimetable);
+                                    mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.TRA, railGeneralTimetable);
+                                }
+                            }
+                        } else {
+                            if ((railDailyTimetableList_TRA = API.getDailyTimetableByTrainDate(API.TRA, dateTextView.getText().toString())) == null)
+                                throw new MyException("無法從MOTC取得台鐵班次資訊");
+                            if((railGeneralTimetableList_TRA = Router.railGeneralTimetableListCache_TRA) == null) {
+                                if ((railGeneralTimetableList_TRA = API.getGeneralTimetable(API.TRA)) == null)
                                     throw new MyException("無法從MOTC取得台鐵班次資訊");
                             }
-                            publishProgress("更新本地資料庫台鐵班次資訊");
-                            RailDailyTimetable.add(railDailyTimetableList_newest_TRA, railGeneralTimetableList_newest_TRA, dateTextView.getText().toString());
-                            for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_TRA) {
-                                if (railDailyTimetableList_TRA == null)
-                                    railDailyTimetableList_TRA = new ArrayList<>();
-                                railDailyTimetableList_TRA.add(railDailyTimetable);
-                                mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.TRA, railDailyTimetable);
-                            }
-                            for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_TRA) {
-                                mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.TRA, railGeneralTimetable);
-                            }
-                            if (railDailyTimetableList_TRA == null)
-                                throw new MyException("無法取得台鐵班次資訊");
-                            Router.saveRailDailyTimetableListToCache(API.TRA, railDailyTimetableList_TRA, dateTextView.getText().toString());
                         }
+                        if (railDailyTimetableList_TRA == null) throw new MyException("無法取得台鐵班次資訊");
+                        Router.saveRailDailyTimetableListToCache(API.TRA, railDailyTimetableList_TRA, dateTextView.getText().toString());
+                        Router.saveRailGeneralTimetableToCache(API.TRA, railGeneralTimetableList_TRA);
                     }
 
                     if(Router.railDailyTimetableListCacheDate_THSR == null || !Router.railDailyTimetableListCacheDate_THSR.equals(dateTextView.getText().toString())) {
-                        if (transportation.equals(API.THSR) || transportation.equals(API.TRA_AND_THSR)) {
-                            publishProgress("從本地資料庫取得高鐵班次資訊");
-                            List<RailDailyTimetable> railDailyTimetableList_THSR = mySQLiteOpenHelper.getAllRailDailyTimetable(API.THSR, dateTextView.getText().toString());
-                            List<RailGeneralTimetable> railGeneralTimetableList_THSR = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.THSR);
-                            List<RailDailyTimetable> railDailyTimetableList_newest_THSR;
-                            List<RailGeneralTimetable> railGeneralTimetableList_newest_THSR;
-                            if (railDailyTimetableList_THSR == null) {
-                                publishProgress("從MOTC取得高鐵班次資訊");
-                                if ((railDailyTimetableList_newest_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, dateTextView.getText().toString())) == null)
-                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
-                                if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR)) == null)
-                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
-                            } else {
-                                publishProgress("檢查高鐵班次資訊更新");
-                                if ((railDailyTimetableList_newest_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_THSR))) == null)
-                                    throw new MyException("無法從MOTC取得高鐵班次資訊");
-                                if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_THSR))) == null)
+                        List<RailDailyTimetable> railDailyTimetableList_THSR = null;
+                        List<RailGeneralTimetable> railGeneralTimetableList_THSR = null;
+                        if(useDataBase) {
+                            if (transportation.equals(API.THSR) || transportation.equals(API.TRA_AND_THSR)) {
+                                publishProgress("從本地資料庫取得高鐵班次資訊");
+                                railDailyTimetableList_THSR = mySQLiteOpenHelper.getAllRailDailyTimetable(API.THSR, dateTextView.getText().toString());
+                                railGeneralTimetableList_THSR = mySQLiteOpenHelper.getAllRailGeneralTimetables(API.THSR);
+                                List<RailDailyTimetable> railDailyTimetableList_newest_THSR;
+                                List<RailGeneralTimetable> railGeneralTimetableList_newest_THSR;
+                                if (railDailyTimetableList_THSR == null) {
+                                    publishProgress("從MOTC取得高鐵班次資訊");
+                                    if ((railDailyTimetableList_newest_THSR = API.getDailyTimetableByTrainDate(API.THSR, dateTextView.getText().toString())) == null)
+                                        throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                    if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR)) == null)
+                                        throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                } else {
+                                    publishProgress("檢查高鐵班次資訊更新");
+                                    if ((railDailyTimetableList_newest_THSR = API.getDailyTimetableByTrainDate(API.THSR, dateTextView.getText().toString(), RailDailyTimetable.getNewestUpdateTime(railDailyTimetableList_THSR))) == null)
+                                        throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                    if ((railGeneralTimetableList_newest_THSR = API.getGeneralTimetable(API.THSR, RailGeneralTimetable.getNewestUpdateTime(railGeneralTimetableList_THSR))) == null)
+                                        throw new MyException("無法從MOTC取得高鐵班次資訊");
+                                }
+                                publishProgress("更新本地資料庫高鐵班次資訊");
+                                RailDailyTimetable.add(railDailyTimetableList_newest_THSR, railGeneralTimetableList_newest_THSR, dateTextView.getText().toString());
+                                for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_THSR) {
+                                    if (railDailyTimetableList_THSR == null)
+                                        railDailyTimetableList_THSR = new ArrayList<>();
+                                    railDailyTimetableList_THSR.add(railDailyTimetable);
+                                    mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.THSR, railDailyTimetable);
+                                }
+                                for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_THSR) {
+                                    if (railGeneralTimetableList_THSR == null)
+                                        railGeneralTimetableList_THSR = new ArrayList<>();
+                                    railGeneralTimetableList_THSR.add(railGeneralTimetable);
+                                    mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.THSR, railGeneralTimetable);
+                                }
+                            }
+                        } else {
+                            if ((railDailyTimetableList_THSR = API.getDailyTimetableByTrainDate(API.THSR, dateTextView.getText().toString())) == null)
+                                throw new MyException("無法從MOTC取得高鐵班次資訊");
+                            if((railGeneralTimetableList_THSR = Router.railGeneralTimetableListCache_THSR) == null) {
+                                if ((railGeneralTimetableList_THSR = API.getGeneralTimetable(API.THSR)) == null)
                                     throw new MyException("無法從MOTC取得高鐵班次資訊");
                             }
-                            publishProgress("更新本地資料庫高鐵班次資訊");
-                            RailDailyTimetable.add(railDailyTimetableList_newest_THSR, railGeneralTimetableList_newest_THSR, dateTextView.getText().toString());
-                            for (RailDailyTimetable railDailyTimetable : railDailyTimetableList_newest_THSR) {
-                                if (railDailyTimetableList_THSR == null)
-                                    railDailyTimetableList_THSR = new ArrayList<>();
-                                railDailyTimetableList_THSR.add(railDailyTimetable);
-                                mySQLiteOpenHelper.addOrUpdateRailDailyTimetable(API.THSR, railDailyTimetable);
-                            }
-                            for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList_newest_THSR) {
-                                mySQLiteOpenHelper.addOrUpdateRailGeneralTimetable(API.THSR, railGeneralTimetable);
-                            }
-                            if (railDailyTimetableList_THSR == null)
-                                throw new MyException("無法取得高鐵班次資訊");
-                            Router.saveRailDailyTimetableListToCache(API.THSR, railDailyTimetableList_THSR, dateTextView.getText().toString());
                         }
+                        if (railDailyTimetableList_THSR == null) throw new MyException("無法取得高鐵班次資訊");
+                        Router.saveRailDailyTimetableListToCache(API.THSR, railDailyTimetableList_THSR, dateTextView.getText().toString());
+                        Router.saveRailGeneralTimetableToCache(API.THSR, railGeneralTimetableList_THSR);
                     }
                     dialog.setMessage("取得班次");
                     trainPathList = Router.getTrainPath(transportation, API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
 
-                } catch (ParseException | Router.RouterException | SignatureException | IOException | MyException e) {
+                } catch (ParseException | SignatureException | IOException | MyException e) {
                     e.printStackTrace();
                     errorMessage = e.getMessage();
                 }
@@ -547,28 +613,25 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.setItems(stationList, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which2) {
-                        textView.setText(stationList[which2]);
-                        if(textView == originStationTextView_buffer) {
-                            originStation = regionalRailStationList.get(which).railStationList.get(which2);
-                        } else if(textView == destinationStationTextView_buffer){
-                            destinationStation = regionalRailStationList.get(which).railStationList.get(which2);
-                        }
-                        if((originStation != null)&&(destinationStation != null)){
-                            if (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA)) {
-                                isDirectArrivalCheckBox.setEnabled(true);
-                                isDirectArrivalCheckBox.setChecked(false);
-                                useTHSR.setVisibility(View.VISIBLE);
+                        String newOriginStationName = (textView == originStationTextView_buffer) ? stationList[which2] : originStationTextView_buffer.getText().toString();
+                        String newDestinationStationName = (textView == destinationStationTextView_buffer) ? stationList[which2] : destinationStationTextView_buffer.getText().toString();
 
-                            } else if (originStation.OperatorID.equals(API.THSR) && destinationStation.OperatorID.equals(API.THSR)) {
-                                isDirectArrivalCheckBox.setEnabled(false);
-                                isDirectArrivalCheckBox.setChecked(true);
-                                useTHSR.setVisibility(View.INVISIBLE);
-                                useTHSR.setChecked(false);
-                            } else {
-                                isDirectArrivalCheckBox.setEnabled(false);
-                                isDirectArrivalCheckBox.setChecked(false);
-                                useTHSR.setVisibility(View.INVISIBLE);
-                                useTHSR.setChecked(false);
+                        if(newOriginStationName.equals(newDestinationStationName)) {
+                            Toast.makeText(MainActivity.this, "請選擇不同車站", Toast.LENGTH_SHORT).show();
+                        } else {
+                            textView.setText(stationList[which2]);
+                            if(textView == originStationTextView_buffer) {
+                                originStation = regionalRailStationList.get(which).railStationList.get(which2);
+                            } else if(textView == destinationStationTextView_buffer){
+                                destinationStation = regionalRailStationList.get(which).railStationList.get(which2);
+                            }
+                            if((originStation != null)&&(destinationStation != null)){
+                                boolean directArrival = (originStation.OperatorID.equals(API.THSR) && destinationStation.OperatorID.equals(API.THSR));
+                                int visibility = (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA)) ? View.VISIBLE : View.INVISIBLE;
+                                boolean directArrivalEnable = (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA));
+                                isDirectArrivalCheckBox.setEnabled(directArrivalEnable);
+                                isDirectArrivalCheckBox.setChecked(directArrival);
+                                useTHSR.setVisibility(visibility);
                             }
                         }
                     }

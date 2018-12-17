@@ -1,4 +1,4 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.LineStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MyRailStation {
-    public static List<List<RailStation>> getRailStationList(final List<RailStation> railStationList_TRA_all, final RailStation originStation, final RailStation destinationStation) {
+class MyRailStation {
+    static List<List<RailStation>> getRailStationList(final List<RailStation> railStationList_TRA_all, final RailStation originStation, final RailStation destinationStation) {
         List<List<RailStation>> out;
 
         final StationOfLine originStationOfLine = StationOfLine.getStationOfLine(Router.stationOfLineList, originStation.StationID);

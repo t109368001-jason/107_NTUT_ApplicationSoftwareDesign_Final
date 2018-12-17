@@ -20,14 +20,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.Router;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.security.SignatureException;
-import java.util.Calendar;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
