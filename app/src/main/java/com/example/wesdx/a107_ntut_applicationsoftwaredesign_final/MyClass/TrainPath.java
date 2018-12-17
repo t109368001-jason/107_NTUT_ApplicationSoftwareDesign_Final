@@ -56,6 +56,7 @@ public class TrainPath implements Comparable<TrainPath> {
             int stopTimes_temp = 0;
             RailStation firstStation = null;
             RailStation lastStation = null;
+
             for(int i = 0; i < railStationList.size(); i++) {
                 for(int j = 0 ; j < railDailyTimetable.StopTimes.size(); j++) {
                     if(railDailyTimetable.StopTimes.get(j).StationID.equals(railStationList.get(i).StationID)) {

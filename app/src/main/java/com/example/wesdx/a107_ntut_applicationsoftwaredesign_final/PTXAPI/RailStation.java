@@ -71,6 +71,7 @@ public class RailStation implements Comparable<RailStation> {
                     }
                     if (same) {
                         railStationList_List_new.remove(j);
+                        j--;
                     }
                 }
             }

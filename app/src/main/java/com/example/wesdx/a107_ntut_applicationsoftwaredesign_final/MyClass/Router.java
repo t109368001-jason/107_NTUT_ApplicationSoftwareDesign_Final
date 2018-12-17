@@ -393,7 +393,7 @@ public class Router {
                         return null;
 
                     for (List<RailStation> railStationList_current : railStationList_List) {
-
+                        RailStation.logD(railStationList_current);
                         List<TrainPath> trainPathList_mid_all = TrainPath.filter(railDailyTimetableList_all, railStationList_current, originDepartureTime, destinationArrivalTime, true, 2);
                         List<RailDailyTimetable> railDailyTimetableList_mid_all = TrainPath.convert(trainPathList_mid_all);
 
