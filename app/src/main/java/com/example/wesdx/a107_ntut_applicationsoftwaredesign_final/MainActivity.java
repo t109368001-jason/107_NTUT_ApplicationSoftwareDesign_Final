@@ -477,6 +477,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                         if (railDailyTimetableList_TRA == null) throw new MyException("無法取得台鐵班次資訊");
+                        RailDailyTimetable.add(railDailyTimetableList_TRA, railGeneralTimetableList_TRA, dateTextView.getText().toString());
                         Router.saveRailDailyTimetableListToCache(API.TRA, railDailyTimetableList_TRA, dateTextView.getText().toString());
                         Router.saveRailGeneralTimetableToCache(API.TRA, railGeneralTimetableList_TRA);
                     }
@@ -528,6 +529,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                         if (railDailyTimetableList_THSR == null) throw new MyException("無法取得高鐵班次資訊");
+                        RailDailyTimetable.add(railDailyTimetableList_THSR, railGeneralTimetableList_THSR, dateTextView.getText().toString());
                         Router.saveRailDailyTimetableListToCache(API.THSR, railDailyTimetableList_THSR, dateTextView.getText().toString());
                         Router.saveRailGeneralTimetableToCache(API.THSR, railGeneralTimetableList_THSR);
                     }
