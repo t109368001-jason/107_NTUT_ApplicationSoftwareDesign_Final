@@ -380,10 +380,10 @@ class MyRailStation {
                 List<RailStation> railStationList_CC = new ArrayList<>();
                 List<RailStation> railStationList_CCC = new ArrayList<>();
 
-                StationOfLine currentStationOfLine_WC = begStationOfLine;
-                StationOfLine currentStationOfLine_WCC = begStationOfLine;
-                StationOfLine currentStationOfLine_CC = begStationOfLine;
-                StationOfLine currentStationOfLine_CCC = begStationOfLine;
+                StationOfLine currentStationOfLine_WC = new StationOfLine(begStationOfLine);
+                StationOfLine currentStationOfLine_WCC = new StationOfLine(begStationOfLine);
+                StationOfLine currentStationOfLine_CC = new StationOfLine(begStationOfLine);
+                StationOfLine currentStationOfLine_CCC = new StationOfLine(begStationOfLine);
                 boolean WC_finish = false;
                 boolean WCC_finish = false;
                 boolean CC_finish = false;
@@ -693,6 +693,7 @@ class MyRailStation {
                     i--;
                 }
             }
+            RailStation.logD(railStationList_temp);
         }
 
         return out;

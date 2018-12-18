@@ -169,8 +169,8 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("useDataBase", useDataBase);
-        if(originStation != null) editor.putString("originStationID", originStation.StationID);
-        if(destinationStation != null) editor.putString("destinationStationID", destinationStation.StationID);
+        if(originStation != null) editor.putString("originOperatorIDStationID", originStation.OperatorID + originStation.StationID);
+        if(destinationStation != null) editor.putString("destinationOperatorIDStationID", destinationStation.OperatorID + destinationStation.StationID);
         editor.apply();
     }
 
@@ -298,19 +298,19 @@ public class MainActivity extends AppCompatActivity {
                     regionalRailStationList = RegionalRailStation.convert(railStationList);
 
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                    String originStationID = settings.getString("originStationID", "");
-                    String destinationStationID = settings.getString("destinationStationID", "");
+                    String originOperatorIDStationID = settings.getString("originOperatorIDStationID", "");
+                    String destinationOperatorIDStationID = settings.getString("destinationOperatorIDStationID", "");
                     useDataBase = settings.getBoolean("useDataBase", false);
                     int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
                     int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
                     Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
                     Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime * 60 * 1000;
                     for (RailStation railStation:railStationList) {
-                        if (railStation.StationID.equals(originStationID)) {
+                        if ((railStation.OperatorID + railStation.StationID).equals(originOperatorIDStationID)) {
                             originStationTextView_buffer.setText(railStation.StationName.Zh_tw);
                             originStation = railStation;
                         }
-                        if (railStation.StationID.equals(destinationStationID)) {
+                        if ((railStation.OperatorID + railStation.StationID).equals(destinationOperatorIDStationID)) {
                             destinationStationTextView_buffer.setText(railStation.StationName.Zh_tw);
                             destinationStation = railStation;
                         }
@@ -345,6 +345,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     alertDialog.show();
+                }
+                if((originStation != null)&&(destinationStation != null)){
+                    boolean directArrival = (originStation.OperatorID.equals(API.THSR) && destinationStation.OperatorID.equals(API.THSR));
+                    int visibility = (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA)) ? View.VISIBLE : View.INVISIBLE;
+                    boolean directArrivalEnable = (originStation.OperatorID.equals(API.TRA) && destinationStation.OperatorID.equals(API.TRA));
+                    isDirectArrivalCheckBox.setEnabled(directArrivalEnable);
+                    isDirectArrivalCheckBox.setChecked(directArrival);
+                    useTHSR.setVisibility(visibility);
                 }
             }
 

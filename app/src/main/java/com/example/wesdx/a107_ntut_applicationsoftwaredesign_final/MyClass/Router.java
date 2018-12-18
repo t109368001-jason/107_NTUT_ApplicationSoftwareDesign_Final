@@ -190,8 +190,6 @@ public class Router {
 
                                 if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
                                     return null;
-                                if ((railStation_list_list = RailStation.filter(railStation_list_list, 2)) == null)
-                                    return null;
                                 int min = 239;
                                 int minIndex = 0;
 
@@ -228,8 +226,6 @@ public class Router {
 
                             if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
                                 return null;
-                            if ((railStation_list_list = RailStation.filter(railStation_list_list, 2)) == null)
-                                return null;
                             int min = 239;
                             int minIndex = 0;
 
@@ -265,8 +261,6 @@ public class Router {
                                 List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation, railStation_TRA_temp);
 
                                 if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
-                                    return null;
-                                if ((railStation_list_list = RailStation.filter(railStation_list_list, 2)) == null)
                                     return null;
                                 int min = 239;
                                 int minIndex = 0;
@@ -305,8 +299,6 @@ public class Router {
 
                             if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
                                 return null;
-                            if ((railStation_list_list = RailStation.filter(railStation_list_list, 2)) == null)
-                                return null;
                             int min = 239;
                             int minIndex = 0;
 
@@ -338,8 +330,6 @@ public class Router {
                             List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation_TRA, destinationStation_TRA);
 
                             if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
-                                return null;
-                            if ((railStation_list_list = RailStation.filter(railStation_list_list, 2)) == null)
                                 return null;
                             int min = 239;
                             int minIndex = 0;
@@ -432,8 +422,6 @@ public class Router {
                         return null;
 
                     if ((railStationList_List = RailStation.removeRepeatedRailStationList(railStationList_List)) == null)
-                        return null;
-                    if ((railStationList_List = RailStation.filter(railStationList_List, 2)) == null)
                         return null;
 
                     for (List<RailStation> railStationList_current : railStationList_List) {
