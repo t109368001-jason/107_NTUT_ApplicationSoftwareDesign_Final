@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     private void changeSettings() {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
 
-        final String[] settingList = {"變更台鐵-台鐵轉乘時間：" + Long.toString(Router.TRAToTRATransferTime/60/1000), "變更台鐵-高鐵轉乘時間：" + Long.toString(Router.TRAToTHSRTransferTime/60/1000), "其他"};
+        final String[] settingList = {"變更台鐵-台鐵轉乘時間：" + Long.toString(Router.TRAToTRATransferTime) + "分鐘", "變更台鐵-高鐵轉乘時間：" + Long.toString(Router.TRAToTHSRTransferTime) + "分鐘", "其他"};
 
         alertDialog.setTitle("選擇設定");
         alertDialog.setItems(settingList, new DialogInterface.OnClickListener() {
@@ -241,9 +241,9 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.makeText(MainActivity.this, "請輸入大於等於0的數字", Toast.LENGTH_SHORT).show();
                                 } else {
                                     if (which == 0) {
-                                        Router.TRAToTRATransferTime = time * 60 * 1000;
+                                        Router.TRAToTRATransferTime = time;
                                     } else {
-                                        Router.TRAToTHSRTransferTime = time * 60 * 1000;
+                                        Router.TRAToTHSRTransferTime = time;
                                     }
                                     SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
                                     SharedPreferences.Editor editor = settings.edit();
@@ -303,15 +303,13 @@ public class MainActivity extends AppCompatActivity {
                     useDataBase = settings.getBoolean("useDataBase", false);
                     int TRAToTRATransferTime = settings.getInt("TRAToTRATransferTime", 5);
                     int TRAToTHSRTransferTime = settings.getInt("TRAToTHSRTransferTime", 10);
-                    Router.TRAToTRATransferTime = TRAToTRATransferTime * 60 * 1000;
-                    Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime * 60 * 1000;
+                    Router.TRAToTRATransferTime = TRAToTRATransferTime;
+                    Router.TRAToTHSRTransferTime = TRAToTHSRTransferTime;
                     for (RailStation railStation:railStationList) {
                         if ((railStation.OperatorID + railStation.StationID).equals(originOperatorIDStationID)) {
-                            originStationTextView_buffer.setText(railStation.StationName.Zh_tw);
                             originStation = railStation;
                         }
                         if ((railStation.OperatorID + railStation.StationID).equals(destinationOperatorIDStationID)) {
-                            destinationStationTextView_buffer.setText(railStation.StationName.Zh_tw);
                             destinationStation = railStation;
                         }
                     }
@@ -355,6 +353,8 @@ public class MainActivity extends AppCompatActivity {
                     isDirectArrivalCheckBox.setChecked(directArrival);
                     useTHSR.setVisibility(visibility);
                 }
+                if(originStation != null) originStationTextView_buffer.setText(originStation.StationName.Zh_tw);
+                if(destinationStation != null) destinationStationTextView_buffer.setText(destinationStation.StationName.Zh_tw);
             }
 
             @Override
@@ -542,7 +542,7 @@ public class MainActivity extends AppCompatActivity {
                         Router.saveRailDailyTimetableListToCache(API.THSR, railDailyTimetableList_THSR, dateTextView.getText().toString());
                         Router.saveRailGeneralTimetableToCache(API.THSR, railGeneralTimetableList_THSR);
                     }
-                    dialog.setMessage("取得班次");
+                    publishProgress("取得班次");
                     trainPathList = Router.getTrainPath(transportation, API.timeFormat.parse(timeTextView.getText().toString()), null, null, railStationList, originStation, destinationStation, isDirectArrivalCheckBox.isChecked());
 
                 } catch (ParseException | SignatureException | IOException | MyException e) {

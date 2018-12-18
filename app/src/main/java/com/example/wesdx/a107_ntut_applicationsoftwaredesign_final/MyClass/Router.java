@@ -1,5 +1,7 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
+import android.provider.CalendarContract;
+
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGeneralTimetable;
@@ -8,12 +10,13 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.Statio
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class Router {
-    public static long TRAToTRATransferTime = 5 * 60 * 1000;
-    public static long TRAToTHSRTransferTime = 10 * 60 * 1000;
+    public static int TRAToTRATransferTime = 5;
+    public static int TRAToTHSRTransferTime = 10;
     public static List<StationOfLine> stationOfLineList;
     public static String railDailyTimetableListCacheDate_TRA;
     public static String railDailyTimetableListCacheDate_THSR;
@@ -370,9 +373,11 @@ public class Router {
 
                                 if ((originStation_TRA != null) && (firstRailStation_TRA != null) && !originflag) {
                                     if (!(originStation_TRA.StationID.equals(firstRailStation_TRA.StationID))) {
-                                        Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTHSRTransferTime);
+                                        Calendar firstTimeThreshold = Calendar.getInstance();
+                                        firstTimeThreshold.setTime(firstTime);
+                                        firstTimeThreshold.add(Calendar.MINUTE, -TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_first;
-                                        if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold, null, null, originStation_TRA, firstRailStation_TRA, true)) == null)
+                                        if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold.getTime(), null, null, originStation_TRA, firstRailStation_TRA, true)) == null)
                                             continue;
 
                                         if ((trainPath_first = TrainPath.getBest(trainPathList_first, true, false)) == null)
@@ -382,9 +387,11 @@ public class Router {
 
                                 if ((destinationStation_TRA != null) && (lastRailStation_TRA != null) && !destinationflag) {
                                     if (!(destinationStation_TRA.StationID.equals(lastRailStation_TRA.StationID))) {
-                                        Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTHSRTransferTime);
+                                        Calendar lastTimeThreshold = Calendar.getInstance();
+                                        lastTimeThreshold.setTime(lastTime);
+                                        lastTimeThreshold.add(Calendar.MINUTE, TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_last;
-                                        if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold, destinationArrivalTime, null, null, lastRailStation_TRA, destinationStation_TRA, true)) == null)
+                                        if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold.getTime(), destinationArrivalTime, null, null, lastRailStation_TRA, destinationStation_TRA, true)) == null)
                                             continue;
 
                                         if ((trainPath_last = TrainPath.getBest(trainPathList_last, false, true)) == null)
@@ -441,9 +448,11 @@ public class Router {
                             trainPath_temp.trainPathPartList = new ArrayList<>();
 
                             if (!trainPath_mid.getOriginRailStation().StationID.equals(originStation.StationID)) {
-                                Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTRATransferTime);
+                                Calendar firstTimeThreshold = Calendar.getInstance();
+                                firstTimeThreshold.setTime(firstTime);
+                                firstTimeThreshold.add(Calendar.MINUTE, -TRAToTRATransferTime);
                                 List<TrainPath> trainPathList_first;
-                                if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold, railDailyTimetableList_mid_all, null, originStation, firstRailStation, true)) == null)
+                                if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold.getTime(), railDailyTimetableList_mid_all, null, originStation, firstRailStation, true)) == null)
                                     continue;
 
                                 if ((trainPath_first = TrainPath.getBest(trainPathList_first, true, false)) == null)
@@ -451,9 +460,11 @@ public class Router {
                             }
 
                             if (!lastRailStation.StationID.equals(destinationStation.StationID)) {
-                                Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTRATransferTime);
+                                Calendar lastTimeThreshold = Calendar.getInstance();
+                                lastTimeThreshold.setTime(lastTime);
+                                lastTimeThreshold.add(Calendar.MINUTE, TRAToTRATransferTime);
                                 List<TrainPath> trainPathList_last;
-                                if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold, destinationArrivalTime, railDailyTimetableList_mid_all, null, lastRailStation, destinationStation, true)) == null)
+                                if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold.getTime(), destinationArrivalTime, railDailyTimetableList_mid_all, null, lastRailStation, destinationStation, true)) == null)
                                     continue;
 
                                 if ((trainPath_last = TrainPath.getBest(trainPathList_last, false, true)) == null)
