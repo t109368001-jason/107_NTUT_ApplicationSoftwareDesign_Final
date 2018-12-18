@@ -337,7 +337,8 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
                 if(exception != null) {
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-                    alertDialog.setMessage("嚴重錯誤");
+                    alertDialog.setTitle("嚴重錯誤");
+                    alertDialog.setMessage(exception.getMessage());
                     alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
