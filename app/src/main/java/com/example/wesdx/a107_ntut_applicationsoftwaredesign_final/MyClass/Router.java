@@ -139,9 +139,10 @@ public class Router {
                     if ((originStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, originStation) != null)) && (destinationStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, destinationStation) != null))) {//如果起站跟終站都是高鐵的話不轉乘
                         trainPathList = getTrainPath(API.THSR, originDepartureTime, destinationArrivalTime, null, null, originStation.OperatorID.equals(API.THSR) ? originStation : RailStation.transferStation(railStationList, originStation), destinationStation.OperatorID.equals(API.THSR) ? destinationStation : RailStation.transferStation(railStationList, destinationStation), true);
                     } else {
-                        boolean boolorininStationisTHSR = originStation.OperatorID.equals("THSR");//把輸入車站一律轉換成高鐵，若無法轉換則為null
+                        boolean boolorininStationisTHSR = originStation.OperatorID.equals("THSR");
                         boolean booldestinationStationisTHSR = destinationStation.OperatorID.equals("THSR");
-                        boolean flag = false;
+                        boolean originflag;
+                        boolean destinationflag;
                         List<RailStation> originStation_THSR_twoSide = new ArrayList<>();
                         List<RailStation> destinationStation_THSR_twoSide = new ArrayList<>();
                         RailStation firstRailStation = new RailStation();
@@ -153,7 +154,6 @@ public class Router {
                         if (boolorininStationisTHSR && booldestinationStationisTHSR) return null;
 
                         if (boolorininStationisTHSR) {
-                            flag = true;
                             originStation_THSR_twoSide.add(originStation);
                             if (RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(0)) == null) {
                                 originStation_THSR_twoSide = RailStation.getTwoSide(railStationList, originStation);
@@ -161,11 +161,9 @@ public class Router {
                             firstRailStation = originStation;
                         } else {
                             originStation_TRA = originStation;
-                            flag = RailStation.transferStation(railStationList, destinationStation) != null;
                         }
 
                         if (booldestinationStationisTHSR) {
-                            flag = true;
                             destinationStation_THSR_twoSide.add(destinationStation);
                             if (RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(0)) == null) {
                                 destinationStation_THSR_twoSide = RailStation.getTwoSide(railStationList, destinationStation);
@@ -173,8 +171,10 @@ public class Router {
                             lastRailStation = destinationStation;
                         } else {
                             destinationStation_TRA = destinationStation;
-                            flag = RailStation.transferStation(railStationList, destinationStation) != null;
                         }
+
+                        originflag = boolorininStationisTHSR || (RailStation.transferStation(railStationList, originStation) != null);
+                        destinationflag = booldestinationStationisTHSR||(RailStation.transferStation(railStationList, destinationStation) != null);
 
                         if ((originStation_THSR_twoSide == null) || (destinationStation_THSR_twoSide == null))
                             return null;
@@ -378,7 +378,7 @@ public class Router {
                                 TrainPath trainPath_temp = new TrainPath();
                                 trainPath_temp.trainPathPartList = new ArrayList<>();
 
-                                if ((originStation_TRA != null) && (firstRailStation_TRA != null) && !flag) {
+                                if ((originStation_TRA != null) && (firstRailStation_TRA != null) && !originflag) {
                                     if (!(originStation_TRA.StationID.equals(firstRailStation_TRA.StationID))) {
                                         Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_first;
@@ -390,7 +390,7 @@ public class Router {
                                     }
                                 }
 
-                                if ((destinationStation_TRA != null) && (lastRailStation_TRA != null) && !flag) {
+                                if ((destinationStation_TRA != null) && (lastRailStation_TRA != null) && !destinationflag) {
                                     if (!(destinationStation_TRA.StationID.equals(lastRailStation_TRA.StationID))) {
                                         Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_last;
