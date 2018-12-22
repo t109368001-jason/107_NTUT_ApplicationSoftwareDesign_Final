@@ -1,8 +1,11 @@
 package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
-import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.Router;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.MyException;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.Router;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class StationOfLine {
@@ -102,9 +105,9 @@ public class StationOfLine {
         return stationOfLine_new;
     }
 
-    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws Router.RouterException {
+    public static void fixMissing15StationProblem(List<StationOfLine> stationOfLineList) throws MyException {
         StationOfLine B_NW_StationOfLine = StationOfLine.getStationOfLineByLineNo(stationOfLineList, StationOfLine.B_NW);
-        if(B_NW_StationOfLine == null) throw new Router.RouterException("stationOfLineList illegal");
+        if(B_NW_StationOfLine == null) throw new MyException("stationOfLineList illegal");
 
         for(StationOfLine stationOfLine:stationOfLineList) {
             switch (stationOfLine.LineNo) {
@@ -222,6 +225,18 @@ public class StationOfLine {
             }
         }
     }
+
+    public static Date getNewestUpdateTime(List<StationOfLine> stationOfLineList) throws ParseException {
+        Date newest = null;
+        for(StationOfLine stationOfLine:stationOfLineList) {
+            if(stationOfLine.UpdateTime.length() < 11) continue;
+            Date temp = API.updateTimeFormat.parse(stationOfLine.UpdateTime);
+            if(newest == null) newest = temp;
+            if (temp.after(newest)) newest = temp;
+        }
+        return newest;
+    }
+
 }
 
 

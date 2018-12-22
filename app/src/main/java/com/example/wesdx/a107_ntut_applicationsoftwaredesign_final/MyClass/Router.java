@@ -1,6 +1,6 @@
-package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final;
+package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass;
 
-import android.annotation.SuppressLint;
+import android.provider.CalendarContract;
 
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailDailyTimetable;
@@ -8,52 +8,27 @@ import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailGe
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.RailStation;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StationOfLine;
 
-import java.io.IOException;
-import java.security.SignatureException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class Router {
-    public static class RouterException extends Exception {
-        public static String INPUT_OBJECT_IS_NULL = "Input object is null";
-        public static String ORIGINSTATION_EQUALS_DESTINATIONSTATION = "Origin station equals destination station";
-        public RouterException(String message)
-        {
-            super(message);
-        }
-    }
-
-    public static long TRAToTRATransferTime = 5 * 60 * 1000;
-    public static long TRAToTHSRTransferTime = 10 * 60 * 1000;
+    public static int TRAToTRATransferTime = 5;
+    public static int TRAToTHSRTransferTime = 10;
     public static List<StationOfLine> stationOfLineList;
+    public static String railDailyTimetableListCacheDate_TRA;
+    public static String railDailyTimetableListCacheDate_THSR;
+    public static List<RailGeneralTimetable> railGeneralTimetableListCache_TRA;
+    public static List<RailGeneralTimetable> railGeneralTimetableListCache_THSR;
 
     private static List<RailStation> railStationListCache_TRA;
     private static List<RailStation> railStationListCache_THSR;
-    private static String railDailyTimetableListCacheDate_TRA;
     private static List<RailDailyTimetable> railDailyTimetableListCache_TRA;
-    private static String railDailyTimetableListCacheDate_THSR;
     private static List<RailDailyTimetable> railDailyTimetableListCache_THSR;
-    private static List<RailGeneralTimetable> railGeneralTimetableListCache_TRA;
-    private static List<RailGeneralTimetable> railGeneralTimetableListCache_THSR;
 
-    public static void initCache(List<RailStation> railStationList_TRA, List<RailStation> railStationList_THSR) throws IOException, SignatureException, RouterException, ParseException {
-        if(Router.stationOfLineList == null) {
-            stationOfLineList = API.getStationOfLine(API.TRA);
-            StationOfLine.fixMissing15StationProblem(stationOfLineList);
-            if(stationOfLineList == null) throw new RouterException("Failed to get stationOfLineList API");
-        }
-
-        Router.saveRailStationListToCache(API.TRA, railStationList_TRA);
-        Router.saveRailStationListToCache(API.THSR, railStationList_THSR);
-        Router.upDateRailDailyTimetableList(API.TRA, API.dateFormat.format(Calendar.getInstance().getTime()));
-        Router.upDateRailDailyTimetableList(API.THSR, API.dateFormat.format(Calendar.getInstance().getTime()));
-    }
-
-    public static List<RailStation> getRailStationListFromCache(String transportation) {
+    private static List<RailStation> getRailStationListFromCache(String transportation) {
         if(transportation.equals(API.TRA)) {
             return new ArrayList<>(railStationListCache_TRA);
         } else if(transportation.equals(API.THSR)) {
@@ -62,79 +37,8 @@ public class Router {
         return null;
     }
 
-    public static void saveRailStationListToCache(String transportation, List<RailStation> railStationList) {
-        if(transportation.equals(API.TRA)) {
-            railStationListCache_TRA = new ArrayList<>(railStationList);
-        } else {
-            railStationListCache_THSR = new ArrayList<>(railStationList);
-        }
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    public static void upDateRailDailyTimetableList(String transportation, String date) throws ParseException, IOException, SignatureException {
-        if(transportation.equals(API.TRA)) {
-            if (!date.equals((railDailyTimetableListCacheDate_TRA != null ? railDailyTimetableListCacheDate_TRA : ""))) {
-                if(railGeneralTimetableListCache_TRA == null) {
-                    railGeneralTimetableListCache_TRA = API.getGeneralTimetable(API.TRA);
-                }
-                List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
-                railDailyTimetableListCache_TRA = API.getDailyTimetable(API.TRA, API.TRAIN_DATE, date);
-
-                int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
-
-                for(RailGeneralTimetable railGeneralTimetable:railGeneralTimetableListCache_TRA) {
-                    if(railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
-                        railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
-                    }
-                }
-                for(RailDailyTimetable railDailyTimetable_temp:railDailyTimetableList_temp) {
-                    boolean addToList = true;
-                    for(RailDailyTimetable railDailyTimetable_temp2:railDailyTimetableListCache_TRA) {
-                        if(railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
-                            addToList = false;
-                            break;
-                        }
-                    }
-                    if(addToList) {
-                        railDailyTimetableListCache_TRA.add(railDailyTimetable_temp);
-                    }
-                }
-                railDailyTimetableListCacheDate_TRA = date;
-            }
-        } else if(transportation.equals(API.THSR)) {
-            if (!date.equals((railDailyTimetableListCacheDate_THSR != null ? railDailyTimetableListCacheDate_THSR : ""))) {
-                if(railGeneralTimetableListCache_THSR == null) {
-                    railGeneralTimetableListCache_THSR = API.getGeneralTimetable(API.THSR);
-                }
-                List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
-                railDailyTimetableListCache_THSR = API.getDailyTimetable(API.THSR, API.TRAIN_DATE, date);
-
-                int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
-
-                for(RailGeneralTimetable railGeneralTimetable:railGeneralTimetableListCache_THSR) {
-                    if(railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
-                        railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
-                    }
-                }
-                for(RailDailyTimetable railDailyTimetable_temp:railDailyTimetableList_temp) {
-                    boolean addToList = true;
-                    for(RailDailyTimetable railDailyTimetable_temp2:railDailyTimetableListCache_THSR) {
-                        if(railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
-                            addToList = false;
-                            break;
-                        }
-                    }
-                    if(addToList) {
-                        railDailyTimetableListCache_THSR.add(railDailyTimetable_temp);
-                    }
-                }
-                railDailyTimetableListCacheDate_THSR = date;
-            }
-        }
-    }
-
-    public static List<RailDailyTimetable> getRailDailyTimetableList(String transportation, String date) throws ParseException, SignatureException, IOException {
-        upDateRailDailyTimetableList(transportation, date);
+    private static List<RailDailyTimetable> getRailDailyTimetableList(String transportation){
+        //upDateRailDailyTimetableList(transportation, date);
         if(transportation.equals(API.TRA)) {
             return new ArrayList<>(railDailyTimetableListCache_TRA);
         } else if(transportation.equals(API.THSR)) {
@@ -143,18 +47,64 @@ public class Router {
         return null;
     }
 
-    public static List<TrainPath> getTrainPath(final String transportation, final String date, final Date originDepartureTime, final Date destinationArrivalTime, final List<RailDailyTimetable> railDailyTimetableList_input, final List<RailStation> railStationList, final RailStation originStation, final RailStation destinationStation, final boolean isDirectArrival) throws IOException, SignatureException, RouterException, ParseException {
+    public static void saveRailStationListToCache(String transportation, List<RailStation> railStationList) {
+        switch (transportation) {
+            case API.TRA:
+                railStationListCache_TRA = new ArrayList<>(railStationList);
+                break;
+            case API.THSR:
+                railStationListCache_THSR = new ArrayList<>(railStationList);
+                break;
+            case API.TRA_AND_THSR:
+                for (RailStation railStation : railStationList) {
+                    if(railStation.OperatorID.equals(API.TRA)) {
+                        if(railStationListCache_TRA == null) railStationListCache_TRA = new ArrayList<>();
+                        railStationListCache_TRA.add(railStation);
+                    } else if(railStation.OperatorID.equals(API.THSR)){
+                        if(railStationListCache_THSR == null) railStationListCache_THSR = new ArrayList<>();
+                        railStationListCache_THSR.add(railStation);
+                    }
+                }
+                break;
+        }
+    }
+
+    public static void saveRailDailyTimetableListToCache(String transportation, List<RailDailyTimetable> railDailyTimetableList, String date) {
+        switch (transportation) {
+            case API.TRA:
+                railDailyTimetableListCache_TRA = new ArrayList<>(railDailyTimetableList);
+                railDailyTimetableListCacheDate_TRA = date;
+                break;
+            case API.THSR:
+                railDailyTimetableListCache_THSR = new ArrayList<>(railDailyTimetableList);
+                railDailyTimetableListCacheDate_THSR = date;
+                break;
+        }
+    }
+
+    public static void saveRailGeneralTimetableToCache(String transportation, List<RailGeneralTimetable> railGeneralTimetableList) {
+        switch (transportation) {
+            case API.TRA:
+                railGeneralTimetableListCache_TRA = new ArrayList<>(railGeneralTimetableList);
+                break;
+            case API.THSR:
+                railGeneralTimetableListCache_THSR = new ArrayList<>(railGeneralTimetableList);
+                break;
+        }
+    }
+
+    public static List<TrainPath> getTrainPath(final String transportation, final Date originDepartureTime, final Date destinationArrivalTime, final List<RailDailyTimetable> railDailyTimetableList_input, final List<RailStation> railStationList, final RailStation originStation, final RailStation destinationStation, final boolean isDirectArrival) throws ParseException, MyException {
         List<TrainPath> trainPathList = new ArrayList<>();
 
-        if((!isDirectArrival)&&(railStationList == null)) throw new RouterException(RouterException.INPUT_OBJECT_IS_NULL);
-        if((transportation == null) || (date == null) || (originStation == null) || (destinationStation == null)) throw new RouterException(RouterException.INPUT_OBJECT_IS_NULL);
-        if(originStation.StationID.equals(destinationStation.StationID)) throw new RouterException(RouterException.ORIGINSTATION_EQUALS_DESTINATIONSTATION);
+        if((!isDirectArrival)&&(railStationList == null)) throw new MyException("Router 缺少參數");
+        if((transportation == null) || (originStation == null) || (destinationStation == null)) throw new MyException("Router 缺少參數");
+        if(originStation.StationID.equals(destinationStation.StationID)) throw new MyException("Router 起訖站相同");
 
         if(isDirectArrival) {
             List<RailDailyTimetable> railDailyTimetableList_temp;
 
             if(railDailyTimetableList_input == null) {
-                if ((railDailyTimetableList_temp = getRailDailyTimetableList(transportation, date)) == null) return null;
+                if ((railDailyTimetableList_temp = getRailDailyTimetableList(transportation)) == null) return null;
             } else {
                 railDailyTimetableList_temp = railDailyTimetableList_input;
             }
@@ -162,7 +112,7 @@ public class Router {
             if((railDailyTimetableList_temp = RailDailyTimetable.filterByOD(railDailyTimetableList_temp, originStation, destinationStation, originDepartureTime, destinationArrivalTime, true)) == null) return null;
 
             for(RailDailyTimetable railDailyTimetable:railDailyTimetableList_temp) {
-                TrainPath.TrainPathPart trainPathPart = new TrainPath.TrainPathPart(originStation, destinationStation, railDailyTimetable);
+                TrainPathPart trainPathPart = new TrainPathPart(originStation, destinationStation, railDailyTimetable);
                 TrainPath trainPath = new TrainPath(trainPathPart);
                 trainPathList.add(trainPath);
             }
@@ -190,10 +140,12 @@ public class Router {
                     }
 
                     if ((originStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, originStation) != null)) && (destinationStation.OperatorID.equals("THSR") || (RailStation.transferStation(railStationList, destinationStation) != null))) {//如果起站跟終站都是高鐵的話不轉乘
-                        trainPathList = getTrainPath(API.THSR, date, originDepartureTime, destinationArrivalTime, null, null, originStation.OperatorID.equals(API.THSR) ? originStation : RailStation.transferStation(railStationList, originStation), destinationStation.OperatorID.equals(API.THSR) ? destinationStation : RailStation.transferStation(railStationList, destinationStation), true);
+                        trainPathList = getTrainPath(API.THSR, originDepartureTime, destinationArrivalTime, null, null, originStation.OperatorID.equals(API.THSR) ? originStation : RailStation.transferStation(railStationList, originStation), destinationStation.OperatorID.equals(API.THSR) ? destinationStation : RailStation.transferStation(railStationList, destinationStation), true);
                     } else {
-                        boolean boolorininStationisTHSR = originStation.OperatorID.equals("THSR");//把輸入車站一律轉換成高鐵，若無法轉換則為null
+                        boolean boolorininStationisTHSR = originStation.OperatorID.equals("THSR");
                         boolean booldestinationStationisTHSR = destinationStation.OperatorID.equals("THSR");
+                        boolean originflag;
+                        boolean destinationflag;
                         List<RailStation> originStation_THSR_twoSide = new ArrayList<>();
                         List<RailStation> destinationStation_THSR_twoSide = new ArrayList<>();
                         RailStation firstRailStation = new RailStation();
@@ -224,6 +176,9 @@ public class Router {
                             destinationStation_TRA = destinationStation;
                         }
 
+                        originflag = boolorininStationisTHSR || (RailStation.transferStation(railStationList, originStation) != null);
+                        destinationflag = booldestinationStationisTHSR||(RailStation.transferStation(railStationList, destinationStation) != null);
+
                         if ((originStation_THSR_twoSide == null) || (destinationStation_THSR_twoSide == null))
                             return null;
 
@@ -232,10 +187,12 @@ public class Router {
                             int min_THSR_Index = 0;
                             for (int i = 0; i < originStation_THSR_twoSide.size(); i++) {
                                 RailStation railStation_TRA_temp = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(i));
-                                if (railStation_TRA_temp == null) throw new RouterException("170");
+                                if (railStation_TRA_temp == null) throw new MyException("170");
 
                                 List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, railStation_TRA_temp, destinationStation);
 
+                                if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
+                                    return null;
                                 int min = 239;
                                 int minIndex = 0;
 
@@ -247,6 +204,11 @@ public class Router {
                                 }
 
                                 List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                                if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) < 2) {
+                                    originStation_TRA = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(min_THSR_Index));
+                                    return getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                                }
 
                                 if (railStationList_THSR.size() < min_THSR) {
                                     min_THSR = railStationList_THSR.size();
@@ -265,6 +227,8 @@ public class Router {
 
                             List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, firstRailStation_temp, destinationStation);
 
+                            if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
+                                return null;
                             int min = 239;
                             int minIndex = 0;
 
@@ -276,6 +240,11 @@ public class Router {
                             }
 
                             List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+                            RailStation.logD(railStation_list_list.get(minIndex));
+                            if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) < 2) {
+                                originStation_TRA = RailStation.transferStation(railStationList, originStation_THSR_twoSide.get(0));
+                                return getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                            }
 
                             if (railStationList_THSR.size() > 0) {
                                 lastRailStation = railStationList_THSR.get(railStationList_THSR.size() - 1);
@@ -290,10 +259,12 @@ public class Router {
                             int min_THSR_Index = 0;
                             for (int i = 0; i < destinationStation_THSR_twoSide.size(); i++) {
                                 RailStation railStation_TRA_temp = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(i));
-                                if (railStation_TRA_temp == null) throw new RouterException("239");
+                                if (railStation_TRA_temp == null) throw new MyException("239");
 
                                 List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation, railStation_TRA_temp);
 
+                                if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
+                                    return null;
                                 int min = 239;
                                 int minIndex = 0;
 
@@ -305,6 +276,11 @@ public class Router {
                                 }
 
                                 List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                                if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) < 2) {
+                                    destinationStation_TRA = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(min_THSR_Index));
+                                    return getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                                }
 
                                 if (railStationList_THSR.size() < min_THSR) {
                                     min_THSR = railStationList_THSR.size();
@@ -324,6 +300,8 @@ public class Router {
 
                             List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation, lastRailStation_temp);
 
+                            if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
+                                return null;
                             int min = 239;
                             int minIndex = 0;
 
@@ -335,6 +313,11 @@ public class Router {
                             }
 
                             List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
+
+                            if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) < 2) {
+                                destinationStation_TRA = RailStation.transferStation(railStationList, destinationStation_THSR_twoSide.get(0));
+                                return getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                            }
 
                             if (railStationList_THSR.size() > 0) {
                                 firstRailStation = railStationList_THSR.get(0);
@@ -349,6 +332,8 @@ public class Router {
 
                             List<List<RailStation>> railStation_list_list = MyRailStation.getRailStationList(railStations_TRA_ALL, originStation_TRA, destinationStation_TRA);
 
+                            if ((railStation_list_list = RailStation.removeRepeatedRailStationList(railStation_list_list)) == null)
+                                return null;
                             int min = 239;
                             int minIndex = 0;
 
@@ -362,19 +347,18 @@ public class Router {
 
                             List<RailStation> railStationList_THSR = RailStation.filterTHSR(railStation_list_list.get(minIndex), railStationList);//在臺鐵當下班次裡把高鐵有經過的站列出來
 
-                            if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) == 0) {
-                                return getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                            if ((railStationList_THSR != null ? railStationList_THSR.size() : 0) < 2) {
+                                return getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
                             }
                             firstRailStation = railStationList_THSR.get(0);
                             lastRailStation = railStationList_THSR.get(railStationList_THSR.size() - 1);
                         }
 
                         if ((originStation.OperatorID.equals(API.THSR) ? originStation : firstRailStation).StationID.equals((destinationStation.OperatorID.equals(API.THSR) ? destinationStation : lastRailStation).StationID) && (!(boolorininStationisTHSR || booldestinationStationisTHSR))) {
-                            trainPathList = getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
+                            trainPathList = getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false);
                         } else {
 
-                            List<TrainPath> trainPathList_mid_all = getTrainPath(API.THSR, date, originDepartureTime, destinationArrivalTime, null, null, (originStation.OperatorID.equals(API.THSR) ? originStation : firstRailStation), (destinationStation.OperatorID.equals(API.THSR) ? destinationStation : lastRailStation), true);
-
+                            List<TrainPath> trainPathList_mid_all = getTrainPath(API.THSR, originDepartureTime, destinationArrivalTime, null, null, (originStation.OperatorID.equals(API.THSR) ? originStation : firstRailStation), (destinationStation.OperatorID.equals(API.THSR) ? destinationStation : lastRailStation), true);
 
                             for (TrainPath trainPath_mid : trainPathList_mid_all) {
                                 TrainPath trainPath_first = null;
@@ -387,11 +371,13 @@ public class Router {
                                 TrainPath trainPath_temp = new TrainPath();
                                 trainPath_temp.trainPathPartList = new ArrayList<>();
 
-                                if ((originStation_TRA != null) && (firstRailStation_TRA != null)) {
+                                if ((originStation_TRA != null) && (firstRailStation_TRA != null) && !originflag) {
                                     if (!(originStation_TRA.StationID.equals(firstRailStation_TRA.StationID))) {
-                                        Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTHSRTransferTime);
+                                        Calendar firstTimeThreshold = Calendar.getInstance();
+                                        firstTimeThreshold.setTime(firstTime);
+                                        firstTimeThreshold.add(Calendar.MINUTE, -TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_first;
-                                        if ((trainPathList_first = getTrainPath(API.TRA, date, originDepartureTime, firstTimeThreshold, null, null, originStation_TRA, firstRailStation_TRA, true)) == null)
+                                        if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold.getTime(), null, null, originStation_TRA, firstRailStation_TRA, true)) == null)
                                             continue;
 
                                         if ((trainPath_first = TrainPath.getBest(trainPathList_first, true, false)) == null)
@@ -399,11 +385,13 @@ public class Router {
                                     }
                                 }
 
-                                if ((destinationStation_TRA != null) && (lastRailStation_TRA != null)) {
+                                if ((destinationStation_TRA != null) && (lastRailStation_TRA != null) && !destinationflag) {
                                     if (!(destinationStation_TRA.StationID.equals(lastRailStation_TRA.StationID))) {
-                                        Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTHSRTransferTime);
+                                        Calendar lastTimeThreshold = Calendar.getInstance();
+                                        lastTimeThreshold.setTime(lastTime);
+                                        lastTimeThreshold.add(Calendar.MINUTE, TRAToTHSRTransferTime);
                                         List<TrainPath> trainPathList_last;
-                                        if ((trainPathList_last = getTrainPath(API.TRA, date, lastTimeThreshold, destinationArrivalTime, null, null, lastRailStation_TRA, destinationStation_TRA, true)) == null)
+                                        if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold.getTime(), destinationArrivalTime, null, null, lastRailStation_TRA, destinationStation_TRA, true)) == null)
                                             continue;
 
                                         if ((trainPath_last = TrainPath.getBest(trainPathList_last, false, true)) == null)
@@ -421,9 +409,9 @@ public class Router {
 
                                 trainPathList.add(trainPath_temp);
                             }
-                            if (!(boolorininStationisTHSR || booldestinationStationisTHSR)) {
+                            if (!((originStation_THSR_twoSide.size() > 1) || (destinationStation_THSR_twoSide.size() > 1))) {
                                 List<TrainPath> trainPathList_temp;
-                                if ((trainPathList_temp = getTrainPath(API.TRA, date, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false)) != null) {
+                                if ((trainPathList_temp = getTrainPath(API.TRA, originDepartureTime, destinationArrivalTime, null, railStations_TRA_ALL, originStation_TRA, destinationStation_TRA, false)) != null) {
                                     trainPathList.addAll(trainPathList_temp);
                                 }
                             }
@@ -434,7 +422,7 @@ public class Router {
                     List<List<RailStation>> railStationList_List;
                     List<RailDailyTimetable> railDailyTimetableList_all;
 
-                    if ((railDailyTimetableList_all = getRailDailyTimetableList(transportation, date)) == null)
+                    if ((railDailyTimetableList_all = getRailDailyTimetableList(transportation)) == null)
                         return null;
 
                     if ((railStationList_List = MyRailStation.getRailStationList(railStationList, originStation, destinationStation)) == null)
@@ -442,11 +430,9 @@ public class Router {
 
                     if ((railStationList_List = RailStation.removeRepeatedRailStationList(railStationList_List)) == null)
                         return null;
-                    if ((railStationList_List = RailStation.filter(railStationList_List, 2)) == null)
-                        return null;
 
                     for (List<RailStation> railStationList_current : railStationList_List) {
-
+                        RailStation.logD(railStationList_current);
                         List<TrainPath> trainPathList_mid_all = TrainPath.filter(railDailyTimetableList_all, railStationList_current, originDepartureTime, destinationArrivalTime, true, 2);
                         List<RailDailyTimetable> railDailyTimetableList_mid_all = TrainPath.convert(trainPathList_mid_all);
 
@@ -462,9 +448,11 @@ public class Router {
                             trainPath_temp.trainPathPartList = new ArrayList<>();
 
                             if (!trainPath_mid.getOriginRailStation().StationID.equals(originStation.StationID)) {
-                                Date firstTimeThreshold = new Date(firstTime.getTime() - TRAToTRATransferTime);
+                                Calendar firstTimeThreshold = Calendar.getInstance();
+                                firstTimeThreshold.setTime(firstTime);
+                                firstTimeThreshold.add(Calendar.MINUTE, -TRAToTRATransferTime);
                                 List<TrainPath> trainPathList_first;
-                                if ((trainPathList_first = getTrainPath(API.TRA, date, originDepartureTime, firstTimeThreshold, railDailyTimetableList_mid_all, null, originStation, firstRailStation, true)) == null)
+                                if ((trainPathList_first = getTrainPath(API.TRA, originDepartureTime, firstTimeThreshold.getTime(), railDailyTimetableList_mid_all, null, originStation, firstRailStation, true)) == null)
                                     continue;
 
                                 if ((trainPath_first = TrainPath.getBest(trainPathList_first, true, false)) == null)
@@ -472,9 +460,11 @@ public class Router {
                             }
 
                             if (!lastRailStation.StationID.equals(destinationStation.StationID)) {
-                                Date lastTimeThreshold = new Date(lastTime.getTime() + TRAToTRATransferTime);
+                                Calendar lastTimeThreshold = Calendar.getInstance();
+                                lastTimeThreshold.setTime(lastTime);
+                                lastTimeThreshold.add(Calendar.MINUTE, TRAToTRATransferTime);
                                 List<TrainPath> trainPathList_last;
-                                if ((trainPathList_last = getTrainPath(API.TRA, date, lastTimeThreshold, destinationArrivalTime, railDailyTimetableList_mid_all, null, lastRailStation, destinationStation, true)) == null)
+                                if ((trainPathList_last = getTrainPath(API.TRA, lastTimeThreshold.getTime(), destinationArrivalTime, railDailyTimetableList_mid_all, null, lastRailStation, destinationStation, true)) == null)
                                     continue;
 
                                 if ((trainPath_last = TrainPath.getBest(trainPathList_last, false, true)) == null)
@@ -494,7 +484,7 @@ public class Router {
                     }
                     break;
                 case API.THSR:
-                    trainPathList = getTrainPath(API.THSR, date, originDepartureTime, destinationArrivalTime, null, null, originStation, destinationStation, true);
+                    trainPathList = getTrainPath(API.THSR, originDepartureTime, destinationArrivalTime, null, null, originStation, destinationStation, true);
                     break;
             }
         }

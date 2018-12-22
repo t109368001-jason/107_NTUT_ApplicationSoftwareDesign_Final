@@ -10,11 +10,11 @@ public class StopTime {
     public String ArrivalTime;
     public String DepartureTime;
 
-    public Date getDepartureTimeDate() throws ParseException {
+    Date getDepartureTimeDate() throws ParseException {
         return API.timeFormat.parse(this.DepartureTime);
     }
 
-    public Date getArrivalTimeDate() throws ParseException {
+    Date getArrivalTimeDate() throws ParseException {
         return API.timeFormat.parse(this.ArrivalTime);
     }
 }

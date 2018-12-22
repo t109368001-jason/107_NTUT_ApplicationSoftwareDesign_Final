@@ -4,10 +4,15 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
  * GET /v2/Rail/THSR/DailyTimetable/Today
  *
  */
+import android.annotation.SuppressLint;
+
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class RailDailyTimetable {
     public String TrainDate;
@@ -16,7 +21,7 @@ public class RailDailyTimetable {
     public String  UpdateTime;
     public String  VersionID;
 
-    public RailDailyTimetable(RailGeneralTimetable railGeneralTimetable, String date) throws ParseException {
+    private RailDailyTimetable(RailGeneralTimetable railGeneralTimetable, String date) throws ParseException {
         this.TrainDate = date;
         this.DailyTrainInfo = new RailDailyTrainInfo();
         this.DailyTrainInfo.TrainNo = railGeneralTimetable.GeneralTimetable.GeneralTrainInfo.TrainNo;
@@ -71,7 +76,7 @@ public class RailDailyTimetable {
         return false;
     }
 
-    public StopTime getStopTimeOfStopTimes(String StationID) {//給StationID，回傳停靠資訊
+    private StopTime getStopTimeOfStopTimes(String StationID) {//給StationID，回傳停靠資訊
         for(int i = 0; i < this.StopTimes.size(); i++) {
             if(StopTimes.get(i).StationID.equals(StationID)) {
                 return StopTimes.get(i);
@@ -98,21 +103,57 @@ public class RailDailyTimetable {
     }
 
     public Date getDepartureTimeDateByStationID(String stationID) throws ParseException {
-        Date time = this.getStopTimeOfStopTimes(stationID).getDepartureTimeDate();
-
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(Objects.requireNonNull(this.getStopTimeOfStopTimes(stationID)).getDepartureTimeDate());
         if(this.afterOverNightStation(stationID)) {
-            time.setDate(time.getDate() + 1);
+            calendar.add(Calendar.HOUR_OF_DAY, 24);
         }
-        return time;
+        return calendar.getTime();
     }
 
     public Date getArrivalTimeDateByStationID(String stationID) throws ParseException {
-        Date time = this.getStopTimeOfStopTimes(stationID).getArrivalTimeDate();
-
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(Objects.requireNonNull(this.getStopTimeOfStopTimes(stationID)).getArrivalTimeDate());
         if(this.afterOverNightStation(stationID)) {
-            time.setDate(time.getDate() + 1);
+            calendar.add(Calendar.HOUR_OF_DAY, 24);
         }
-        return time;
+        return calendar.getTime();
+    }
+
+    public static Date getNewestUpdateTime(List<RailDailyTimetable> railDailyTimetableList) throws ParseException {
+        Date newest = null;
+        for(RailDailyTimetable railDailyTimetable:railDailyTimetableList) {
+            if(railDailyTimetable.UpdateTime.length() < 11) continue;
+            Date temp = API.updateTimeFormat.parse(railDailyTimetable.UpdateTime);
+            if(newest == null) newest = temp;
+            if (temp.after(newest)) newest = temp;
+        }
+        return newest;
+    }
+
+    public static void add(List<RailDailyTimetable> railDailyTimetableList, List<RailGeneralTimetable> railGeneralTimetableList, String date) throws ParseException {
+
+        List<RailDailyTimetable> railDailyTimetableList_temp = new ArrayList<>();
+
+        @SuppressLint("SimpleDateFormat") int dayOfWeek = Integer.parseInt(new SimpleDateFormat("u").format(new SimpleDateFormat("yyyy-MM-dd").parse(date)));
+
+        for (RailGeneralTimetable railGeneralTimetable : railGeneralTimetableList) {
+            if (railGeneralTimetable.GeneralTimetable.ServiceDay.compare(dayOfWeek)) {
+                railDailyTimetableList_temp.add(new RailDailyTimetable(railGeneralTimetable, date));
+            }
+        }
+        for (RailDailyTimetable railDailyTimetable_temp : railDailyTimetableList_temp) {
+            boolean addToList = true;
+            for (RailDailyTimetable railDailyTimetable_temp2 : railDailyTimetableList) {
+                if (railDailyTimetable_temp.DailyTrainInfo.TrainNo.equals(railDailyTimetable_temp2.DailyTrainInfo.TrainNo)) {
+                    addToList = false;
+                    break;
+                }
+            }
+            if (addToList) {
+                railDailyTimetableList.add(railDailyTimetable_temp);
+            }
+        }
     }
 
     public static List<RailDailyTimetable> filterByOD(List<RailDailyTimetable> railDailyTimetableList, RailStation originStation, RailStation destinationStation, Date originDepartureTime, Date destinationArrivalTime, boolean isDirectional) throws ParseException {
@@ -127,11 +168,12 @@ public class RailDailyTimetable {
                         break;
                     }
                     if(destinationArrivalTime != null) {
-                        Date arrivalTime = railDailyTimetable.StopTimes.get(i).getArrivalTimeDate();
+                        Calendar arrivalTime = Calendar.getInstance();
+                        arrivalTime.setTime(railDailyTimetable.StopTimes.get(i).getArrivalTimeDate());
                         if(railDailyTimetable.afterOverNightStation(destinationStation.StationID)) {
-                            arrivalTime.setDate(arrivalTime.getDate() + 1);
+                            arrivalTime.add(Calendar.HOUR_OF_DAY, 24);
                         }
-                        if (arrivalTime.after(destinationArrivalTime)) {
+                        if (arrivalTime.getTime().after(destinationArrivalTime)) {
                             break;
                         }
                     }

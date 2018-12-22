@@ -14,6 +14,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.TrainPath;
+import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.MyClass.TrainPathPart;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.API;
 import com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI.StopTime;
 import com.google.gson.Gson;
@@ -95,7 +97,7 @@ public class ShowResultDetailActivity extends AppCompatActivity {
     public class TrainPathPartStopTimesAdapter extends BaseAdapter {
         private List<StopTime> stopTimeList;
 
-        public TrainPathPartStopTimesAdapter(List<StopTime> stopTimeList) {
+        TrainPathPartStopTimesAdapter(List<StopTime> stopTimeList) {
             this.stopTimeList = stopTimeList;
         }
 
@@ -127,9 +129,9 @@ public class ShowResultDetailActivity extends AppCompatActivity {
     }
 
     public class TrainPathPartAdapter extends BaseAdapter {
-        private List<TrainPath.TrainPathPart> trainPathPartList;
+        private List<TrainPathPart> trainPathPartList;
 
-        public TrainPathPartAdapter(List<TrainPath.TrainPathPart> trainPathPartList) {
+        TrainPathPartAdapter(List<TrainPathPart> trainPathPartList) {
             this.trainPathPartList = trainPathPartList;
         }
 
@@ -139,7 +141,7 @@ public class ShowResultDetailActivity extends AppCompatActivity {
         }
 
         @Override
-        public TrainPath.TrainPathPart getItem(int position) {
+        public TrainPathPart getItem(int position) {
             return trainPathPartList.get(position);
         }
 
@@ -158,7 +160,7 @@ public class ShowResultDetailActivity extends AppCompatActivity {
             if(position == (trainPathPartList.size() - 1)) {
                 convertView.findViewById(R.id.dowmCircleImageView).setVisibility(View.GONE);
             }
-            TrainPath.TrainPathPart trainPathPart = trainPathPartList.get(position);
+            TrainPathPart trainPathPart = trainPathPartList.get(position);
             ((TextView)convertView.findViewById(R.id.stationNameTextView)).setText(trainPathPart.originStation.StationName.Zh_tw);
             ((TextView)convertView.findViewById(R.id.destinationStationTextView)).setText(trainPathPart.destinationStation.StationName.Zh_tw);
             ((TextView)convertView.findViewById(R.id.arrivalTimeTextView)).setText(trainPathPart.railDailyTimetable.getStopTimeOfStopTimes(trainPathPart.originStation).DepartureTime);

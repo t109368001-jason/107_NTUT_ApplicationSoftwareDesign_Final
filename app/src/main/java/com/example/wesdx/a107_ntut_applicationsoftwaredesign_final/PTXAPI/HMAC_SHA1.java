@@ -5,8 +5,8 @@ import java.security.SignatureException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class HMAC_SHA1 {
-	public static String Signature(String xData, String AppKey) throws java.security.SignatureException {
+class HMAC_SHA1 {
+	static String Signature(String xData, String AppKey) throws java.security.SignatureException {
 		try {
 			//final Base64.Encoder encoder = Base64.getEncoder();
 

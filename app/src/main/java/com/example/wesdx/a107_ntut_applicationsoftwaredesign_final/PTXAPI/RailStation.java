@@ -2,7 +2,9 @@ package com.example.wesdx.a107_ntut_applicationsoftwaredesign_final.PTXAPI;
 
 import android.util.Log;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 /**
  * 台鐵車站基本資料
@@ -23,24 +25,16 @@ public class RailStation implements Comparable<RailStation> {
     public String VersionID;
     public String OperatorID;//高鐵
 
-    public static List<List<RailStation>> filter(List<List<RailStation>> railStationList_List, int upToMinMultipleNum) {
-        if(railStationList_List.size() < 2) return railStationList_List;
-        List<List<RailStation>> railStationList_List_new = new ArrayList<>(railStationList_List);
-
-        for(int i = 0 ; i < railStationList_List_new.size(); i++) {
-            for(int j = i + 1; j < railStationList_List_new.size(); j++) {
-                if(railStationList_List_new.get(i).size() < railStationList_List_new.get(j).size() * upToMinMultipleNum) {
-                    railStationList_List_new.remove(j);
-                    j--;
-                } else if(railStationList_List_new.get(i).size() > railStationList_List_new.get(j).size() * upToMinMultipleNum) {
-                    railStationList_List_new.remove(i);
-                    i--;
-                    break;
-                }
+    public static Date getNewestUpdateTime(String transportation, List<RailStation> railStationList) throws ParseException {
+        Date newest = null;
+        for(RailStation railStation:railStationList) {
+            if(railStation.OperatorID.equals(transportation)||transportation.equals(API.TRA_AND_THSR)) {
+                Date temp = API.updateTimeFormat.parse(railStation.UpdateTime);
+                if(newest == null) newest = temp;
+                if (temp.after(newest)) newest = temp;
             }
         }
-
-        return railStationList_List_new;
+        return newest;
     }
 
     public static List<List<RailStation>> removeRepeatedRailStationList(final List<List<RailStation>> railStationList_List) {
@@ -57,6 +51,7 @@ public class RailStation implements Comparable<RailStation> {
                     }
                     if (same) {
                         railStationList_List_new.remove(j);
+                        j--;
                     }
                 }
             }
@@ -146,7 +141,7 @@ public class RailStation implements Comparable<RailStation> {
         return railStationList_new;
     }
 
-        public static List<RailStation> getTwoSide (List<RailStation> railStationList, RailStation railStation){
+    public static List<RailStation> getTwoSide (List<RailStation> railStationList, RailStation railStation){
         List<RailStation> railStationList_new = new ArrayList<>();
         String name1;
         String name2;
@@ -271,4 +266,3 @@ public class RailStation implements Comparable<RailStation> {
         return Integer.compare(Integer.parseInt(ReservationCode), Integer.parseInt(f.ReservationCode));
     }
 }
-

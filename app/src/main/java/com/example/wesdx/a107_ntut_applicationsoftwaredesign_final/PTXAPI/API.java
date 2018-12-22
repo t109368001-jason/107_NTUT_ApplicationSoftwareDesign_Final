@@ -16,6 +16,7 @@ import java.net.URL;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -25,55 +26,29 @@ public class API {
     public final static String TRA = "TRA";
     public final static String THSR = "THSR";
     public final static String TRA_AND_THSR = "TRA_AND_THSR";
-    public final static int TRAIN_NO = 1;
-    public final static int TRAIN_DATE = 2;
 
     private final static String APPID = "6066d2cbc3324183bbaf01e2515df9df";
     private final static String APPKey = "CphTjey0dfL8Hqz1O7kdHq34GEY";
 
-    private static class APIURL {
-        private String preFix;
-        public String transportation;
-        public String function;
-        private String postFix;
-
-        public APIURL() {
-            preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
-            transportation = "TRA / THSR";
-            function = "Station / GeneralTimetable / ODFare/OS/to/DS / GeneralTrainInfo / DailyTimetable/OS/to/DS";
-            postFix = "?format=JSON";
-        }
-
-        public APIURL(String transportation, String function) {
-            this.preFix = "http://ptx.transportdata.tw/MOTC/v2/Rail/";
-            this.transportation =transportation;
-            this.function = function;
-            this.postFix = "?format=JSON";
-        }
-
-        public String get() {
-            return preFix + transportation + '/' + function + postFix;
-        }
-    }
-
+    @SuppressLint("SimpleDateFormat")
+    static SimpleDateFormat updateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+    @SuppressLint("SimpleDateFormat")
+    private static SimpleDateFormat timeFormat2 = new SimpleDateFormat("HH:mm:ss");
     @SuppressLint("SimpleDateFormat")
     public static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
     @SuppressLint("SimpleDateFormat")
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static String getAPIResponse(String APIUrl) throws SignatureException, IOException {
+    private static String getAPIResponse(String domain, String service, String application, String queryOpyions) throws SignatureException, IOException {
+        String APIUrl = "http://ptx.transportdata.tw/MOTC/v2/" + domain + '/' + service + '/' + application + '?' + queryOpyions + "$format=JSON";
         HttpURLConnection connection;
 
         String xdate = getServerTime();
         String SignDate = "x-date: " + xdate;
 
-        String Signature;
+        String Signature = HMAC_SHA1.Signature(SignDate, APPKey);
 
-        Signature = HMAC_SHA1.Signature(SignDate, APPKey);
-
-        System.out.println("Signature :" + Signature);
         String sAuth = "hmac username=\"" + APPID + "\", algorithm=\"hmac-sha1\", headers=\"x-date\", signature=\"" + Signature + "\"";
-        System.out.println(sAuth);
 
         URL url = new URL(APIUrl);
         connection = (HttpURLConnection) url.openConnection();
@@ -82,7 +57,6 @@ public class API {
         connection.setRequestProperty("x-date", xdate);
         connection.setRequestProperty("Accept-Encoding", "gzip");
         connection.setDoInput(true);
-        //connection.setDoOutput(true);
 
         //將InputStream轉換為Byte
         InputStream inputStream = connection.getInputStream();
@@ -107,116 +81,125 @@ public class API {
         return response.toString();
     }
 
-    //Network
-
     public static List<RailStation> getStation(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "Station");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStation>>() {}.getType());
+        if(transportation.equals(TRA_AND_THSR)) {
+            List<RailStation> railStationList_TRA = getStation(TRA);
+            List<RailStation> railStationList_THSR = getStation(THSR);
+            railStationList_TRA.addAll(railStationList_THSR);
+            return railStationList_TRA;
+        } else {
+            String application = "Station";
+            return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application, ""), new TypeToken<List<RailStation>>() {}.getType());
+        }
+    }
+
+    public static List<RailStation> getStation(String transportation, Date updateTime) throws SignatureException, IOException {
+        if(transportation.equals(TRA_AND_THSR)) {
+            List<RailStation> railStationList_TRA = getStation(TRA, updateTime);
+            List<RailStation> railStationList_THSR = getStation(THSR, updateTime);
+            railStationList_TRA.addAll(railStationList_THSR);
+            return railStationList_TRA;
+        } else {
+            String application = "Station";
+            String queryOpyions = "$filter=date(UpdateTime) ge " + API.dateFormat.format(updateTime) + " and time(UpdateTime) gt " + API.timeFormat2.format(updateTime) + "&";
+            return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application, queryOpyions), new TypeToken<List<RailStation>>() {}.getType());
+        }
     }
 
     //Line
-    public static List<Line> getLine(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "Line");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<Line>>() {}.getType());
+    public static List<Line> getLine() throws SignatureException, IOException {
+        String application = "Line";
+        return (new Gson()).fromJson(getAPIResponse("Rail", TRA, application, ""), new TypeToken<List<Line>>() {}.getType());
     }
 
     //StationOfLine
-    public static List<StationOfLine> getStationOfLine(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "StationOfLine");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<StationOfLine>>() {}.getType());
+    public static List<StationOfLine> getStationOfLine() throws SignatureException, IOException {
+        String application = "StationOfLine";
+        return (new Gson()).fromJson(getAPIResponse("Rail", TRA, application,""), new TypeToken<List<StationOfLine>>() {}.getType());
     }
 
-    //TrainType
-    public static List<TrainType> getTrainType(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "TrainType");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<TrainType>>() {}.getType());
+    //StationOfLine
+    public static List<StationOfLine> getStationOfLine(Date updateTime) throws SignatureException, IOException {
+        String application = "StationOfLine";
+        String queryOpyions = "$filter=date(UpdateTime) ge " + API.dateFormat.format(updateTime) + " and time(UpdateTime) gt " + API.timeFormat2.format(updateTime) + "&";
+        return (new Gson()).fromJson(getAPIResponse("Rail", TRA, application, queryOpyions), new TypeToken<List<StationOfLine>>() {}.getType());
     }
 
-    //Shape
+    public static List<TrainType> getTrainType() throws SignatureException, IOException {
+        String application = "TrainType";
+        return (new Gson()).fromJson(getAPIResponse("Rail", TRA, application,""), new TypeToken<List<TrainType>>() {}.getType());
+    }
+
     public static List<TRAShape> getTRAShape(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "Shape");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<TRAShape>>() {}.getType());
+        String application = "Shape";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<TRAShape>>() {}.getType());
     }
 
     public static List<RailODFare> getODFare(String transportation, String originStationID, String destinationStationID) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "ODFare/" + originStationID + "/to/" + destinationStationID);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailODFare>>() {}.getType());
-    }
-
-    public static List<RailODFare> getRailODFare(String transportation, RailStation originStation, RailStation destinationStation) throws SignatureException, IOException {
-        return getODFare(transportation, originStation.StationID, destinationStation.StationID);
-    }
-
-    public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, APIURL apiurl) throws SignatureException, IOException {
-        if(transportation.equals(THSR)) return null;
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
+        String application = "ODFare/" + originStationID + "/to/" + destinationStationID;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailODFare>>() {}.getType());
     }
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo");
-        return getGeneralTrainInfo(transportation, apiurl);
+        String application = "GeneralTrainInfo";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
     public static List<RailGeneralTrainInfo> getGeneralTrainInfo(String transportation, String TrainTypeID) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "GeneralTrainInfo/TrainNo/" + TrainTypeID);
-        return getGeneralTrainInfo(transportation, apiurl);
+        String application = "GeneralTrainInfo/TrainNo/" + TrainTypeID;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailGeneralTrainInfo>>() {}.getType());
     }
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "GeneralTimetable");
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        String application = "GeneralTimetable";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+    }
+
+    public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, Date updateTime) throws SignatureException, IOException {
+        String application = "GeneralTimetable";
+        String queryOpyions = "$filter=date(UpdateTime) ge " + API.dateFormat.format(updateTime) + " and time(UpdateTime) gt " + API.timeFormat2.format(updateTime) + "&";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,queryOpyions), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
     public static List<RailGeneralTimetable> getGeneralTimetable(String transportation, String TrainTypeID) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "GeneralTimetable/TrainNo/" + TrainTypeID);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
+        String application = "GeneralTimetable/TrainNo/" + TrainTypeID;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailGeneralTimetable>>() {}.getType());
     }
 
-    //DailyTrainInfo/Today
-    //DailyTrainInfo/Today/TrainNo/{TrainNo}
-    //DailyTrainInfo/TrainDate/{TrainDate}
-    //DailyTrainInfo/TrainNo/{TrainNo}/TrainDate{TrainDate}
-
-    private static List<RailDailyTimetable> getDailyTimetable(String transportation, String functionParameter) throws SignatureException, IOException {
-        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+    public static List<RailDailyTimetable> getDailyTimetableToday(String transportation) throws SignatureException, IOException {
+        String application = "DailyTimetable/Today";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailDailyTimetable> getDailyTimetable(String transportation) throws SignatureException, IOException {
-        String functionParameter = "Today";
-        return getDailyTimetable(transportation, functionParameter);
+    public static List<RailDailyTimetable> getDailyTimetableTodayByTrainNo(String transportation, String trainNo) throws SignatureException, IOException {
+        String application = "DailyTimetable/Today/TrainNo/" + trainNo;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
-    public static List<RailDailyTimetable> getDailyTimetable(String transportation, int serachBy, String key) throws SignatureException, IOException {
-        String functionParameter = "";
-        if(serachBy == TRAIN_NO) {
-            functionParameter = "Today/TrainNo/" + key;
-        } else if(serachBy == TRAIN_DATE){
-            functionParameter = "TrainDate/" + key;
-        }
-        return getDailyTimetable(transportation, functionParameter);
+    public static List<RailDailyTimetable> getDailyTimetableByTrainDate(String transportation, String trainDate) throws SignatureException, IOException {
+        String application = "DailyTimetable/TrainDate/" + trainDate;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+    }
+
+    public static List<RailDailyTimetable> getDailyTimetableByTrainDate(String transportation, String trainDate, Date updateTime) throws SignatureException, IOException {
+        String application = "DailyTimetable/TrainDate/" + trainDate;
+        String queryOpyions = "$filter=date(UpdateTime) ge " + API.dateFormat.format(updateTime) + " and time(UpdateTime) gt " + API.timeFormat2.format(updateTime) + "&";
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,queryOpyions), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailDailyTimetable> getDailyTimetable(String transportation, String trainNo, String trainDate) throws SignatureException, IOException {
-        String functionParameter = "TrainNo/" + trainNo + "/TrainDate/" + trainDate;
-        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
+        String application = "DailyTimetable/TrainNo/" + trainNo + "/TrainDate/" + trainDate;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailDailyTimetable>>() {}.getType());
     }
 
     public static List<RailStationTimetable> getStationTimetable(String transportation, String stationID, String trainDate) throws SignatureException, IOException {
-        String functionParameter = "Station/" + stationID + "/" + trainDate;
-        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailStationTimetable>>() {}.getType());
+        String application = "DailyTimetable/Station/" + stationID + "/" + trainDate;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailStationTimetable>>() {}.getType());
     }
 
     public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, String originStationID, String destinationStationID, String TrainDate) throws SignatureException, IOException {
-        String functionParameter = "OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
-        APIURL apiurl = new APIURL(transportation, "DailyTimetable/" + functionParameter);
-        return (new Gson()).fromJson(getAPIResponse(apiurl.get()), new TypeToken<List<RailDailyTimetable>>() {}.getType());
-    }
-
-    public static List<RailODDailyTimetable> getODDailyTimetable(String transportation, RailStation originStation, RailStation destinationStation, String trainDate) throws SignatureException, IOException {
-        return getODDailyTimetable(transportation, originStation.StationID, destinationStation.StationID, trainDate);
+        String application = "DailyTimetable/OD/" + originStationID + "/to/" + destinationStationID + "/" + TrainDate;
+        return (new Gson()).fromJson(getAPIResponse("Rail", transportation, application,""), new TypeToken<List<RailODDailyTimetable>>() {}.getType());
     }
 
     //取得當下UTC時間
